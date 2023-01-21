@@ -16,6 +16,7 @@ const Empresa: NextPage = () => {
         />
         <link rel="icon" href="/calendario.ico" />
       </Head>
+
     </div>
   );
 }

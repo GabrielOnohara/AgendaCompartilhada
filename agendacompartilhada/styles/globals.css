@@ -2,6 +2,7 @@
 
 * {
   box-sizing: border-box;
+  font-family: 'Comfortaa', cursive;
 }
 
 body {
@@ -9,7 +10,6 @@ body {
   --type-first: Helvetica, Arial, sans-serif;
   --type-second: 'Spectral', georgia;
   font-family: 'Comfortaa', cursive;
-  ;
 }
 
 a {
@@ -65,6 +65,11 @@ img {
   color: #034078;
 }
 
+.darkBlueText:hover
+.darkBlueText:focus {
+  color: #034078;
+}
+
 .btnDarkBlue {
   background-color: #034078;
   color: #FEFCFB;
@@ -80,4 +85,8 @@ img {
 .btnDarkBlue:focus {
   color: #FACE54;
   cursor: pointer;
+}
+
+.apply-no-underline {
+  text-decoration: none;
 }

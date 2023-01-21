@@ -4,6 +4,7 @@ import React from "react";
 import styles from "../../styles/Register.module.css";
 import logo from "../../public/calendario.png";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const RegisterPage: NextPage = () => {
   const [email, setEmail] = React.useState("");
@@ -12,11 +13,15 @@ const RegisterPage: NextPage = () => {
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
-
+  const router = useRouter();
 
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
     console.log(event.target.checked);
+  }
+
+  function handlerSubmit(){
+    router.push('/empresa')
   }
 
   return (
@@ -134,7 +139,7 @@ const RegisterPage: NextPage = () => {
             <div className="centerHorizontal">
               <button
                 className="btnDarkBlue"
-                // onClick={}
+                onClick={() => handlerSubmit}
               >
                 Confirmar
               </button>

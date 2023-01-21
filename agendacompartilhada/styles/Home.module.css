@@ -34,6 +34,10 @@
   padding-left: 25px;
 }
 
+.boxExplanation ul {
+  padding-left: 0;
+}
+
 .lista li {
   list-style: inside;
   list-style-position: outside;
@@ -87,6 +91,7 @@
 .checkboxContainer input[type="checkbox"] {
   height: 20px;
   width: 20px;
+  margin: 3px;
 }
 
 .checkboxContainer p {
@@ -97,6 +102,10 @@
 .login button {
   margin-top: 20px;
   width: 100%;
+}
+
+.login button a{
+  color: #fff;
 }
 
 .registerContainer {
@@ -118,4 +127,5 @@
 .registerContainer a:focus {
   outline: none;
   text-decoration: underline;
+  color: #034078;
 }

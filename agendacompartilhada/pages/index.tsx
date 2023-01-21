@@ -30,7 +30,7 @@ const Home: NextPage = () => {
     }
 
     //router push to companypage
-    router.push('/empresa')
+    
   }
 
   React.useEffect(() => {
@@ -124,13 +124,13 @@ const Home: NextPage = () => {
               <p>Manter-me conectado</p>
             </div>
             <div className="centerHorizontal">
-              <button className="btnDarkBlue" onClick={handlerSubmit}>
-                Confirmar
+              <button className="btnDarkBlue" >
+                <Link href={{pathname: "/empresa"}}>Confirmar</Link>
               </button>
             </div>
             <div className={styles.registerContainer}>
               <p>Não possui conta ainda?</p>
-              <Link href="/cadastro" className={`darkBlueText`}>
+              <Link href={{pathname: "/cadastro"}} className={`darkBlueText apply-no-underline`}>
                 Criar Conta
               </Link>
             </div>
