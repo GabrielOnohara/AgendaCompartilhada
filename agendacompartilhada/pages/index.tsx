@@ -5,8 +5,11 @@ import styles from "../styles/Home.module.css";
 import logo from "../public/calendario.png";
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+
+  const router = useRouter();
   const [maintainConnected, setMaintainConnected] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -25,6 +28,9 @@ const Home: NextPage = () => {
       window.localStorage.setItem("email", email);
       window.localStorage.setItem("password", password);
     }
+
+    //router push to companypage
+    router.push('/empresa')
   }
 
   React.useEffect(() => {
