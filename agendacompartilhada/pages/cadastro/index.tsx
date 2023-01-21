@@ -1,56 +1,35 @@
-import type { NextPage } from "next";
+import { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import styles from "../styles/Home.module.css";
-import logo from "../public/calendario.png";
 import React from "react";
-import Link from "next/link";
+import styles from "../../styles/Register.module.css";
+import logo from "../../public/calendario.png";
+import Image from "next/image";
 
-const Home: NextPage = () => {
-  const [maintainConnected, setMaintainConnected] = React.useState(false);
+const RegisterPage: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [telefone, setTelefone] = React.useState("");
+  const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
+
 
   function toggleCheckbox(event: any) {
-    setMaintainConnected(event.target.checked);
+    setAcceptPrivacyPolitics(event.target.checked);
     console.log(event.target.checked);
   }
-
-  function handlerSubmit() {
-    window.localStorage.setItem(
-      "maintainConnected",
-      maintainConnected.toString()
-    );
-    if (maintainConnected) {
-      window.localStorage.setItem("email", email);
-      window.localStorage.setItem("password", password);
-    }
-  }
-
-  React.useEffect(() => {
-    const lastMaintainChecked =
-      window.localStorage.getItem("maintainConnected");
-    if (lastMaintainChecked === "true") {
-      const lastEmail = window.localStorage.getItem("email");
-      const lastPassword = window.localStorage.getItem("password");
-      setEmail(lastEmail ?? "");
-      setPassword(lastPassword ?? "");
-      setMaintainConnected(true);
-    }
-  }, []);
 
   return (
     <div>
       <Head>
-        <title>Agenda Compartilhada</title>
+        <title>Agenda Compartilhada - Cadastro</title>
         <meta content="text/html;charset=UTF-8" />
         <meta
           name="description"
-          content="Aplicativo para sistema automatizado de agendamento"
+          content="Cadastre sua empresa e começe a utiliza o sistema da Agenda Compartilhada"
         />
         <link rel="icon" href="/calendario.ico" />
       </Head>
-
       <main className={styles.mainContainer}>
         <div className={styles.description}>
           <div className="centerHorizontal">
@@ -61,7 +40,7 @@ const Home: NextPage = () => {
               width={150}
               style={{ margin: "10px auto" }}
             />
-            <h1 className={`${styles.title2} lightText cursive `}>
+            <h1 className={`${styles.title2}  lightText cursive `}>
               Agenda Compartilhada
             </h1>
           </div>
@@ -83,8 +62,21 @@ const Home: NextPage = () => {
           </fieldset>
         </div>
         <div className={`${styles.login} darkBlueText `}>
-          <h1 className={`${styles.title1}`}>Login</h1>
+          <div className="centerHorizontal">
+            <h1 className={`title1 darkBlueText`}>Cadastro</h1>
+          </div>
           <form autoComplete="off">
+            <label htmlFor="name" className="title3">
+              Nome da empresa
+            </label>
+            <input
+              className={styles.input}
+              type="name"
+              name="name"
+              id="name"
+              value={name}
+              onChange={({ target }) => setName(target.value)}
+            />
             <label htmlFor="email" className="title3">
               Email
             </label>
@@ -95,6 +87,17 @@ const Home: NextPage = () => {
               id="email"
               value={email}
               onChange={({ target }) => setEmail(target.value)}
+            />
+            <label htmlFor="telefone" className="title3">
+              Telefone
+            </label>
+            <input
+              className={styles.input}
+              type="telefone"
+              name="telefone"
+              id="telefone"
+              value={telefone}
+              onChange={({ target }) => setTelefone(target.value)}
             />
             <label htmlFor="password" className="title3">
               Senha
@@ -107,26 +110,34 @@ const Home: NextPage = () => {
               value={password}
               onChange={({ target }) => setPassword(target.value)}
             />
+            <label htmlFor="password" className="title3">
+              Confirmar Senha
+            </label>
+            <input
+              className={styles.input}
+              type="password"
+              name="password"
+              id="password"
+              value={passwordConfirmation}
+              onChange={({ target }) => setPasswordConfirmation(target.value)}
+            />
             <div className={styles.checkboxContainer}>
               <input
                 type="checkbox"
                 name="saveUsername"
                 id="saveUsername"
                 onChange={toggleCheckbox}
-                checked={maintainConnected}
+                checked={acceptPrivacyPolitics}
               />
               <p>Manter-me conectado</p>
             </div>
             <div className="centerHorizontal">
-              <button className="btnDarkBlue" onClick={handlerSubmit}>
+              <button
+                className="btnDarkBlue"
+                // onClick={}
+              >
                 Confirmar
               </button>
-            </div>
-            <div className={styles.registerContainer}>
-              <p>Não possui conta ainda?</p>
-              <Link href="/cadastro" className={`darkBlueText`}>
-                Criar Conta
-              </Link>
             </div>
           </form>
         </div>
@@ -135,4 +146,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default RegisterPage;
