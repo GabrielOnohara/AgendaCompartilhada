@@ -1,0 +1,17 @@
+.navbar {
+  background-color: #034078;
+
+}
+
+.applySpaceBetween {
+  justify-content: space-between;
+}
+
+.companyName {
+  position: absolute;
+}
+
+.logoutButton {
+  position: absolute;
+  right: 3%;
+}

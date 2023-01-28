@@ -1,6 +1,7 @@
 .mainContainer {
-  width: calc(100vw - 15px);
+  background-color: #E3E5F7;
   height: 100vh;
+  width: calc(100vw - 15px);
   display: grid;
   grid-template-columns: repeat(2, 1fr);
 }
@@ -8,16 +9,6 @@
 .description {
   background-color: #034078;
   padding: 80px 100px;
-}
-
-.login {
-  padding: 100px 100px;
-  background-color: #E3E5F7;
-}
-
-.title1 {
-  font-size: 3rem;
-  text-align: center;
 }
 
 .title2 {
@@ -28,21 +19,9 @@
   font-size: 1.5rem;
 }
 
-.boxExplanation {
-  margin-top: 60px;
-  padding-top: 10px;
-  padding-left: 25px;
-}
-
-.boxExplanation ul {
-  padding-left: 0;
-}
-
-.lista li {
-  list-style: inside;
-  list-style-position: outside;
-  font-size: 1.125rem;
-  margin: 15px 20px;
+.login {
+  padding: 20px 100px;
+  background-color: #E3E5F7;
 }
 
 .login label {
@@ -50,7 +29,7 @@
 }
 
 .login form {
-  margin-top: 40px;
+  margin-top: 20px;
   margin-right: auto;
   margin-left: auto;
   width: 80%;
@@ -62,6 +41,12 @@
   margin-bottom: 8px;
   font-weight: bold;
 }
+
+.login button {
+  margin-top: 20px;
+  width: 100%;
+}
+
 
 .input {
   display: block;
@@ -84,6 +69,23 @@
   box-shadow: 0 0 0 3px #FACE54;
 }
 
+.boxExplanation {
+  margin-top: 60px;
+  padding-top: 10px;
+  padding-left: 25px;
+}
+
+.boxExplanation ul {
+  padding-left: 0;
+}
+
+.lista li {
+  list-style: inside;
+  list-style-position: outside;
+  font-size: 1.125rem;
+  margin: 15px 20px;
+}
+
 .checkboxContainer {
   display: flex;
 }
@@ -97,35 +99,4 @@
 .checkboxContainer p {
   margin-left: 4px;
   line-height: 1.8;
-}
-
-.login button {
-  margin-top: 20px;
-  width: 100%;
-}
-
-.login button a{
-  color: #fff;
-}
-
-.registerContainer {
-  margin-top: 60px;
-  justify-content: space-between;
-  display: flex;
-}
-
-.registerContainer p {
-  font-size: 1.125rem;
-}
-
-.registerContainer a {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-.registerContainer a:hover,
-.registerContainer a:focus {
-  outline: none;
-  text-decoration: underline;
-  color: #034078;
 }

@@ -1,26 +1,92 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap');
 
 * {
   box-sizing: border-box;
+  font-family: 'Comfortaa', cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: black;
-  }
+body {
+  margin: 0;
+  --type-first: Helvetica, Arial, sans-serif;
+  --type-second: 'Spectral', georgia;
+  font-family: 'Comfortaa', cursive;
+}
+
+a {
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.lightText {
+  color: #FEFCFB;
+}
+
+.darkText {
+  color: #001F54;
+}
+
+.yellowText {
+  color: #FACE54;
+}
+
+.cursive {
+  font-family: 'Comfortaa', cursive;
+}
+
+.title1 {
+  font-weight: bold;
+  font-size: 2.5rem;
+}
+
+.centerHorizontal {
+  text-align: center;
+}
+
+.darkBlueText {
+  color: #034078;
+}
+
+.darkBlueText:hover
+.darkBlueText:focus {
+  color: #034078;
+}
+
+.btnDarkBlue {
+  background-color: #034078;
+  color: #FEFCFB;
+  padding: 10px 20px;
+  font-size: 1.125rem;
+  border-radius: 0.4rem;
+  border: 1px solid #034078;
+  font-family: 'Comfortaa', cursive;
+  font-weight: bold;
+}
+
+.btnDarkBlue:hover,
+.btnDarkBlue:focus {
+  color: #FACE54;
+  cursor: pointer;
+}
+
+.apply-no-underline {
+  text-decoration: none;
 }
