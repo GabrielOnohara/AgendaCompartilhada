@@ -51,7 +51,7 @@
 .input {
   display: block;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border: 1px solid #034078;
   color: #034078;
   padding: 10px;
@@ -99,4 +99,9 @@
 .checkboxContainer p {
   margin-left: 4px;
   line-height: 1.8;
+}
+
+.errorMessage{
+  color: red;
+  margin-top: 5px;
 }

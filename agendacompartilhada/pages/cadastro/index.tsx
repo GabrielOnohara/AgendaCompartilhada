@@ -13,15 +13,122 @@ const RegisterPage: NextPage = () => {
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const router = useRouter();
 
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
-    console.log(event.target.checked);
   }
 
-  function handlerSubmit(){
-    router.push('/empresa')
+  async function onSubmitHandler(e:any){
+    e.preventDefault();
+
+    const validations = {
+      emailIsValid: true,
+      passwordLengthIsValid: true,
+      passwordsMatches: true,
+      privacyPoliticIsAccepted: true
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
+    let data = {
+      email: email,
+      password: password,
+      name: name,
+      phone: telefone
+    }
+
+    if(password != passwordConfirmation){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Senhas não se correspondem");
+        oldValue.splice(index, 1);
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        validations.passwordsMatches= false;
+        return ([...oldValue, "Senhas não se correspondem"]);
+      })
+    }else{
+      const index = errorMessage.indexOf("Senhas não se correspondem");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        validations.passwordsMatches= true;
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(password.length <= 5){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        validations.passwordLengthIsValid = false;
+        return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
+      })
+    }else{
+      const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        validations.passwordLengthIsValid = true;
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!validateEmail(email)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Email inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        validations.emailIsValid = false;
+        return ([...oldValue, "Email inválido"]);
+      })
+    }else{
+      const index = errorMessage.indexOf("Email inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        validations.emailIsValid = true;
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!acceptPrivacyPolitics){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("É necessário aceiter a nossa política de privacidade");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        validations.privacyPoliticIsAccepted = false;
+        return ([...oldValue, "É necessário aceiter a nossa política de privacidade"])
+      })
+    }else{
+      const index = errorMessage.indexOf("É necessário aceiter a nossa política de privacidade");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        validations.privacyPoliticIsAccepted = true;
+        return oldValue.splice(index, 1);
+      })
+    }
+    
+    if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
+      const url = "http://localhost:3000/api/companies/create";
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        },
+        body: JSON.stringify(data),
+      });
+      const json = await response.json();
+      console.log(json);
+      
+    }
+
   }
 
   return (
@@ -70,7 +177,7 @@ const RegisterPage: NextPage = () => {
           <div className="centerHorizontal">
             <h1 className={`title1 darkBlueText`}>Cadastro</h1>
           </div>
-          <form autoComplete="off">
+          <form autoComplete="off" method="POST" onSubmit={onSubmitHandler}>
             <label htmlFor="name" className="title3">
               Nome da empresa
             </label>
@@ -121,8 +228,8 @@ const RegisterPage: NextPage = () => {
             <input
               className={styles.input}
               type="password"
-              name="password"
-              id="password"
+              name="passwordConfirmation"
+              id="passwordConfirmation"
               value={passwordConfirmation}
               onChange={({ target }) => setPasswordConfirmation(target.value)}
             />
@@ -134,12 +241,14 @@ const RegisterPage: NextPage = () => {
                 onChange={toggleCheckbox}
                 checked={acceptPrivacyPolitics}
               />
-              <p>Manter-me conectado</p>
+              <p>Aceita a nossa política de privacidade</p>
             </div>
-            <div className="centerHorizontal">
+            {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+            <div className="centerHorizontal">   
               <button
                 className="btnDarkBlue"
-                onClick={() => handlerSubmit}
+                type="submit"
+                onClick={() => onSubmitHandler}
               >
                 Confirmar
               </button>
