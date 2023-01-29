@@ -5,6 +5,9 @@ import styles from "../../styles/Register.module.css";
 import logo from "../../public/calendario.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import ToastComponent from "../../src/components/ToastComponent";
+import { fail } from "assert";
+var bcrypt = require('bcryptjs');
 
 const RegisterPage: NextPage = () => {
   const [email, setEmail] = React.useState("");
@@ -24,10 +27,10 @@ const RegisterPage: NextPage = () => {
     e.preventDefault();
 
     const validations = {
-      emailIsValid: true,
-      passwordLengthIsValid: true,
-      passwordsMatches: true,
-      privacyPoliticIsAccepted: true
+      emailIsValid: false,
+      passwordLengthIsValid: false,
+      passwordsMatches: false,
+      privacyPoliticIsAccepted: false
     }
 
     const validateEmail = (email:string) => {
@@ -43,92 +46,109 @@ const RegisterPage: NextPage = () => {
     }
 
     if(password != passwordConfirmation){
+      validations.passwordsMatches= false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Senhas não se correspondem");
         oldValue.splice(index, 1);
         if(index >= 0){
           oldValue.splice(index, 1);
         }
-        validations.passwordsMatches= false;
         return ([...oldValue, "Senhas não se correspondem"]);
       })
     }else{
+      validations.passwordsMatches= true;
       const index = errorMessage.indexOf("Senhas não se correspondem");
       if(index >= 0)
       setErrorMessage((oldValue) => {
-        validations.passwordsMatches= true;
         return oldValue.splice(index, 1);
       })
     }
 
     if(password.length <= 5){
+      validations.passwordLengthIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
         if(index >= 0){
           oldValue.splice(index, 1);
         }
-        validations.passwordLengthIsValid = false;
         return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
       })
     }else{
+      validations.passwordLengthIsValid = true;
       const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
       if(index >= 0)
       setErrorMessage((oldValue) => {
-        validations.passwordLengthIsValid = true;
         return oldValue.splice(index, 1);
       })
     }
 
     if(!validateEmail(email)){
+      validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Email inválido");
         if(index >= 0){
           oldValue.splice(index, 1);
         }
-        validations.emailIsValid = false;
         return ([...oldValue, "Email inválido"]);
       })
     }else{
+      validations.emailIsValid = true;
       const index = errorMessage.indexOf("Email inválido");
       if(index >= 0)
       setErrorMessage((oldValue) => {
-        validations.emailIsValid = true;
         return oldValue.splice(index, 1);
       })
     }
 
     if(!acceptPrivacyPolitics){
+      validations.privacyPoliticIsAccepted = false;
       setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("É necessário aceiter a nossa política de privacidade");
+        const index = oldValue.indexOf("É necessário aceitar a nossa política de privacidade");
         if(index >= 0){
           oldValue.splice(index, 1);
         }
-        validations.privacyPoliticIsAccepted = false;
-        return ([...oldValue, "É necessário aceiter a nossa política de privacidade"])
+        return ([...oldValue, "É necessário aceitar a nossa política de privacidade"])
       })
     }else{
-      const index = errorMessage.indexOf("É necessário aceiter a nossa política de privacidade");
+      validations.privacyPoliticIsAccepted = true;
+      const index = errorMessage.indexOf("É necessário aceitar a nossa política de privacidade");
       if(index >= 0)
       setErrorMessage((oldValue) => {
-        validations.privacyPoliticIsAccepted = true;
         return oldValue.splice(index, 1);
       })
     }
     
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
+      var hash = bcrypt.hashSync(data.password, 8);
+      // console.log(hash);
+      // console.log(bcrypt.compareSync(data.password, hash));
+      data.password = hash;
       const url = "http://localhost:3000/api/companies/create";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await response.json();
-      console.log(json);
-      
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          },
+          body: JSON.stringify(data),
+        });
+        if(response.status == 200){
+          router.push("/empresa")
+        }else{
+          setErrorMessage((oldValue) => {
+            const index = oldValue.indexOf(response.statusText);
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            validations.privacyPoliticIsAccepted = false;
+            return ([...oldValue, response.statusText])
+          })
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
-
+    
   }
 
   return (
