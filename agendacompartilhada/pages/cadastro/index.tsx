@@ -118,7 +118,8 @@ const RegisterPage: NextPage = () => {
     }
     
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
-      var hash = bcrypt.hashSync(data.password, 8);
+      var salt = bcrypt.genSaltSync(10);
+      var hash = bcrypt.hashSync(data.password, salt);
       data.password = hash;
       const url = "api/companies/create";
       try {
@@ -132,13 +133,7 @@ const RegisterPage: NextPage = () => {
         if(response.status == 200){
           router.push("/empresa")
         }else{
-          setErrorMessage((oldValue) => {
-            const index = oldValue.indexOf(response.statusText);
-            if(index >= 0){
-              oldValue.splice(index, 1);
-            }
-            return ([...oldValue, response.statusText])
-          })
+          setErrorMessage([response.statusText])
         }
       } catch (error) {
         console.log(error);

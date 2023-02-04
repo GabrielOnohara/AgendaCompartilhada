@@ -6,6 +6,7 @@ import logo from "../../public/calendario.png";
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+var bcrypt = require('bcryptjs');
 
 const Home: NextPage = () => {  
 
@@ -94,13 +95,7 @@ const Home: NextPage = () => {
         if(response.status == 200){
           router.push("/empresa")
         }else {
-          setErrorMessage((oldValue) => {
-            const index = oldValue.indexOf(response.statusText);
-            if(index >= 0){
-              oldValue.splice(index, 1);
-            }
-            return ([...oldValue, response.statusText])
-          })
+          setErrorMessage([response.statusText])
         }
       } catch (error) {
         console.log(error);

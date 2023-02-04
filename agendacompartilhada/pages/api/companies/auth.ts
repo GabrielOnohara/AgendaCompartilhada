@@ -16,14 +16,13 @@ export default async function handler(
           }
         });
         if(user){
-          var hash = bcrypt.hashSync(data.password, 8);
-          var passwordsMatch = bcrypt.compareSync(user.password, hash);
+          var passwordsMatch = bcrypt.compareSync(data.password, user.password); 
           if(passwordsMatch){
             res.statusMessage = "Login efetuado com sucesso";
             res.status(200).json({});
           }else{
             res.statusMessage = "Senha inválida";
-            res.status(200);
+            res.status(400);
           }
         }else{
           res.statusMessage = "Email inválido";
