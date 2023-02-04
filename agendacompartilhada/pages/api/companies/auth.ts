@@ -22,7 +22,7 @@ export default async function handler(
           if(passwordsMatch){
             const token = jwt.sign({user}, process.env.JWT_KEY, {expiresIn: 60*60});
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({jwt:process.env.JWT_KEY});
+            res.status(200).json({});
           }else{
             res.statusMessage = "Senha inválida";
             res.status(400);
