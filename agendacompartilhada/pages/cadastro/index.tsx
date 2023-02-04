@@ -120,8 +120,6 @@ const RegisterPage: NextPage = () => {
     
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
       var hash = bcrypt.hashSync(data.password, 8);
-      // console.log(hash);
-      // console.log(bcrypt.compareSync(data.password, hash));
       data.password = hash;
       const url = "http://localhost:3000/api/companies/create";
       try {
