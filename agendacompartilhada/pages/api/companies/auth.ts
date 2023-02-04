@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next'
 var bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -18,8 +20,9 @@ export default async function handler(
         if(user){
           var passwordsMatch = bcrypt.compareSync(data.password, user.password); 
           if(passwordsMatch){
+            const token = jwt.sign({user}, process.env.JWT_KEY, {expiresIn: 60*60});
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({});
+            res.status(200).json({jwt:process.env.JWT_KEY});
           }else{
             res.statusMessage = "Senha inválida";
             res.status(400);
