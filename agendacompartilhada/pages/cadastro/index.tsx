@@ -5,18 +5,17 @@ import styles from "../../styles/Register.module.css";
 import logo from "../../public/calendario.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import ToastComponent from "../../src/components/ToastComponent";
-import { fail } from "assert";
 var bcrypt = require('bcryptjs');
 
 const RegisterPage: NextPage = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [telefone, setTelefone] = React.useState("");
+  const [email, setEmail] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
+  const [passwordConfirmation, setPasswordConfirmation] = React.useState<string>("");
+  const [name, setName] = React.useState<string>("");
+  const [telefone, setTelefone] = React.useState<string>("");
+  const [errorMessage, setErrorMessage] = React.useState<string[]>([]);
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
+  
   const router = useRouter();
 
   function toggleCheckbox(event: any) {
@@ -121,7 +120,7 @@ const RegisterPage: NextPage = () => {
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
       var hash = bcrypt.hashSync(data.password, 8);
       data.password = hash;
-      const url = "http://localhost:3000/api/companies/create";
+      const url = `${process.env.API_URL}/companies/create`;
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -138,7 +137,6 @@ const RegisterPage: NextPage = () => {
             if(index >= 0){
               oldValue.splice(index, 1);
             }
-            validations.privacyPoliticIsAccepted = false;
             return ([...oldValue, response.statusText])
           })
         }
