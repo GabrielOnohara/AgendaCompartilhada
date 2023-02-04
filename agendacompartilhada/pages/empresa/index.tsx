@@ -35,7 +35,7 @@ const Empresa: NextPage = () => {
                 <a className="nav-link mx-2" href="#">Funcionários</a>
               </li>
             </ul>
-            <Link className={`navbar-link ${styles.logoutButton} yellowText`} href="/">Sair</Link>
+            <Link className={`navbar-link ${styles.logoutButton} yellowText`} href="/login">Sair</Link>
           </div>
         </div>
       </nav>
