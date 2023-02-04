@@ -1,0 +1,136 @@
+.mainContainer {
+  width: calc(100vw - 15px);
+  height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.description {
+  background-color: #034078;
+  padding: 80px 100px;
+}
+
+.login {
+  padding: 100px 100px;
+  background-color: #E3E5F7;
+}
+
+.title1 {
+  font-size: 3rem;
+  text-align: center;
+}
+
+.title2 {
+  font-size: 2.5rem;
+}
+
+.title3 {
+  font-size: 1.5rem;
+}
+
+.boxExplanation {
+  margin-top: 60px;
+  padding-top: 10px;
+  padding-left: 25px;
+}
+
+.boxExplanation ul {
+  padding-left: 0;
+}
+
+.lista li {
+  list-style: inside;
+  list-style-position: outside;
+  font-size: 1.125rem;
+  margin: 15px 20px;
+}
+
+.login label {
+  display: block;
+}
+
+.login form {
+  margin-top: 40px;
+  margin-right: auto;
+  margin-left: auto;
+  width: 80%;
+}
+
+.login label {
+  font-size: 1.5rem;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #034078;
+  color: #034078;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 0.4rem;
+  transition: 0.2s;
+  background-color: #FEFCFB;
+}
+
+.input:hover,
+.input:focus {
+  outline: none;
+  border-color: #FACE54;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px #FACE54;
+}
+
+.checkboxContainer {
+  display: flex;
+}
+
+.checkboxContainer input[type="checkbox"] {
+  height: 20px;
+  width: 20px;
+  margin: 3px;
+}
+
+.checkboxContainer p {
+  margin-left: 4px;
+  line-height: 1.8;
+}
+
+.login button {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.login button a{
+  color: #fff;
+}
+
+.registerContainer {
+  margin-top: 60px;
+  justify-content: space-between;
+  display: flex;
+}
+
+.registerContainer p {
+  font-size: 1.125rem;
+}
+
+.registerContainer a {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.registerContainer a:hover,
+.registerContainer a:focus {
+  outline: none;
+  text-decoration: underline;
+  color: #034078;
+}
+
+.errorMessage{
+  color: red;
+  margin-top: 5px;
+}

@@ -5,18 +5,18 @@ import styles from "../../styles/Register.module.css";
 import logo from "../../public/calendario.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import ToastComponent from "../../src/components/ToastComponent";
-import { fail } from "assert";
 var bcrypt = require('bcryptjs');
 
 const RegisterPage: NextPage = () => {
+  
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
-  const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
+  const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
+  
   const router = useRouter();
 
   function toggleCheckbox(event: any) {
@@ -49,7 +49,6 @@ const RegisterPage: NextPage = () => {
       validations.passwordsMatches= false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Senhas não se correspondem");
-        oldValue.splice(index, 1);
         if(index >= 0){
           oldValue.splice(index, 1);
         }
@@ -119,11 +118,10 @@ const RegisterPage: NextPage = () => {
     }
     
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
-      var hash = bcrypt.hashSync(data.password, 8);
-      // console.log(hash);
-      // console.log(bcrypt.compareSync(data.password, hash));
+      var salt = bcrypt.genSaltSync(10);
+      var hash = bcrypt.hashSync(data.password, salt);
       data.password = hash;
-      const url = "http://localhost:3000/api/companies/create";
+      const url = "api/companies/create";
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -135,14 +133,7 @@ const RegisterPage: NextPage = () => {
         if(response.status == 200){
           router.push("/empresa")
         }else{
-          setErrorMessage((oldValue) => {
-            const index = oldValue.indexOf(response.statusText);
-            if(index >= 0){
-              oldValue.splice(index, 1);
-            }
-            validations.privacyPoliticIsAccepted = false;
-            return ([...oldValue, response.statusText])
-          })
+          setErrorMessage([response.statusText])
         }
       } catch (error) {
         console.log(error);
@@ -256,8 +247,8 @@ const RegisterPage: NextPage = () => {
             <div className={styles.checkboxContainer}>
               <input
                 type="checkbox"
-                name="saveUsername"
-                id="saveUsername"
+                name="acceptPolitics"
+                id="acceptPolitics"
                 onChange={toggleCheckbox}
                 checked={acceptPrivacyPolitics}
               />

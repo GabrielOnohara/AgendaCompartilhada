@@ -15,7 +15,7 @@ export default async function handler(
           where: {
             email: data.email
           }
-        })
+        });
         if (user) {
           res.statusMessage = "Usuário com o email já existe.";
           res.status(400);
