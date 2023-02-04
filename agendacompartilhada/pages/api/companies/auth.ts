@@ -37,6 +37,7 @@ export default async function handler(
       }
       break;
     default:
+      res.status(200).json({ name: 'John Doe' });
       break;
   }
 

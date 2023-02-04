@@ -8,12 +8,13 @@ import { useRouter } from "next/router";
 var bcrypt = require('bcryptjs');
 
 const RegisterPage: NextPage = () => {
-  const [email, setEmail] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
-  const [passwordConfirmation, setPasswordConfirmation] = React.useState<string>("");
-  const [name, setName] = React.useState<string>("");
-  const [telefone, setTelefone] = React.useState<string>("");
-  const [errorMessage, setErrorMessage] = React.useState<string[]>([]);
+  
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [telefone, setTelefone] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
   
   const router = useRouter();
@@ -48,7 +49,6 @@ const RegisterPage: NextPage = () => {
       validations.passwordsMatches= false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Senhas não se correspondem");
-        oldValue.splice(index, 1);
         if(index >= 0){
           oldValue.splice(index, 1);
         }
@@ -120,7 +120,7 @@ const RegisterPage: NextPage = () => {
     if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
       var hash = bcrypt.hashSync(data.password, 8);
       data.password = hash;
-      const url = `${process.env.API_URL}/companies/create`;
+      const url = "api/companies/create";
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -252,8 +252,8 @@ const RegisterPage: NextPage = () => {
             <div className={styles.checkboxContainer}>
               <input
                 type="checkbox"
-                name="saveUsername"
-                id="saveUsername"
+                name="acceptPolitics"
+                id="acceptPolitics"
                 onChange={toggleCheckbox}
                 checked={acceptPrivacyPolitics}
               />

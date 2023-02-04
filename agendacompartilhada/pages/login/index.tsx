@@ -7,14 +7,26 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const Home: NextPage = () => {
+const Home: NextPage = () => {  
 
+  const [maintainConnected, setMaintainConnected] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   
-  const [maintainConnected, setMaintainConnected] = React.useState<boolean>(false);
-  const [email, setEmail] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
-  const [errorMessage, setErrorMessage] = React.useState<string[]>([]);
   const router = useRouter();
+
+  React.useEffect(() => {
+    const lastMaintainChecked =
+      window.localStorage.getItem("maintainConnected");
+    if (lastMaintainChecked === "true") {
+      const lastEmail = window.localStorage.getItem("email");
+      const lastPassword = window.localStorage.getItem("password");
+      setEmail(lastEmail ?? "");
+      setPassword(lastPassword ?? "");
+      setMaintainConnected(true);
+    }
+  }, []);
 
   function toggleCheckbox(event: any) {
     setMaintainConnected(event.target.checked);
@@ -22,34 +34,28 @@ const Home: NextPage = () => {
 
   async function onSubmitHandler(e:any){
     e.preventDefault();
-
+    
     const validations = {
       emailIsValid: false,
       passwordIsValid: false,
     }
 
-    const validateEmail = (email:string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email)
-    };
-
     let data = {
       email: email,
       password: password,
     }
-
+    
     if(email.trim().length == 0) {
       validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Insira um email");
-        oldValue.splice(index, 1);
         if(index >= 0){
           oldValue.splice(index, 1);
         }
         return ([...oldValue, "Insira um email"]);
       })
     }else{
-      validations.emailIsValid= true;
+      validations.emailIsValid = true;
       const index = errorMessage.indexOf("Insira um email");
       if(index >= 0)
       setErrorMessage((oldValue) => {
@@ -61,14 +67,13 @@ const Home: NextPage = () => {
       validations.passwordIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Insira uma senha");
-        oldValue.splice(index, 1);
         if(index >= 0){
           oldValue.splice(index, 1);
         }
         return ([...oldValue, "Insira uma senha"]);
       })
     }else{
-      validations.passwordIsValid= true;
+      validations.passwordIsValid = true;
       const index = errorMessage.indexOf("Insira uma senha");
       if(index >= 0)
       setErrorMessage((oldValue) => {
@@ -77,7 +82,7 @@ const Home: NextPage = () => {
     }
     
     if(validations.emailIsValid && validations.passwordIsValid){
-      const url = `${process.env.API_RUL}/companies/auth`;
+      const url = "api/companies/auth";
       try {
         const response = await fetch(url, {
           method: "POST",
@@ -110,23 +115,8 @@ const Home: NextPage = () => {
       window.localStorage.setItem("email", email);
       window.localStorage.setItem("password", password);
     }
-
-
-    //router push to companypage
     
   }
-
-  React.useEffect(() => {
-    const lastMaintainChecked =
-      window.localStorage.getItem("maintainConnected");
-    if (lastMaintainChecked === "true") {
-      const lastEmail = window.localStorage.getItem("email");
-      const lastPassword = window.localStorage.getItem("password");
-      setEmail(lastEmail ?? "");
-      setPassword(lastPassword ?? "");
-      setMaintainConnected(true);
-    }
-  }, []);
 
   return (
     <div>
@@ -173,7 +163,7 @@ const Home: NextPage = () => {
         </div>
         <div className={`${styles.login} darkBlueText `}>
           <h1 className={`${styles.title1}`}>Login</h1>
-          <form autoComplete="off">
+          <form autoComplete="off" method="POST" onSubmit={onSubmitHandler}>
             <label htmlFor="email" className="title3">
               Email
             </label>
@@ -206,9 +196,14 @@ const Home: NextPage = () => {
               />
               <p>Manter-me conectado</p>
             </div>
+            {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             <div className="centerHorizontal">
-              <button className="btnDarkBlue" >
-                <Link href={{pathname: "/empresa"}}>Confirmar</Link>
+              <button
+                className="btnDarkBlue"
+                type="submit"
+                onClick={() => onSubmitHandler}
+              >
+                Confirmar
               </button>
             </div>
             <div className={styles.registerContainer}>
