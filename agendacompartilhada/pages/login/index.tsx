@@ -116,7 +116,7 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Agenda Compartilhada</title>
+        <title>Agenda Compartilhada - Login</title>
         <meta content="text/html;charset=UTF-8" />
         <meta
           name="description"
