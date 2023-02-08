@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-const jwt = require('jsonwebtoken');
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,7 +8,7 @@ export default async function handler(
     case "POST":
       try {
         res.statusMessage = "Logout efetuado com sucesso";
-        res.status(200).json({ auth: false, token: null });
+        res.status(200).json({ auth: false, token: "" });
       } catch (error) {
         res.statusMessage = "Não foi possível efetuar o logout";
         res.status(400).json({error});
