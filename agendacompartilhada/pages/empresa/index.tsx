@@ -1,10 +1,40 @@
 import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-
+import { useRouter } from "next/router";
 import styles from "../../styles/Company.module.css";
 
 const Empresa: NextPage = () => {
+
+  const router = useRouter();
+
+  async function onSubmitLogoutHandler(e:any){
+    e.preventDefault();
+    console.log("Logout");
+    
+    const url = "api/companies/logout";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        },
+      });
+      if(response.status == 200){
+        const {token} = await response.json();
+          window.localStorage.setItem(
+            "token",
+            token,
+          );
+        router.push("/login")
+      }else{
+        console.log(response.statusText);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
   return (
     <div >
       <Head>
@@ -35,7 +65,13 @@ const Empresa: NextPage = () => {
                 <a className="nav-link mx-2" href="#">Funcionários</a>
               </li>
             </ul>
-            <Link className={`navbar-link ${styles.logoutButton} yellowText`} href="/login">Sair</Link>
+            <button
+              className={`navbar-link ${styles.logoutButton} yellowText`}
+              type="button"
+              onClick={onSubmitLogoutHandler}
+            >
+              Sair
+            </button>
           </div>
         </div>
       </nav>
