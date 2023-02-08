@@ -12,6 +12,7 @@
 }
 
 .logoutButton {
-  position: absolute;
   right: 3%;
+  background-color: #034078;
+  border: none;
 }
