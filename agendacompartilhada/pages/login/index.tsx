@@ -93,6 +93,11 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
+          const {token} = await response.json();
+          window.localStorage.setItem(
+            "token",
+            token,
+          );
           router.push("/empresa")
         }else {
           setErrorMessage([response.statusText])
@@ -101,7 +106,6 @@ const Home: NextPage = () => {
         console.log(error);
       }
     }
-
     window.localStorage.setItem(
       "maintainConnected",
       maintainConnected.toString()
