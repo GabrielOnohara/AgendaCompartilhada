@@ -3,6 +3,7 @@ import '../styles/globals.css'
 
 import type { AppProps } from 'next/app'
 import { useEffect } from 'react';
+import UserStorage from '../src/context/UserContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -12,7 +13,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     : null
   }, [])
 
-  return <Component {...pageProps} />
+  return (
+  <UserStorage>
+    <Component {...pageProps} />
+  </UserStorage>
+  )
 }
 
 export default MyApp

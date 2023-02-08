@@ -19,6 +19,7 @@ model Company {
   phone        String        @unique
   password     String
   isAdmin      Boolean       @default(true)
+  lastToken    String?       @default("")
   contributors Contributor[]
 }
 
