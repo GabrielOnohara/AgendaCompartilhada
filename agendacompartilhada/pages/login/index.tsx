@@ -6,6 +6,7 @@ import logo from "../../public/calendario.png";
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import {CompanyContext} from "../../src/context/CompanyContext";
 
 const Home: NextPage = () => {  
 
@@ -13,7 +14,7 @@ const Home: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  
+  const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
 
   React.useEffect(() => {
@@ -92,11 +93,12 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
-          const {token} = await response.json();
+          const {token,company} = await response.json();
           window.localStorage.setItem(
             "token",
             token,
           );
+          setCompany(company)
           router.push("/empresa")
         }else {
           setErrorMessage([response.statusText])

@@ -1,9 +1,42 @@
+import { useRouter } from "next/router";
 import React from "react";
 
-export const CompanyContext = React.createContext<any>(null);
+export const CompanyContext = React.createContext<any>({});
 
 const CompanyStorage = (props:any) => {
-  const [company, setCompany] = React.useState(null);
+
+  const router = useRouter();
+  const [company, setCompany] = React.useState({});
+
+  async function getCompanyByToken(token:string){
+    try {
+      const url = "api/token/validate";
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          'x-access-token': token,
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      const json = await response.json()
+      if(response.status == 200){
+        setCompany({name: json.message})
+      }else {
+        setCompany({name: undefined})
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  React.useEffect(()=>{
+    const token = window.localStorage.getItem("token");
+    if(token){
+      getCompanyByToken(token);
+    }else{
+      getCompanyByToken("");
+    }
+  },[])  
 
   return (
     <CompanyContext.Provider value={{company, setCompany}}>
