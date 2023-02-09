@@ -12,17 +12,17 @@ export default async function handler(
       const data =  req.body;
       const prisma = new PrismaClient();
       try {
-        const user = await prisma.company.findFirst({
+        const company = await prisma.company.findFirst({
           where: {
             email: data.email,
           }
         });
-        if(user){
-          var passwordsMatch = bcrypt.compareSync(data.password, user.password); 
+        if(company){
+          var passwordsMatch = bcrypt.compareSync(data.password, company.password); 
           if(passwordsMatch){
-            const token = jwt.sign({user}, process.env.JWT_KEY, {expiresIn: 60*60});
+            const token = jwt.sign({company}, process.env.JWT_KEY, {expiresIn: 60*60});
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({auth:true, token});
+            res.status(200).json({auth:true, token,company });
           }else{
             res.statusMessage = "Senha inválida";
             res.status(400);
