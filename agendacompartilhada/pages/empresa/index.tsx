@@ -2,11 +2,15 @@ import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import React from "react";
+import { CompanyContext } from "../../src/context/CompanyContext";
 import styles from "../../styles/Company.module.css";
 
 const Empresa: NextPage = () => {
 
   const router = useRouter();
+
+  const {company} = React.useContext(CompanyContext)
 
   async function onSubmitLogoutHandler(e:any){
     e.preventDefault();
@@ -49,7 +53,7 @@ const Empresa: NextPage = () => {
 
       <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
         <div className={`container-fluid ${styles.applySpaceBetween}`}>
-          <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">Empresa</Link>
+          <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
