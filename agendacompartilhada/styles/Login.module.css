@@ -92,6 +92,7 @@
   height: 20px;
   width: 20px;
   margin: 3px;
+  accent-color: #034078;
 }
 
 .checkboxContainer p {
@@ -104,7 +105,7 @@
   width: 100%;
 }
 
-.login button a{
+.login button a {
   color: #fff;
 }
 
@@ -130,7 +131,7 @@
   color: #034078;
 }
 
-.errorMessage{
+.errorMessage {
   color: red;
   margin-top: 5px;
 }
