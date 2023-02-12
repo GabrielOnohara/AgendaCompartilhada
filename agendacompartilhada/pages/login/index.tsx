@@ -6,31 +6,39 @@ import logo from "../../public/calendario.png";
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-var bcrypt = require('bcryptjs');
+import {TokenContext} from "../../src/context/TokenContext";
+import {CompanyContext} from "../../src/context/CompanyContext";
 
 const Home: NextPage = () => {  
 
-  const [maintainConnected, setMaintainConnected] = React.useState(false);
+  const [remindeMe, setRemindeMe] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  
+  const {token, setToken} = React.useContext(TokenContext)
+  const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
 
   React.useEffect(() => {
     const lastMaintainChecked =
-      window.localStorage.getItem("maintainConnected");
+    window.localStorage.getItem("remindeMe");
     if (lastMaintainChecked === "true") {
       const lastEmail = window.localStorage.getItem("email");
-      const lastPassword = window.localStorage.getItem("password");
       setEmail(lastEmail ?? "");
-      setPassword(lastPassword ?? "");
-      setMaintainConnected(true);
+      setRemindeMe(true);
     }
   }, []);
 
+  React.useEffect(()=>{
+    if (token) {
+      //adicionar animação de loading 
+      router.push("/empresa")
+    } else {
+    }
+  },)
+
   function toggleCheckbox(event: any) {
-    setMaintainConnected(event.target.checked);
+    setRemindeMe(event.target.checked);
   }
 
   async function onSubmitHandler(e:any){
@@ -93,11 +101,13 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
-          const {token} = await response.json();
+          const {token,company} = await response.json();
           window.localStorage.setItem(
             "token",
             token,
           );
+          setToken(token)
+          setCompany(company)
           router.push("/empresa")
         }else {
           setErrorMessage([response.statusText])
@@ -107,14 +117,10 @@ const Home: NextPage = () => {
       }
     }
     window.localStorage.setItem(
-      "maintainConnected",
-      maintainConnected.toString()
+      "remindeMe",
+      remindeMe.toString()
     );
-    if (maintainConnected) {
-      window.localStorage.setItem("email", email);
-      window.localStorage.setItem("password", password);
-    }
-    
+    window.localStorage.setItem("email", email);
   }
 
   return (
@@ -191,9 +197,9 @@ const Home: NextPage = () => {
                 name="saveUsername"
                 id="saveUsername"
                 onChange={toggleCheckbox}
-                checked={maintainConnected}
+                checked={remindeMe}
               />
-              <p>Manter-me conectado</p>
+              <p>Lembrar de mim</p>
             </div>
             {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             <div className="centerHorizontal">

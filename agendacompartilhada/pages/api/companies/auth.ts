@@ -7,22 +7,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const data =  req.body;
+  const prisma = new PrismaClient();
+  await prisma.$connect()
   switch(req.method){
     case "POST":
-      const data =  req.body;
-      const prisma = new PrismaClient();
       try {
-        const user = await prisma.company.findFirst({
+        const company = await prisma.company.findFirst({
           where: {
             email: data.email,
           }
         });
-        if(user){
-          var passwordsMatch = bcrypt.compareSync(data.password, user.password); 
+        if(company){
+          var passwordsMatch = bcrypt.compareSync(data.password, company.password); 
           if(passwordsMatch){
-            const token = jwt.sign({user}, process.env.JWT_KEY, {expiresIn: 60*60});
+            const token = jwt.sign({company}, process.env.JWT_KEY, {expiresIn: 60*60});
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({auth:true, token});
+            res.status(200).json({auth:true, token, company });
           }else{
             res.statusMessage = "Senha inválida";
             res.status(400);
@@ -36,10 +37,28 @@ export default async function handler(
         res.status(400).json({ error: error});
       }finally {
         res.end();
+        await prisma.$disconnect()
       }
       break;
     default:
-      res.status(200).json({ name: 'John Doe' });
+      try {
+        const company = await prisma.company.findUnique({
+          where: {
+            email: data.email,
+          }
+        });
+        if(company){
+          res.status(200).json({ company });
+        }else{
+          res.statusMessage = "Usuário não encontrado";
+          res.status(400);
+        }
+      }catch(error){
+        res.status(400).json({ error:error });
+      }finally{
+        res.end();
+        await prisma.$disconnect()
+      }
       break;
   }
 

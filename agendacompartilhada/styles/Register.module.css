@@ -94,6 +94,7 @@
   height: 20px;
   width: 20px;
   margin: 3px;
+  accent-color: #034078;
 }
 
 .checkboxContainer p {
@@ -101,7 +102,7 @@
   line-height: 1.8;
 }
 
-.errorMessage{
+.errorMessage {
   color: red;
   margin-top: 5px;
 }
