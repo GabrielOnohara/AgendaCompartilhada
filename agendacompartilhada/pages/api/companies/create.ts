@@ -13,7 +13,7 @@ export default async function handler(
       const prisma = new PrismaClient();
       await prisma.$connect()
       try {
-        const user = await prisma.company.findUnique({
+        const user = await prisma.company.findFirst({
           where: {
             email: data.email
           }
@@ -23,7 +23,7 @@ export default async function handler(
           res.status(400);
         } else {
           const newCompany  = await  prisma.company.create({
-            data : data
+            data: data
           })
           const token = jwt.sign({newCompany}, process.env.JWT_KEY, {expiresIn: 60*60});
           res.statusMessage = "Usuário criado com sucesso.";

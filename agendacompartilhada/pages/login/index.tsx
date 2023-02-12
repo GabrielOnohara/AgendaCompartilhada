@@ -18,6 +18,7 @@ const Home: NextPage = () => {
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
+  var bcrypt = require('bcryptjs');
 
   React.useEffect(() => {
     const lastMaintainChecked =
@@ -101,7 +102,7 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
-          const {token,company} = await response.json();
+          const {token, company} = await response.json();
           window.localStorage.setItem(
             "token",
             token,

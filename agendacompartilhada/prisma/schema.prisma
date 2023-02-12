@@ -5,10 +5,9 @@ generator client {
 datasource db {
   provider          = "mysql"
   url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-model company {
+model Company {
   id           Int           @id @default(autoincrement())
   createdAt    DateTime      @default(now())
   updatedAt    DateTime
@@ -17,10 +16,10 @@ model company {
   phone        String        @unique(map: "Company_phone_key")
   password     String
   isAdmin      Boolean       @default(true)
-  contribuitor contribuitor?
+  contribuitor Contribuitor[]
 }
 
-model contribuitor {
+model Contribuitor {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime
@@ -30,5 +29,5 @@ model contribuitor {
   password  String
   isAdmin   Boolean  @default(false)
   companyId Int?     @unique(map: "Contribuitor_companyId_key")
-  company   company? @relation(fields: [companyId], references: [id], map: "Contribuitor_companyId_fkey")
+  company   Company? @relation(fields: [companyId], references: [id], map: "Contribuitor_companyId_fkey")
 }

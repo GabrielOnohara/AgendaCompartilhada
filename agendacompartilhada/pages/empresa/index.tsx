@@ -6,7 +6,6 @@ import React from "react";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
 import styles from "../../styles/Company.module.css";
-import { compare } from "bcryptjs";
 
 const Empresa: NextPage = () => {
 
@@ -31,8 +30,9 @@ const Empresa: NextPage = () => {
           ""
         );
         router.push("/login");
-        setToken("");
-        setCompany({});
+        setTimeout(setCompany({name: ""}),2000)
+        setTimeout(setToken(""),2000)
+        
       }else{
         console.log(response.statusText);
       }
@@ -41,7 +41,40 @@ const Empresa: NextPage = () => {
     }
   }
 
-  if(!company.hasOwnProperty("name")){
+
+  React.useEffect(()=>{
+
+    async function getCompanyByEmail(email:string){
+
+      try {
+        const url = "api/companies/" + email;
+        const response = await fetch(url, {
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+        if(response.status == 200){
+          const {company} = await response.json();
+          setCompany(company);
+        }else {
+          setCompany({name: ""});
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    const token =  window.localStorage.getItem("token");
+    const companyEmail =  window.localStorage.getItem("email");
+    if(token){
+      if(companyEmail){
+        getCompanyByEmail(companyEmail)
+      }else{
+        setCompany({name:""});
+      }
+    }
+  },[setCompany])  
+
+  if(token == ""){
     return (
       <div>
         <Head>
@@ -74,7 +107,7 @@ const Empresa: NextPage = () => {
   
         <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
           <div className={`container-fluid ${styles.applySpaceBetween}`}>
-            {company && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
+            {(company?.name??"") !== "" && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span className="navbar-toggler-icon"></span>
             </button>
