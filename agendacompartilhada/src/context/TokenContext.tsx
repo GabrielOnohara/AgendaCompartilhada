@@ -1,14 +1,13 @@
 import { useRouter } from "next/router";
 import React from "react";
 
-export const CompanyContext = React.createContext<any>({});
+export const TokenContext = React.createContext<any>("");
 
-const CompanyStorage = (props:any) => {
+const TokenStorage = (props:any) => {
+  
+  const [token, setToken] = React.useState("");
 
-  const router = useRouter();
-  const [company, setCompany] = React.useState({});
-
-  async function getCompanyByToken(token:string){
+  async function verifyToken(token:string){
     try {
       const url = "api/token/validate";
       const response = await fetch(url, {
@@ -18,12 +17,10 @@ const CompanyStorage = (props:any) => {
           "Content-type": "application/json; charset=UTF-8",
         },
       });
-      const json = await response.json()
       if(response.status == 200){
-        if(json.company)//necessario adicionar loginAutomatico
-        setCompany(json.company)
+        setToken(token)
       }else {
-        setCompany({})
+        setToken("")
       }
     } catch (error) {
       console.log(error);
@@ -33,17 +30,17 @@ const CompanyStorage = (props:any) => {
   React.useEffect(()=>{
     const token = window.localStorage.getItem("token");
     if(token){
-      getCompanyByToken(token);
+      verifyToken(token);
     }else{
-      getCompanyByToken("");
+      verifyToken("");
     }
   },[])  
 
   return (
-    <CompanyContext.Provider value={{company, setCompany}}>
+    <TokenContext.Provider value={{token, setToken}}>
       {props.children}
-    </CompanyContext.Provider>
+    </TokenContext.Provider>
   );
 }
 
-export default CompanyStorage;
+export default TokenStorage;
