@@ -14,8 +14,6 @@ const Empresa: NextPage = () => {
 
   async function onSubmitLogoutHandler(e:any){
     e.preventDefault();
-    console.log("Logout");
-    
     const url = "api/companies/logout";
     try {
       const response = await fetch(url, {
@@ -25,11 +23,11 @@ const Empresa: NextPage = () => {
         },
       });
       if(response.status == 200){
-        window.localStorage.setItem(
+        window.localStorage.removeItem(
           "token",
-          "",
         );
-        router.push("/login")
+        router.push("/login");
+        setTimeout(setCompany({}), 3000)
       }else{
         console.log(response.statusText);
       }
