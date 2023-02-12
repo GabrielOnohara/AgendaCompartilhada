@@ -21,6 +21,14 @@ export default async function handler(
           var passwordsMatch = bcrypt.compareSync(data.password, company.password); 
           if(passwordsMatch){
             const token = jwt.sign({company}, process.env.JWT_KEY, {expiresIn: 60*60});
+            prisma.company.update({
+              where: {
+                email: data.email,
+              },
+              data: {
+                lastToken: token
+              }
+            })
             res.statusMessage = "Login efetuado com sucesso";
             res.status(200).json({auth:true, token,company });
           }else{
