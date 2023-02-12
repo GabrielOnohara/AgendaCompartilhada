@@ -3,13 +3,16 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
 import styles from "../../styles/Company.module.css";
+import { compare } from "bcryptjs";
 
 const Empresa: NextPage = () => {
 
   const router = useRouter();
 
+  const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
 
   async function onSubmitLogoutHandler(e:any){
@@ -23,11 +26,13 @@ const Empresa: NextPage = () => {
         },
       });
       if(response.status == 200){
-        window.localStorage.removeItem(
+        window.localStorage.setItem(
           "token",
+          ""
         );
         router.push("/login");
-        setTimeout(setCompany({}), 3000)
+        setToken("");
+        setCompany({});
       }else{
         console.log(response.statusText);
       }
@@ -36,7 +41,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  if(!company.hasOwnProperty('name')){
+  if(!company.hasOwnProperty("name")){
     return (
       <div>
         <Head>
