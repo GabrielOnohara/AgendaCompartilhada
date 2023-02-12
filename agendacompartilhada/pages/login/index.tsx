@@ -6,6 +6,7 @@ import logo from "../../public/calendario.png";
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import {TokenContext} from "../../src/context/TokenContext";
 import {CompanyContext} from "../../src/context/CompanyContext";
 
 const Home: NextPage = () => {  
@@ -14,23 +15,27 @@ const Home: NextPage = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
+  const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
 
   React.useEffect(() => {
     const lastMaintainChecked =
-      window.localStorage.getItem("remindeMe");
+    window.localStorage.getItem("remindeMe");
     if (lastMaintainChecked === "true") {
-      if (company.hasOwnProperty('name')) {
-        //adicionar animação de loading 
-        router.push("/empresa")
-      } else {
-        const lastEmail = window.localStorage.getItem("email");
-        setEmail(lastEmail ?? "");
-      }
+      const lastEmail = window.localStorage.getItem("email");
+      setEmail(lastEmail ?? "");
       setRemindeMe(true);
     }
-  }, [router, company]);
+  }, []);
+
+  React.useEffect(()=>{
+    if (token) {
+      //adicionar animação de loading 
+      router.push("/empresa")
+    } else {
+    }
+  },)
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
@@ -101,6 +106,7 @@ const Home: NextPage = () => {
             "token",
             token,
           );
+          setToken(token)
           setCompany(company)
           router.push("/empresa")
         }else {
@@ -114,10 +120,7 @@ const Home: NextPage = () => {
       "remindeMe",
       remindeMe.toString()
     );
-    if (remindeMe) {
-      window.localStorage.setItem("email", email);
-    }
-    
+    window.localStorage.setItem("email", email);
   }
 
   return (

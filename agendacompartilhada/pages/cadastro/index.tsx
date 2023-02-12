@@ -5,6 +5,8 @@ import styles from "../../styles/Register.module.css";
 import logo from "../../public/calendario.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { TokenContext } from "../../src/context/TokenContext";
+import { CompanyContext } from "../../src/context/CompanyContext";
 var bcrypt = require('bcryptjs');
 
 const RegisterPage: NextPage = () => {
@@ -16,7 +18,8 @@ const RegisterPage: NextPage = () => {
   const [telefone, setTelefone] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
-  
+  const {token, setToken} = React.useContext(TokenContext)
+  const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
 
   function toggleCheckbox(event: any) {
@@ -131,6 +134,13 @@ const RegisterPage: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
+          const {token,company} = await response.json();
+          window.localStorage.setItem(
+            "token",
+            token,
+          );
+          setToken(token)
+          setCompany(company)
           router.push("/empresa")
         }else{
           setErrorMessage([response.statusText])
