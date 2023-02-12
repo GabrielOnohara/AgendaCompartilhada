@@ -20,9 +20,10 @@ const CompanyStorage = (props:any) => {
       });
       const json = await response.json()
       if(response.status == 200){
-        setCompany({name: json.message})
+        if(json.company)//necessario adicionar loginAutomatico
+        setCompany(json.company)
       }else {
-        setCompany({name: undefined})
+        setCompany({})
       }
     } catch (error) {
       console.log(error);

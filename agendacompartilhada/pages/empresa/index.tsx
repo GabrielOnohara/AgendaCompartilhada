@@ -38,7 +38,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  if(!company.name){
+  if(!company.hasOwnProperty('name')){
     return (
       <div>
         <Head>
