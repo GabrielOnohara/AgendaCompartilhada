@@ -16,19 +16,8 @@ export default async function handler(
         jwt.verify(token, process.env.JWT_KEY, function(err: any) {
           if (err) return res.status(500).json({ auth: false, message: 'Failed to authenticate token.' });
         });
-        
-        const companyFindedByToken = await prisma.company.findFirst({
-          where: {
-            lastToken: token,
-          }
-        });
-        if (companyFindedByToken) {
-          return res.status(200).json({ auth: true, company: companyFindedByToken });
-        } else {
-          return res.status(400).json({ auth: false, message: 'Token Inválido' });
-        }
-
-        
+        res.statusMessage = "Token Válido"
+        return res.status(200);      
       } catch (error) {
         return res.status(500).json({ auth: false, message: error });
       }finally{
