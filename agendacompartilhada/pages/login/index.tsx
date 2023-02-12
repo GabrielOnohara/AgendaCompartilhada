@@ -21,10 +21,13 @@ const Home: NextPage = () => {
     const lastMaintainChecked =
       window.localStorage.getItem("maintainConnected");
     if (lastMaintainChecked === "true") {
-      const lastEmail = window.localStorage.getItem("email");
-      const lastPassword = window.localStorage.getItem("password");
-      setEmail(lastEmail ?? "");
-      setPassword(lastPassword ?? "");
+      if (company.hasOwnProperty('name')) {
+        //adicionar animação de loading 
+        router.push("/empresa")
+      } else {
+        const lastEmail = window.localStorage.getItem("email");
+        setEmail(lastEmail ?? "");
+      }
       setMaintainConnected(true);
     }
   }, []);
