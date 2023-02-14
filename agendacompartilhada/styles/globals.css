@@ -81,6 +81,17 @@ img {
   font-weight: bold;
 }
 
+.btnDarkBlue:disabled{
+  background-color: #3575B3;
+  color: #EDEBEA;
+  padding: 10px 20px;
+  font-size: 1.125rem;
+  border-radius: 0.4rem;
+  border: 1px solid #3575B3;
+  font-family: 'Comfortaa', cursive;
+  font-weight: normal;
+}
+
 .btnDarkBlue:hover,
 .btnDarkBlue:focus {
   color: #FACE54;

@@ -6,14 +6,26 @@ import React from "react";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
 import styles from "../../styles/Company.module.css";
-import { compare } from "bcryptjs";
 
 const Empresa: NextPage = () => {
 
   const router = useRouter();
-
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
+  const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
+
+  function companyMenuClick(e:any){
+    e.preventDefault();
+    setMenuItemSelected("resumo")
+  }
+  function scheduleMenuClick(e:any){
+    e.preventDefault();
+    setMenuItemSelected("agenda")
+  }
+  function teamMenuClick(e:any){
+    e.preventDefault();
+    setMenuItemSelected("equipe")
+  }
 
   async function onSubmitLogoutHandler(e:any){
     e.preventDefault();
@@ -31,17 +43,61 @@ const Empresa: NextPage = () => {
           ""
         );
         router.push("/login");
-        setToken("");
-        setCompany({});
+        setTimeout(setCompany({name: ""}),2000)
+        setTimeout(setToken(""),2000)
+        
       }else{
         console.log(response.statusText);
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   }
 
-  if(!company.hasOwnProperty("name")){
+  React.useEffect(()=>{
+    async function getCompanyByEmail(email:string){
+      try {
+        const url = "api/companies/" + email;
+        const response = await fetch(url, {
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+        if(response.status == 200){
+          const {company} = await response.json();
+          setCompany(company);
+        }else {
+          setCompany({name: ""});
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    const token =  window.localStorage.getItem("token");
+    const companyEmail =  window.localStorage.getItem("email");
+    if(token){
+      if(companyEmail){
+        getCompanyByEmail(companyEmail)
+      }else{
+        setCompany({});
+      }
+    }
+  },[router,setCompany])  
+
+  React.useEffect(()=>{
+    switch (menuItemSelected) {
+      case "resumo":   
+        break;
+      case "agenda":   
+        break;
+      case "equipe":   
+        break;
+      default:
+        break;
+    }
+  },[menuItemSelected])
+
+  if(token == ""){
     return (
       <div>
         <Head>
@@ -63,7 +119,7 @@ const Empresa: NextPage = () => {
     return (
       <div >
         <Head>
-          <title>Agenda Compartilhada</title>
+          <title>Agenda Compartilhada - {menuItemSelected.charAt(0).toUpperCase() + menuItemSelected.slice(1)}</title>
           <meta content="text/html;charset=UTF-8" />
           <meta
             name="description"
@@ -81,13 +137,31 @@ const Empresa: NextPage = () => {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
               <ul className="navbar-nav mx-auto mb-2 mb-lg-2 mt-lg-2">
                 <li className="nav-item">
-                  <a className="nav-link active mx-2" aria-current="page" href="#">Resumo</a>
+                  <button
+                    className={`nav-link mx-2 ${menuItemSelected == "resumo" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={companyMenuClick}
+                  >
+                    Resumo
+                  </button>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link mx-2" href="#">Horários</a>
+                  <button
+                    className={`nav-link mx-2  ${menuItemSelected == "agenda" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={scheduleMenuClick}
+                  >
+                    Agenda
+                  </button>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link mx-2" href="#">Funcionários</a>
+                  <button
+                    className={`nav-link mx-2  ${menuItemSelected == "equipe" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={teamMenuClick}
+                  >
+                    Equipe
+                  </button>
                 </li>
               </ul>
               <button
@@ -100,6 +174,24 @@ const Empresa: NextPage = () => {
             </div>
           </div>
         </nav>
+        <main>
+          {
+            menuItemSelected == "resumo" 
+            ?
+            (
+              <div>resumo</div>
+            )
+            :menuItemSelected == "agenda" 
+            ?
+            (
+              <div>agenda</div>
+            ) 
+            :
+            (
+              <div>equipe</div>
+            )
+          }
+        </main>
       </div>
     );
   }

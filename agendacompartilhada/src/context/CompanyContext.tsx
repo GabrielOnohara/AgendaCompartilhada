@@ -1,44 +1,44 @@
 import React from "react";
 import { TokenContext } from "./TokenContext";
-export const CompanyContext = React.createContext<any>("");
+export const CompanyContext = React.createContext<any>({});
 
 const CompanyStorage = (props:any) => {
   
-  const {token, setToken} = React.useContext(TokenContext)
   const [company, setCompany] = React.useState({});
 
-  async function getCompany(email:string){
-    try {
-      const url = "api/companies/auth";
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify({email: email}),
-      });
-      if(response.status == 200){
-        const {company} = await response.json();
-        setCompany(company);
-      }else {
+  React.useEffect(()=>{
+    async function getCompanyByEmail(email:string){
+
+      try {
+        const url = "api/companies/" + email;
+        const response = await fetch(url, {
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+        if(response.status == 200){
+          const {company} = await response.json();
+          setCompany(company);
+        }else {
+          setCompany({});
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    const token =  window.localStorage.getItem("token");
+    const companyEmail =  window.localStorage.getItem("email");
+    if(token){
+      if(companyEmail){
+        getCompanyByEmail(companyEmail)
+      }else{
         setCompany({});
       }
-    } catch (error) {
-      console.log(error);
     }
-  }
-
-  React.useEffect(()=>{
-    if(token){
-      const companyEmail =  window.localStorage.getItem("email") as string;
-      getCompany(companyEmail)
-    }else{
-      setCompany({});
-    }
-  },[token])  
+  },[])  
 
   return (
-    <CompanyContext.Provider value={{token, setToken}}>
+    <CompanyContext.Provider value={{company, setCompany}}>
       {props.children}
     </CompanyContext.Provider>
   );

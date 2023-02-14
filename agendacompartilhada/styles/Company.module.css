@@ -7,12 +7,13 @@
   justify-content: space-between;
 }
 
-.companyName {
-  position: absolute;
-}
-
 .logoutButton {
   right: 3%;
   background-color: #034078;
   border: none;
+}
+
+.menuButton{
+  background-color: #034078;
+  border: none
 }

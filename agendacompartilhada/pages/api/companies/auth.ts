@@ -23,7 +23,7 @@ export default async function handler(
           if(passwordsMatch){
             const token = jwt.sign({company}, process.env.JWT_KEY, {expiresIn: 60*60});
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({auth:true, token, company });
+            res.status(200).json({token, company });
           }else{
             res.statusMessage = "Senha inválida";
             res.status(400);
@@ -33,18 +33,18 @@ export default async function handler(
           res.status(400);
         }
       } catch (error) {
-        res.statusMessage = "Não foi efetuar login";
+        res.statusMessage = "Não foi possível efetuar login";
         res.status(400).json({ error: error});
-      }finally {
+      } finally {
         res.end();
         await prisma.$disconnect()
       }
       break;
     default:
       try {
-        const company = await prisma.company.findUnique({
+        const company = await prisma.company.findFirst({
           where: {
-            email: data.email,
+            email: data.email
           }
         });
         if(company){

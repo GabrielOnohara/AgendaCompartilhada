@@ -18,6 +18,7 @@ const Home: NextPage = () => {
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
+  const [autoLogin, setAutologin] = React.useState(false);
 
   React.useEffect(() => {
     const lastMaintainChecked =
@@ -31,11 +32,18 @@ const Home: NextPage = () => {
 
   React.useEffect(()=>{
     if (token) {
-      //adicionar animação de loading 
-      router.push("/empresa")
+      setAutologin(true);
+      try{
+        setTimeout(()=>{
+          router.push("/empresa");
+        }, 3000);
+      }finally{
+        setAutologin(false);
+      }
     } else {
+      setAutologin(false);
     }
-  },)
+  },[router,token])
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
@@ -101,7 +109,7 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if(response.status == 200){
-          const {token,company} = await response.json();
+          const {token, company} = await response.json();
           window.localStorage.setItem(
             "token",
             token,
@@ -203,13 +211,27 @@ const Home: NextPage = () => {
             </div>
             {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             <div className="centerHorizontal">
-              <button
-                className="btnDarkBlue"
-                type="submit"
-                onClick={() => onSubmitHandler}
-              >
-                Confirmar
-              </button>
+              {autoLogin?
+                (
+                  <button
+                    className="btnDarkBlue"
+                    type="submit"
+                    disabled
+                  >
+                    Carregando...
+                  </button>
+                )
+               :(
+                  <button
+                    className="btnDarkBlue"
+                    type="submit"
+                    onClick={() => onSubmitHandler}
+                  >
+                    Confirmar
+                  </button>
+                )
+               }
+              
             </div>
             <div className={styles.registerContainer}>
               <p>Não possui conta ainda?</p>
