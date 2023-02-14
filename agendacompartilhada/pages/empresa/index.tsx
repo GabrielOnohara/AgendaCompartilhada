@@ -8,6 +8,8 @@ import { CompanyContext } from "../../src/context/CompanyContext";
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
+
 import styles from "../../styles/Company.module.css";
 
 
@@ -193,13 +195,24 @@ const Empresa: NextPage = () => {
             :
             (
               <div>
-                <h1 className="darkBlueText ">Equipe</h1>
+                <div className={styles.initialTeamContent}>
+                  <h1 className="darkBlueText ">Equipe</h1>
+                  <div className={styles.actionContent}>
+                    <Button variant="success">Adicionar</Button>
+                  </div>
+                </div>
                 <div className="teamContent">
                   <Row xs={1} md={2} className="g-4">
                     {Array.from({ length: 4 }).map((_, idx) => (
                       <Col key={idx}>
-                        <Card >
-                          <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto", borderRadius: "50%"}}/>
+                        <Card style={{border: "1px solid #034078", color:"#034078"}}>
+                          <div className={styles.logoSection}>
+                            <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto 20x 0px", borderRadius: "50%"}}/>
+                            <div className={styles.actionContent}>
+                              <Button variant="warning">Editar</Button>
+                              <Button variant="danger">Deletar</Button>
+                            </div>
+                          </div>
                           <Card.Body>
                             <Card.Title>Card title {idx}</Card.Title>
                             <Card.Text>

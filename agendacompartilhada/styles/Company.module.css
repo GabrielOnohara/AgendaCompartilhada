@@ -13,18 +13,46 @@
   border: none;
 }
 
-.menuButton{
+.menuButton {
   background-color: #034078;
   border: none
 }
 
 .mainContainer {
   width: calc(100vw - 15px);
-  height: 100vh;
+  min-height: 100vh;
   padding: 75px 100px;
   background-color: #E3E5F7;
 }
 
-.mainContainer h1{
+.mainContainer h1 {
   margin-bottom: 25px;
+  display: inline-block;
+}
+
+.initialTeamContent {
+  width: auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.actionContent {
+  display: inline-block;
+}
+
+.logoSection {
+  display: flex;
+  justify-content: space-between;
+}
+
+.logoSection .actionContent {
+  margin-top: 25px;
+  margin-right: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logoSection .actionContent button{
+  color: white;
+  margin-bottom: 10px;
 }
