@@ -32,12 +32,16 @@ const Home: NextPage = () => {
 
   React.useEffect(()=>{
     if (token) {
-      setTimeout(()=>{
-        setAutologin(true)
-      }, 2000);
-      router.push("/empresa")
-      setAutologin(false)
+      setAutologin(true);
+      try{
+        setTimeout(()=>{
+          router.push("/empresa");
+        }, 3000);
+      }finally{
+        setAutologin(false);
+      }
     } else {
+      setAutologin(false);
     }
   },[router,token])
 
@@ -207,8 +211,17 @@ const Home: NextPage = () => {
             </div>
             {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             <div className="centerHorizontal">
-              {autoLogin 
-                ?(
+              {autoLogin?
+                (
+                  <button
+                    className="btnDarkBlue"
+                    type="submit"
+                    disabled
+                  >
+                    Carregando...
+                  </button>
+                )
+               :(
                   <button
                     className="btnDarkBlue"
                     type="submit"
@@ -216,15 +229,6 @@ const Home: NextPage = () => {
                   >
                     Confirmar
                   </button>
-                )
-               :(
-                <button
-                  className="btnDarkBlue"
-                  type="submit"
-                  disabled
-                >
-                  Carregando...
-                </button>
                 )
                }
               
