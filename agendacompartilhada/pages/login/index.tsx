@@ -18,7 +18,7 @@ const Home: NextPage = () => {
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const router = useRouter();
-  var bcrypt = require('bcryptjs');
+  const [autoLogin, setAutologin] = React.useState(false);
 
   React.useEffect(() => {
     const lastMaintainChecked =
@@ -32,11 +32,14 @@ const Home: NextPage = () => {
 
   React.useEffect(()=>{
     if (token) {
-      //adicionar animação de loading 
+      setTimeout(()=>{
+        setAutologin(true)
+      }, 2000);
       router.push("/empresa")
+      setAutologin(false)
     } else {
     }
-  },)
+  },[router,token])
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
@@ -204,13 +207,27 @@ const Home: NextPage = () => {
             </div>
             {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             <div className="centerHorizontal">
-              <button
-                className="btnDarkBlue"
-                type="submit"
-                onClick={() => onSubmitHandler}
-              >
-                Confirmar
-              </button>
+              {autoLogin 
+                ?(
+                  <button
+                    className="btnDarkBlue"
+                    type="submit"
+                    onClick={() => onSubmitHandler}
+                  >
+                    Confirmar
+                  </button>
+                )
+               :(
+                <button
+                  className="btnDarkBlue"
+                  type="submit"
+                  disabled
+                >
+                  Carregando...
+                </button>
+                )
+               }
+              
             </div>
             <div className={styles.registerContainer}>
               <p>Não possui conta ainda?</p>

@@ -1,6 +1,6 @@
 import React from "react";
 
-export const TokenContext = React.createContext<any>({name:""});
+export const TokenContext = React.createContext<any>("");
 
 const TokenStorage = (props:any) => {
   

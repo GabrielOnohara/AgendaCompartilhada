@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next'
-var bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,7 +20,7 @@ export default async function handler(
           }
         });
         if(company){
-          res.status(200).json(company);
+          res.status(200).json({company});
         }else{
           res.status(400).json({error: "Usuário não encontrado"});
         }

@@ -1,11 +1,10 @@
 import React from "react";
 import { TokenContext } from "./TokenContext";
-export const CompanyContext = React.createContext<any>("");
+export const CompanyContext = React.createContext<any>({});
 
 const CompanyStorage = (props:any) => {
   
-  const {token, setToken} = React.useContext(TokenContext)
-  const [company, setCompany] = React.useState({name: ""});
+  const [company, setCompany] = React.useState({});
 
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
@@ -21,20 +20,19 @@ const CompanyStorage = (props:any) => {
           const {company} = await response.json();
           setCompany(company);
         }else {
-          setCompany({name: ""});
+          setCompany({});
         }
       } catch (error) {
         console.log(error)
       }
     }
-
     const token =  window.localStorage.getItem("token");
     const companyEmail =  window.localStorage.getItem("email");
     if(token){
       if(companyEmail){
         getCompanyByEmail(companyEmail)
       }else{
-        setCompany({name: ""});
+        setCompany({});
       }
     }
   },[])  

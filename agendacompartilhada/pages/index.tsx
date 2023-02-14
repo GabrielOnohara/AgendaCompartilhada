@@ -4,8 +4,6 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import logo from "../public/calendario.png";
 import React from "react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
 

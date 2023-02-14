@@ -45,7 +45,7 @@ const RegisterPage: NextPage = () => {
       email: email,
       password: password,
       name: name,
-      phone: telefone
+      phone: telefone,
     }
 
     if(password != passwordConfirmation){
@@ -129,24 +129,25 @@ const RegisterPage: NextPage = () => {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "Content-type": "application/json; charset=UTF-8"
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(data),
         });
-        if(response.status == 200){
-          const {token,company} = await response.json();
+          if(response.ok){
+            const json = await response.json();
+          
           window.localStorage.setItem(
             "token",
-            token,
+            json.token,
           );
-          setToken(token)
-          setCompany(company)
+          setToken(json.token)
+          setCompany(json.newCompany)
           router.push("/empresa")
         }else{
           setErrorMessage([response.statusText])
         }
       } catch (error) {
-        console.log(error);
+        throw error
       }
     }
     

@@ -10,7 +10,6 @@ import styles from "../../styles/Company.module.css";
 const Empresa: NextPage = () => {
 
   const router = useRouter();
-
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
 
@@ -37,15 +36,12 @@ const Empresa: NextPage = () => {
         console.log(response.statusText);
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   }
 
-
   React.useEffect(()=>{
-
     async function getCompanyByEmail(email:string){
-
       try {
         const url = "api/companies/" + email;
         const response = await fetch(url, {
@@ -69,10 +65,10 @@ const Empresa: NextPage = () => {
       if(companyEmail){
         getCompanyByEmail(companyEmail)
       }else{
-        setCompany({name:""});
+        setCompany({});
       }
     }
-  },[setCompany])  
+  },[router,setCompany])  
 
   if(token == ""){
     return (
@@ -107,7 +103,7 @@ const Empresa: NextPage = () => {
   
         <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
           <div className={`container-fluid ${styles.applySpaceBetween}`}>
-            {(company?.name??"") !== "" && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
+            {company && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span className="navbar-toggler-icon"></span>
             </button>
