@@ -5,7 +5,11 @@ import { useRouter } from "next/router";
 import React from "react";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
 import styles from "../../styles/Company.module.css";
+
 
 const Empresa: NextPage = () => {
 
@@ -174,7 +178,7 @@ const Empresa: NextPage = () => {
             </div>
           </div>
         </nav>
-        <main>
+        <main className={styles.mainContainer}>
           {
             menuItemSelected == "resumo" 
             ?
@@ -188,7 +192,28 @@ const Empresa: NextPage = () => {
             ) 
             :
             (
-              <div>equipe</div>
+              <div>
+                <h1 className="darkBlueText ">Equipe</h1>
+                <div className="teamContent">
+                  <Row xs={1} md={2} className="g-4">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <Col key={idx}>
+                        <Card >
+                          <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto", borderRadius: "50%"}}/>
+                          <Card.Body>
+                            <Card.Title>Card title {idx}</Card.Title>
+                            <Card.Text>
+                              This is a longer card with supporting text below as a natural
+                              lead-in to additional content. This content is a little bit
+                              longer.
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              </div>
             )
           }
         </main>

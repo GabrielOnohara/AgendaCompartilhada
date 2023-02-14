@@ -17,3 +17,19 @@
   background-color: #034078;
   border: none
 }
+
+.mainContainer {
+  width: calc(100vw - 15px);
+  height: 100vh;
+  padding: 75px 100px;
+  background-color: #E3E5F7;
+}
+
+.mainContainer h1{
+  margin-bottom: 25px;
+}
+
+.teamContent .teamPhoto {
+   width: 300px !important;
+   height: 300px !important;
+}
