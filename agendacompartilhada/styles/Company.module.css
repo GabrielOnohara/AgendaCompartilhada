@@ -52,7 +52,29 @@
   flex-direction: column;
 }
 
-.logoSection .actionContent button{
+.logoSection .actionContent button {
   color: white;
   margin-bottom: 10px;
+}
+
+.teamEmail {
+  display: flex;
+  justify-content: space-between;
+}
+
+.teamEmail span {
+  color: #034078;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.teamPhone {
+  display: flex;
+  justify-content: space-between;
+}
+
+.teamPhone span {
+  color: #034078;
+  font-weight: bold;
+  margin-right: 5px;
 }

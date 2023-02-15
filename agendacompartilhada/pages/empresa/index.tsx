@@ -9,7 +9,8 @@ import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
-
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import styles from "../../styles/Company.module.css";
 
 
@@ -19,6 +20,19 @@ const Empresa: NextPage = () => {
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
+
+  const [showAddModal, setShowAddModal] = React.useState(false);
+  const handleClose = () => setShowAddModal(false);
+  const handleShow = () => setShowAddModal(true);
+
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [telefone, setTelefone] = React.useState("");
+  const [admin, setAdmin] = React.useState(false);
+  function toggleCheckbox(event: any) {
+    setAdmin(event.target.checked);
+  }
 
   function companyMenuClick(e:any){
     e.preventDefault();
@@ -198,10 +212,75 @@ const Empresa: NextPage = () => {
                 <div className={styles.initialTeamContent}>
                   <h1 className="darkBlueText ">Equipe</h1>
                   <div className={styles.actionContent}>
-                    <Button variant="success">Adicionar</Button>
+                    <Button variant="success" onClick={handleShow}>Adicionar</Button>
                   </div>
                 </div>
                 <div className="teamContent">
+                  <Modal show={showAddModal} onHide={handleClose} style={{color: "#034078", fontWeight: "bold"}}>
+                    <Modal.Header closeButton >
+                      <Modal.Title>Adicionar Contribuidor</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body >
+                      <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                          <Form.Label>Email</Form.Label>
+                          <Form.Control
+                            type="email"
+                            placeholder="name@example.com"
+                            autoFocus
+                            className="bg-white"
+                            value={email}
+                            onChange={({ target }) => setEmail(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                          <Form.Label>Nome</Form.Label>
+                          <Form.Control
+                            type="name"
+                            placeholder="Nome Completo"
+                            className="bg-white"
+                            value={name}
+                            onChange={({ target }) => setName(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                          <Form.Label>Telefone</Form.Label>
+                          <Form.Control
+                            type="phone"
+                            placeholder="11999999999"
+                            className="bg-white"
+                            value={telefone}
+                            onChange={({ target }) => setTelefone(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput4">
+                          <Form.Label>Senha</Form.Label>
+                          <Form.Control
+                            type="password"
+                            placeholder="Senha"
+                            className="bg-white"
+                            value={password}
+                            onChange={({ target }) => setPassword(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                          <Form.Check
+                            type="checkbox" label="Usuário é administrador?"
+                            onChange={toggleCheckbox}
+                            checked={admin}  
+                          />
+                        </Form.Group>
+                      </Form>
+                    </Modal.Body>
+                    <Modal.Footer >
+                      <Button variant="danger" onClick={handleClose}>
+                        Cancelar
+                      </Button>
+                      <Button variant="success" onClick={handleClose}>
+                        Confirmar
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
                   <Row xs={1} md={2} className="g-4">
                     {Array.from({ length: 4 }).map((_, idx) => (
                       <Col key={idx}>
@@ -214,11 +293,10 @@ const Empresa: NextPage = () => {
                             </div>
                           </div>
                           <Card.Body>
-                            <Card.Title>Card title {idx}</Card.Title>
+                            <Card.Title style={{fontWeight:"bold"}}>Card title {idx}</Card.Title>
                             <Card.Text>
-                              This is a longer card with supporting text below as a natural
-                              lead-in to additional content. This content is a little bit
-                              longer.
+                              <div className={styles.teamPhone}><span>Telefone:</span><p>1199999999</p></div>
+                              <div className={styles.teamEmail}><span>Email:</span><p>teste@teste.com</p></div>
                             </Card.Text>
                           </Card.Body>
                         </Card>
