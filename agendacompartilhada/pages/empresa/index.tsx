@@ -12,7 +12,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import styles from "../../styles/Company.module.css";
-
+var bcrypt = require('bcryptjs');
 
 const Empresa: NextPage = () => {
 
@@ -22,14 +22,18 @@ const Empresa: NextPage = () => {
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
 
   const [showAddModal, setShowAddModal] = React.useState(false);
-  const handleClose = () => setShowAddModal(false);
-  const handleShow = () => setShowAddModal(true);
+  const handleCloseAddModal = () => setShowAddModal(false);
+  const handleShowAddModal = () => setShowAddModal(true);
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
   const [admin, setAdmin] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
+  const [errorMessageContribuitor, setErrorMessageContribuitor] = React.useState<String[]>([]);
+  const [contribuitors, setContribuitors] = React.useState<any[]>([]);
+
   function toggleCheckbox(event: any) {
     setAdmin(event.target.checked);
   }
@@ -74,6 +78,116 @@ const Empresa: NextPage = () => {
     }
   }
 
+  async function onSubmitAddContribuitor(e:any){
+    e.preventDefault();
+    const data = {
+      email,
+      name,
+      phone: telefone,
+      password,
+      isAdmin: admin,
+      companyId: company.id,
+    }
+
+    const validations = {
+      emailIsValid: false,
+      passwordLengthIsValid: false,
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
+    if(password.length <= 5){
+      validations.passwordLengthIsValid = false;
+      setErrorMessageContribuitor((oldValue) => {
+        const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
+      })
+    }else{
+      validations.passwordLengthIsValid = true;
+      const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
+      if(index >= 0)
+      setErrorMessageContribuitor((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!validateEmail(email)){
+      validations.emailIsValid = false;
+      setErrorMessageContribuitor((oldValue) => {
+        const index = oldValue.indexOf("Email inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Email inválido"]);
+      })
+    }else{
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Email inválido");
+      if(index >= 0)
+      setErrorMessageContribuitor((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(validations.emailIsValid && validations.passwordLengthIsValid){
+      var salt = bcrypt.genSaltSync(10);
+      var hash = bcrypt.hashSync(data.password, salt);
+      data.password = hash;
+
+      const url = "api/contribuitors/create";
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        if(response.ok){
+          const {newContribuitor} = await response.json();
+          if(newContribuitor){
+            refreshTeam(data.companyId);
+
+          }
+        }else{
+          setErrorMessageContribuitor([response.statusText])
+        }
+      } catch (error) {
+        throw error
+      }
+    }
+
+  }
+
+  async function refreshTeam(companyID:any) {
+    const url = "api/contribuitors/list";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id:companyID}),
+      });
+      if(response.ok){
+        const {contribuitors} = await response.json();
+        if(contribuitors){
+          setContribuitors(contribuitors)
+        }
+      }else{
+        setErrorMessage([response.statusText])
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -106,16 +220,18 @@ const Empresa: NextPage = () => {
 
   React.useEffect(()=>{
     switch (menuItemSelected) {
-      case "resumo":   
+      case "resumo": 
+
         break;
       case "agenda":   
         break;
-      case "equipe":   
+      case "equipe":  
+        refreshTeam(company.id).then(()=>setShowAddModal(false)) 
         break;
       default:
         break;
     }
-  },[menuItemSelected])
+  },[menuItemSelected,company.id])
 
   if(token == ""){
     return (
@@ -212,11 +328,11 @@ const Empresa: NextPage = () => {
                 <div className={styles.initialTeamContent}>
                   <h1 className="darkBlueText ">Equipe</h1>
                   <div className={styles.actionContent}>
-                    <Button variant="success" onClick={handleShow}>Adicionar</Button>
+                    <Button variant="success" onClick={handleShowAddModal}>Adicionar</Button>
                   </div>
                 </div>
                 <div className="teamContent">
-                  <Modal show={showAddModal} onHide={handleClose} style={{color: "#034078", fontWeight: "bold"}}>
+                  <Modal show={showAddModal} onHide={handleCloseAddModal} style={{color: "#034078", fontWeight: "bold"}}>
                     <Modal.Header closeButton >
                       <Modal.Title>Adicionar Contribuidor</Modal.Title>
                     </Modal.Header>
@@ -270,19 +386,20 @@ const Empresa: NextPage = () => {
                             checked={admin}  
                           />
                         </Form.Group>
+                        {errorMessageContribuitor && errorMessageContribuitor.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
                       </Form>
                     </Modal.Body>
                     <Modal.Footer >
-                      <Button variant="danger" onClick={handleClose}>
+                      <Button variant="danger" onClick={handleCloseAddModal}>
                         Cancelar
                       </Button>
-                      <Button variant="success" onClick={handleClose}>
+                      <Button variant="success" onClick={onSubmitAddContribuitor}>
                         Confirmar
                       </Button>
                     </Modal.Footer>
                   </Modal>
                   <Row xs={1} md={2} className="g-4">
-                    {Array.from({ length: 4 }).map((_, idx) => (
+                    {contribuitors.map((contribuitor, idx) => (
                       <Col key={idx}>
                         <Card style={{border: "1px solid #034078", color:"#034078"}}>
                           <div className={styles.logoSection}>
@@ -293,9 +410,9 @@ const Empresa: NextPage = () => {
                             </div>
                           </div>
                           <Card.Body>
-                            <Card.Title style={{fontWeight:"bold"}}>Card title {idx}</Card.Title>
+                            <Card.Title style={{fontWeight:"bold"}}>{contribuitor.name}</Card.Title>
                             <Card.Text>
-                              <div className={styles.teamPhone}><span>Telefone:</span><p>1199999999</p></div>
+                              <div className={styles.teamPhone}><span>Telefone:</span><p>{contribuitor.phone}</p></div>
                               <div className={styles.teamEmail}><span>Email:</span><p>teste@teste.com</p></div>
                             </Card.Text>
                           </Card.Body>
