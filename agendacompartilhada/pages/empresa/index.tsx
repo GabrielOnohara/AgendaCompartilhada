@@ -153,7 +153,7 @@ const Empresa: NextPage = () => {
           const {newContribuitor} = await response.json();
           if(newContribuitor){
             refreshTeam(data.companyId);
-
+            setShowAddModal(false);
           }
         }else{
           setErrorMessageContribuitor([response.statusText])
