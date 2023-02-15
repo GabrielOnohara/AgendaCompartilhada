@@ -17,7 +17,7 @@ model Company {
   phone        String        @unique()
   password     String
   isAdmin      Boolean       @default(true)
-  contribuitor Contribuitor[]
+  contribuitors Contribuitor[]
 }
 
 model Contribuitor {
@@ -29,6 +29,6 @@ model Contribuitor {
   phone     String   @unique()
   password  String
   isAdmin   Boolean  @default(false)
-  companyId Int?     @unique()
-  company   Company? @relation(fields: [companyId], references: [id])
+  companyId Int      
+  company   Company @relation(fields: [companyId], references: [id])
 }
