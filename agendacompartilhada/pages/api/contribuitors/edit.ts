@@ -18,14 +18,19 @@ export default async function handler(
           }
         });
         if (contributorExists) {
-          let contributor = await prisma.contribuitor.update({
-            where: {
-              email: jsonData.email
-            },
-            data: jsonData
-          });
-          res.statusMessage = "Contribuidores editado com sucesso";
-          res.status(200).json({contributor});
+          try {
+            let contributorEdited = await prisma.contribuitor.update({
+              where: {
+                email: jsonData.email
+              },
+              data: jsonData
+            });
+            res.statusMessage = "Contribuidores editado com sucesso";
+            res.status(200).json({contributorEdited});
+          } catch (error) {
+            res.statusMessage = "Não foi possível editar contribuidor";
+            res.status(400).json({error:error});
+          }          
         } else {
           res.statusMessage = "Nenhum contribuidor encontrado";
           res.status(400);

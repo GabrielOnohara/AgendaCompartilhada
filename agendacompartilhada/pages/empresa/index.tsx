@@ -192,7 +192,6 @@ const Empresa: NextPage = () => {
         break;
       case "Editar":
         setModalTitle("Editar");
-
     
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
@@ -241,8 +240,8 @@ const Empresa: NextPage = () => {
               body: JSON.stringify(data),
             });
             if(response.ok){
-              const {ContributorEdited} = await response.json();
-              if(ContributorEdited){
+              const {contributorEdited} = await response.json();
+              if(contributorEdited){
                 refreshTeam(data.companyId);
                 setShowModal(false);
                 setModalTitle("");
