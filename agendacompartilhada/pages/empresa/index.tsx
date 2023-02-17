@@ -20,7 +20,6 @@ const Empresa: NextPage = () => {
   const {token, setToken} = React.useContext(TokenContext)
   const {company, setCompany} = React.useContext(CompanyContext)
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
-
   const [showModal, setShowModal] = React.useState(false);
 
   const handleCloseModal = () => setShowModal(false);
@@ -40,7 +39,7 @@ const Empresa: NextPage = () => {
     setName(contributor.name??"");
     setTelefone(contributor.phone??"")
     setPassword(contributor.password??"")
-    setAdmin(contributor.admin??false);
+    setAdmin(contributor.isAdmin??false);
     setModalTitle("Editar");
     setShowModal(true);
   }
