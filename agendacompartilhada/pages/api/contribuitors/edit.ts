@@ -21,7 +21,7 @@ export default async function handler(
           try {
             let contributorEdited = await prisma.contribuitor.update({
               where: {
-                email: jsonData.email
+                id: jsonData.id
               },
               data: jsonData
             });
