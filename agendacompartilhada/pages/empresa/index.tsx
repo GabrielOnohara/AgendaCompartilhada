@@ -30,6 +30,7 @@ const Empresa: NextPage = () => {
     setEmail("");
     setName("");
     setTelefone("")
+    setPassword("")
     setAdmin(false);
     setShowModal(true);
 
@@ -38,8 +39,8 @@ const Empresa: NextPage = () => {
     setEmail(contributor.email??"");
     setName(contributor.name??"");
     setTelefone(contributor.phone??"")
+    setPassword(contributor.password??"")
     setAdmin(contributor.admin??false);
-    setPassword("")
     setModalTitle("Editar");
     setShowModal(true);
   }
@@ -110,18 +111,19 @@ const Empresa: NextPage = () => {
       companyId: company.id,
     }
 
+    const validations = {
+      emailIsValid: false,
+      passwordLengthIsValid: false,
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
     switch (modalTitle) {
       case "Adicionar":
         setModalTitle("Adicionar")
-        const validations = {
-          emailIsValid: false,
-          passwordLengthIsValid: false,
-        }
-    
-        const validateEmail = (email:string) => {
-          var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-          return regexEmail.test(email)
-        };
     
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
@@ -190,6 +192,68 @@ const Empresa: NextPage = () => {
         break;
       case "Editar":
         setModalTitle("Editar");
+
+    
+        if(password.length <= 5){
+          validations.passwordLengthIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
+          })
+        }else{
+          validations.passwordLengthIsValid = true;
+          const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
+          if(index >= 0)
+          setErrorMessageContribuitor((oldValue) => {
+            return oldValue.splice(index, 1);
+          })
+        }
+    
+        if(!validateEmail(email)){
+          validations.emailIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Email inválido");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Email inválido"]);
+          })
+        }else{
+          validations.emailIsValid = true;
+          const index = errorMessage.indexOf("Email inválido");
+          if(index >= 0)
+          setErrorMessageContribuitor((oldValue) => {
+            return oldValue.splice(index, 1);
+          })
+        }
+
+        if(validations.emailIsValid && validations.passwordLengthIsValid){
+          const url = "api/contribuitors/edit";
+          try {
+            const response = await fetch(url, {
+              method: "PATCH",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+            if(response.ok){
+              const {ContributorEdited} = await response.json();
+              if(ContributorEdited){
+                refreshTeam(data.companyId);
+                setShowModal(false);
+                setModalTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
 
         break;
       case "Deletar":
