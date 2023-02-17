@@ -1,0 +1,45 @@
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { PrismaClient } from '@prisma/client';
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  switch(req.method){
+    case "PATCH":
+      const jsonData =  req.body;
+      const prisma = new PrismaClient();
+      await prisma.$connect()
+      try {
+        let contributorExists = await prisma.contribuitor.findUnique({
+          where: {
+            email: jsonData.email,
+          }
+        });
+        if (contributorExists) {
+          let contributor = await prisma.contribuitor.update({
+            where: {
+              email: jsonData.email
+            },
+            data: jsonData
+          });
+          res.statusMessage = "Contribuidores editado com sucesso";
+          res.status(200).json({contributor});
+        } else {
+          res.statusMessage = "Nenhum contribuidor encontrado";
+          res.status(400);
+        }
+      } catch (error) {
+        res.statusMessage = "Não foi possível editar contribuidor";
+        res.status(400).json({ error:error });
+      }finally{
+        res.end();
+        await prisma.$disconnect()
+      }
+      break;
+    default:
+       res.status(200).json({ name: 'John Doe' });
+      break
+  }
+}
