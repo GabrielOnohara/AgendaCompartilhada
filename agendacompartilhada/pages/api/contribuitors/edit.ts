@@ -29,7 +29,7 @@ export default async function handler(
               res.status(200).json({contributorEdited});
             }else{
               res.statusMessage = "Edição inválida";
-              res.status(200).json({contributorEdited});
+              res.status(400);
             }
         
         } else {
