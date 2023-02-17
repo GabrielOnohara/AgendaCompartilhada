@@ -28,6 +28,7 @@ const Empresa: NextPage = () => {
   };
 
   const handleShowAddModal = () => {
+    setErrorMessageContribuitor([]);
     setModalTitle("Adicionar");
     setEmail("");
     setName("");
@@ -38,6 +39,7 @@ const Empresa: NextPage = () => {
 
   }
   const handleShowEditModal = (contributor:any) => {
+    setErrorMessageContribuitor([]);
     setID(contributor.id??-1)
     setEmail(contributor.email??"");
     setName(contributor.name??"");
@@ -106,16 +108,6 @@ const Empresa: NextPage = () => {
 
   async function onSubmitModalConfirm(e:any){
     e.preventDefault();
-    const data = {
-      id: ID,
-      email,
-      name,
-      phone: telefone,
-      password,
-      isAdmin: admin,
-      companyId: company.id,
-    }
-
     const validations = {
       emailIsValid: false,
       passwordLengthIsValid: false,
@@ -128,8 +120,19 @@ const Empresa: NextPage = () => {
 
     switch (modalTitle) {
       case "Adicionar":
-        setModalTitle("Adicionar")
+        let dataADD = {
+          id: ID,
+          email,
+          name,
+          phone: telefone,
+          password,
+          isAdmin: admin,
+          companyId: company.id,
+        }
     
+
+        setModalTitle("Adicionar")
+
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
           setErrorMessageContribuitor((oldValue) => {
@@ -168,8 +171,8 @@ const Empresa: NextPage = () => {
     
         if(validations.emailIsValid && validations.passwordLengthIsValid){
           var salt = bcrypt.genSaltSync(10);
-          var hash = bcrypt.hashSync(data.password, salt);
-          data.password = hash;
+          var hash = bcrypt.hashSync(dataADD.password, salt);
+          dataADD.password = hash;
     
           const url = "api/contribuitors/create";
           try {
@@ -178,12 +181,12 @@ const Empresa: NextPage = () => {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify(data),
+              body: JSON.stringify(dataADD),
             });
             if(response.ok){
               const {newContribuitor} = await response.json();
               if(newContribuitor){
-                refreshTeam(data.companyId);
+                refreshTeam(dataADD.companyId);
                 setShowModal(false);
                 setModalTitle("");
               }
@@ -196,6 +199,16 @@ const Empresa: NextPage = () => {
         }
         break;
       case "Editar":
+        let dataEDIT = {
+          id: ID,
+          email,
+          name,
+          phone: telefone,
+          isAdmin: admin,
+          companyId: company.id,
+        }
+    
+
         setModalTitle("Editar");
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
@@ -241,12 +254,12 @@ const Empresa: NextPage = () => {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({data}),
+              body: JSON.stringify({dataEDIT}),
             });
             if(response.ok){
               const {contributorEdited} = await response.json();
               if(contributorEdited){
-                refreshTeam(data.companyId);
+                refreshTeam(dataEDIT.companyId);
                 setShowModal(false);
                 setModalTitle("");
               }
