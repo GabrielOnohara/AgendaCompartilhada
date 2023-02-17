@@ -14,23 +14,24 @@ export default async function handler(
       try {
         let contributorExists = await prisma.contribuitor.findUnique({
           where: {
-            id: jsonData.id,
+            id: +jsonData.id,
           }
         });
         if (contributorExists) {
-          try {
             let contributorEdited = await prisma.contribuitor.update({
               where: {
-                id: jsonData.id
+                id: +jsonData.id
               },
               data: jsonData
             });
-            res.statusMessage = "Contribuidores editado com sucesso";
-            res.status(200).json({contributorEdited});
-          } catch (error) {
-            res.statusMessage = "Não foi possível editar contribuidor";
-            res.status(400).json({error:error});
-          }          
+            if(contributorEdited){
+              res.statusMessage = "Contribuidores editado com sucesso";
+              res.status(200).json({contributorEdited});
+            }else{
+              res.statusMessage = "Edição inválida";
+              res.status(200).json({contributorEdited});
+            }
+        
         } else {
           res.statusMessage = "Nenhum contribuidor encontrado";
           res.status(400);
