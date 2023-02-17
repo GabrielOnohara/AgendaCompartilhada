@@ -14,7 +14,7 @@ export default async function handler(
       try {
         let contributorExists = await prisma.contribuitor.findUnique({
           where: {
-            email: jsonData.email,
+            id: jsonData.id,
           }
         });
         if (contributorExists) {

@@ -35,6 +35,7 @@ const Empresa: NextPage = () => {
 
   }
   const handleShowEditModal = (contributor:any) => {
+    setID(contributor.id??-1)
     setEmail(contributor.email??"");
     setName(contributor.name??"");
     setTelefone(contributor.phone??"")
@@ -45,6 +46,7 @@ const Empresa: NextPage = () => {
   }
 
 
+  const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
@@ -102,6 +104,7 @@ const Empresa: NextPage = () => {
   async function onSubmitModalConfirm(e:any){
     e.preventDefault();
     const data = {
+      id: ID,
       email,
       name,
       phone: telefone,
@@ -191,7 +194,6 @@ const Empresa: NextPage = () => {
         break;
       case "Editar":
         setModalTitle("Editar");
-    
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
           setErrorMessageContribuitor((oldValue) => {
@@ -236,7 +238,7 @@ const Empresa: NextPage = () => {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify(data),
+              body: JSON.stringify({data}),
             });
             if(response.ok){
               const {contributorEdited} = await response.json();
