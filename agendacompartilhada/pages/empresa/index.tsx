@@ -22,7 +22,10 @@ const Empresa: NextPage = () => {
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
   const [showModal, setShowModal] = React.useState(false);
 
-  const handleCloseModal = () => setShowModal(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setErrorMessageContribuitor([]);
+  };
 
   const handleShowAddModal = () => {
     setModalTitle("Adicionar");
