@@ -21,9 +21,29 @@ const Empresa: NextPage = () => {
   const {company, setCompany} = React.useContext(CompanyContext)
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
 
-  const [showAddModal, setShowAddModal] = React.useState(false);
-  const handleCloseAddModal = () => setShowAddModal(false);
-  const handleShowAddModal = () => setShowAddModal(true);
+  const [showModal, setShowModal] = React.useState(false);
+
+  const handleCloseModal = () => setShowModal(false);
+
+  const handleShowAddModal = () => {
+    setModalTitle("Adicionar");
+    setEmail("");
+    setName("");
+    setTelefone("")
+    setAdmin(false);
+    setShowModal(true);
+
+  }
+  const handleShowEditModal = (contributor:any) => {
+    setEmail(contributor.email??"");
+    setName(contributor.name??"");
+    setTelefone(contributor.phone??"")
+    setAdmin(contributor.admin??false);
+    setPassword("")
+    setModalTitle("Editar");
+    setShowModal(true);
+  }
+
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -33,6 +53,7 @@ const Empresa: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [errorMessageContribuitor, setErrorMessageContribuitor] = React.useState<String[]>([]);
   const [contribuitors, setContribuitors] = React.useState<any[]>([]);
+  const [modalTitle, setModalTitle] = React.useState("Adicionar");
 
   function toggleCheckbox(event: any) {
     setAdmin(event.target.checked);
@@ -78,7 +99,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function onSubmitAddContribuitor(e:any){
+  async function onSubmitModalConfirm(e:any){
     e.preventDefault();
     const data = {
       email,
@@ -89,79 +110,97 @@ const Empresa: NextPage = () => {
       companyId: company.id,
     }
 
-    const validations = {
-      emailIsValid: false,
-      passwordLengthIsValid: false,
-    }
-
-    const validateEmail = (email:string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email)
-    };
-
-    if(password.length <= 5){
-      validations.passwordLengthIsValid = false;
-      setErrorMessageContribuitor((oldValue) => {
-        const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
-        if(index >= 0){
-          oldValue.splice(index, 1);
+    switch (modalTitle) {
+      case "Adicionar":
+        setModalTitle("Adicionar")
+        const validations = {
+          emailIsValid: false,
+          passwordLengthIsValid: false,
         }
-        return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
-      })
-    }else{
-      validations.passwordLengthIsValid = true;
-      const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
-      if(index >= 0)
-      setErrorMessageContribuitor((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
-    }
-
-    if(!validateEmail(email)){
-      validations.emailIsValid = false;
-      setErrorMessageContribuitor((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
-        if(index >= 0){
-          oldValue.splice(index, 1);
-        }
-        return ([...oldValue, "Email inválido"]);
-      })
-    }else{
-      validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
-      if(index >= 0)
-      setErrorMessageContribuitor((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
-    }
-
-    if(validations.emailIsValid && validations.passwordLengthIsValid){
-      var salt = bcrypt.genSaltSync(10);
-      var hash = bcrypt.hashSync(data.password, salt);
-      data.password = hash;
-
-      const url = "api/contribuitors/create";
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-        if(response.ok){
-          const {newContribuitor} = await response.json();
-          if(newContribuitor){
-            refreshTeam(data.companyId);
-            setShowAddModal(false);
-          }
+    
+        const validateEmail = (email:string) => {
+          var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+          return regexEmail.test(email)
+        };
+    
+        if(password.length <= 5){
+          validations.passwordLengthIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
+          })
         }else{
-          setErrorMessageContribuitor([response.statusText])
+          validations.passwordLengthIsValid = true;
+          const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
+          if(index >= 0)
+          setErrorMessageContribuitor((oldValue) => {
+            return oldValue.splice(index, 1);
+          })
         }
-      } catch (error) {
-        throw error
-      }
+    
+        if(!validateEmail(email)){
+          validations.emailIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Email inválido");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Email inválido"]);
+          })
+        }else{
+          validations.emailIsValid = true;
+          const index = errorMessage.indexOf("Email inválido");
+          if(index >= 0)
+          setErrorMessageContribuitor((oldValue) => {
+            return oldValue.splice(index, 1);
+          })
+        }
+    
+        if(validations.emailIsValid && validations.passwordLengthIsValid){
+          var salt = bcrypt.genSaltSync(10);
+          var hash = bcrypt.hashSync(data.password, salt);
+          data.password = hash;
+    
+          const url = "api/contribuitors/create";
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+            if(response.ok){
+              const {newContribuitor} = await response.json();
+              if(newContribuitor){
+                refreshTeam(data.companyId);
+                setShowModal(false);
+                setModalTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
+        break;
+      case "Editar":
+        setModalTitle("Editar");
+
+        break;
+      case "Deletar":
+        setModalTitle("Deletar");
+
+        break;
+      default:
+        break;
     }
+    
+    
 
   }
 
@@ -226,7 +265,7 @@ const Empresa: NextPage = () => {
       case "agenda":   
         break;
       case "equipe":  
-        refreshTeam(company.id).then(()=>setShowAddModal(false)) 
+        refreshTeam(company.id).then(()=>setShowModal(false)) 
         break;
       default:
         break;
@@ -332,9 +371,9 @@ const Empresa: NextPage = () => {
                   </div>
                 </div>
                 <div className="teamContent">
-                  <Modal show={showAddModal} onHide={handleCloseAddModal} style={{color: "#034078", fontWeight: "bold"}}>
+                  <Modal show={showModal} onHide={handleCloseModal} style={{color: "#034078", fontWeight: "bold"}}>
                     <Modal.Header closeButton >
-                      <Modal.Title>Adicionar Contribuidor</Modal.Title>
+                      <Modal.Title>{modalTitle} Contribuidor</Modal.Title>
                     </Modal.Header>
                     <Modal.Body >
                       <Form>
@@ -369,16 +408,20 @@ const Empresa: NextPage = () => {
                             onChange={({ target }) => setTelefone(target.value)}
                           />
                         </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput4">
-                          <Form.Label>Senha</Form.Label>
-                          <Form.Control
-                            type="password"
-                            placeholder="Senha"
-                            className="bg-white"
-                            value={password}
-                            onChange={({ target }) => setPassword(target.value)}
-                          />
-                        </Form.Group>
+                        {
+                          modalTitle != "Deletar" 
+                          &&
+                          <Form.Group className="mb-3" controlId="exampleForm.ControlInput4">
+                            <Form.Label>Senha</Form.Label>
+                            <Form.Control
+                              type="password"
+                              placeholder="Senha"
+                              className="bg-white"
+                              value={password}
+                              onChange={({ target }) => setPassword(target.value)}
+                            />
+                          </Form.Group> 
+                        }
                         <Form.Group className="mb-3" controlId="formBasicCheckbox">
                           <Form.Check
                             type="checkbox" label="Usuário é administrador?"
@@ -390,30 +433,30 @@ const Empresa: NextPage = () => {
                       </Form>
                     </Modal.Body>
                     <Modal.Footer >
-                      <Button variant="danger" onClick={handleCloseAddModal}>
+                      <Button variant="danger" onClick={handleCloseModal}>
                         Cancelar
                       </Button>
-                      <Button variant="success" onClick={onSubmitAddContribuitor}>
+                      <Button variant="success" onClick={onSubmitModalConfirm}>
                         Confirmar
                       </Button>
                     </Modal.Footer>
                   </Modal>
                   <Row xs={1} md={2} className="g-4">
-                    {contribuitors.map((contribuitor, idx) => (
+                    {contribuitors.map((contributor, idx) => (
                       <Col key={idx}>
                         <Card style={{border: "1px solid #034078", color:"#034078"}}>
                           <div className={styles.logoSection}>
                             <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto 20x 0px", borderRadius: "50%"}}/>
                             <div className={styles.actionContent}>
-                              <Button variant="warning">Editar</Button>
+                              <Button variant="warning" onClick={()=> handleShowEditModal(contributor)}>Editar</Button>
                               <Button variant="danger">Deletar</Button>
                             </div>
                           </div>
                           <Card.Body>
-                            <Card.Title style={{fontWeight:"bold"}}>{contribuitor.name}</Card.Title>
+                            <Card.Title style={{fontWeight:"bold"}}>{contributor.name}</Card.Title>
                             <Card.Text>
-                              <div className={styles.teamPhone}><span>Telefone:</span><p>{contribuitor.phone}</p></div>
-                              <div className={styles.teamEmail}><span>Email:</span><p>{contribuitor.email}</p></div>
+                              <div className={styles.teamPhone}><span>Telefone:</span><p>{contributor.phone}</p></div>
+                              <div className={styles.teamEmail}><span>Email:</span><p>{contributor.email}</p></div>
                             </Card.Text>
                           </Card.Body>
                         </Card>
