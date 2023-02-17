@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PrismaClient } from '@prisma/client';
+import { Contribuitor, PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { json } from 'stream/consumers';
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,17 +13,25 @@ export default async function handler(
       const prisma = new PrismaClient();
       await prisma.$connect()
       try {
-        let contributorExists = await prisma.contribuitor.findUnique({
+        const contributorExists:any = await prisma.contribuitor.findUnique({
           where: {
-            id: +jsonData.id,
+            id: jsonData.id,
           }
         });
         if (contributorExists) {
+            let changedProperties:any = {}
+            Object.keys(contributorExists).forEach((key)=>{
+              if(jsonData.hasOwnProperty(key)){
+                if(jsonData[key] != contributorExists[key]){
+                  changedProperties[key]= jsonData[key];
+                }
+              }
+            })
             let contributorEdited = await prisma.contribuitor.update({
               where: {
-                id: +jsonData.id
+                id: jsonData.id
               },
-              data: jsonData
+              data: changedProperties
             });
             if(contributorEdited){
               res.statusMessage = "Contribuidores editado com sucesso";
@@ -37,6 +46,7 @@ export default async function handler(
           res.status(400);
         }
       } catch (error) {
+        throw error;
         res.statusMessage = "Não foi possível editar contribuidor";
         res.status(400).json({ error:error });
       }finally{

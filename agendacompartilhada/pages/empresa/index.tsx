@@ -121,7 +121,6 @@ const Empresa: NextPage = () => {
     switch (modalTitle) {
       case "Adicionar":
         let dataADD = {
-          id: ID,
           email,
           name,
           phone: telefone,
@@ -254,7 +253,7 @@ const Empresa: NextPage = () => {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({dataEDIT}),
+              body: JSON.stringify(dataEDIT),
             });
             if(response.ok){
               const {contributorEdited} = await response.json();
