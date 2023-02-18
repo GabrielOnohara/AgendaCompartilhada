@@ -120,6 +120,7 @@ const Empresa: NextPage = () => {
 
     switch (modalTitle) {
       case "Adicionar":
+
         let dataADD = {
           email,
           name,
@@ -129,7 +130,6 @@ const Empresa: NextPage = () => {
           companyId: company.id,
         }
     
-
         setModalTitle("Adicionar")
 
         if(password.length <= 5){
@@ -197,7 +197,9 @@ const Empresa: NextPage = () => {
           }
         }
         break;
+
       case "Editar":
+
         let dataEDIT = {
           id: ID,
           email,
@@ -207,7 +209,6 @@ const Empresa: NextPage = () => {
           companyId: company.id,
         }
     
-
         setModalTitle("Editar");
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
@@ -279,8 +280,6 @@ const Empresa: NextPage = () => {
         break;
     }
     
-    
-
   }
 
   async function refreshTeam(companyID:any) {
