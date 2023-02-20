@@ -577,8 +577,8 @@ const Empresa: NextPage = () => {
                           <Card.Body>
                             <Card.Title style={{fontWeight:"bold"}}>{contributor.name}</Card.Title>
                             <Card.Text>
-                              <div className={styles.teamPhone}><span>Telefone:</span><p>{contributor.phone}</p></div>
-                              <div className={styles.teamEmail}><span>Email:</span><p>{contributor.email}</p></div>
+                              <p className={styles.teamPhone}><span>Telefone:</span><p>{contributor.phone}</p></p>
+                              <p className={styles.teamEmail}><span>Email:</span><p>{contributor.email}</p></p>
                             </Card.Text>
                           </Card.Body>
                         </Card>
