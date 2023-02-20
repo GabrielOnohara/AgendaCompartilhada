@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { idSlug } = req.query;
-  const id = Number(idSlug?.at(0)); 
+  const id = idSlug?.at(0) as string; 
   const prisma = new PrismaClient();
   await prisma.$connect()
   switch(req.method){
@@ -14,13 +14,13 @@ export default async function handler(
       try{
         const contributorExists = await prisma.contribuitor.findFirst({
           where: {
-            id: id
+            id: +id
           }
         });
         if(contributorExists){
           const deletedContributor = await prisma.contribuitor.delete({
             where: {
-              id: id
+              id: +id
             }
           });
           if(deletedContributor){
