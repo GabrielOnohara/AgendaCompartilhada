@@ -510,13 +510,17 @@ const Empresa: NextPage = () => {
                             />
                           </Form.Group> 
                         }
-                        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                        {
+                          modalTitle != "Deletar" 
+                          &&
+                          <Form.Group className="mb-3" controlId="formBasicCheckbox">
                           <Form.Check
                             type="checkbox" label="Usuário é administrador?"
                             onChange={toggleCheckbox}
                             checked={admin}  
                           />
                         </Form.Group>
+                        }
                         {errorMessageContribuitor && errorMessageContribuitor.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
                       </Form>
                     </Modal.Body>
