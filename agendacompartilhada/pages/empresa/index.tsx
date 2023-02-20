@@ -487,7 +487,7 @@ const Empresa: NextPage = () => {
                           />
                         </Form.Group>
                         {
-                          modalTitle != "Deletar" 
+                          modalTitle == "Adicionar" 
                           &&
                           <Form.Group className="mb-3" controlId="exampleForm.ControlInput4">
                             <Form.Label>Senha</Form.Label>
