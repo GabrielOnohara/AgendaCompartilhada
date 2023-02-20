@@ -36,7 +36,6 @@ const Empresa: NextPage = () => {
     setPassword("")
     setAdmin(false);
     setShowModal(true);
-
   }
   const handleShowEditModal = (contributor:any) => {
     setErrorMessageContribuitor([]);
@@ -49,7 +48,15 @@ const Empresa: NextPage = () => {
     setModalTitle("Editar");
     setShowModal(true);
   }
-
+  const handleShowDeleteModal = (contributor:any) => {
+    setErrorMessageContribuitor([]);
+    setID(contributor.id??-1)
+    setEmail(contributor.email??"");
+    setName(contributor.name??"");
+    setTelefone(contributor.phone??"")
+    setModalTitle("Deletar");
+    setShowModal(true);
+  }
 
   const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
@@ -464,6 +471,7 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={email}
                             onChange={({ target }) => setEmail(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
@@ -474,6 +482,7 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={name}
                             onChange={({ target }) => setName(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
@@ -484,6 +493,7 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={telefone}
                             onChange={({ target }) => setTelefone(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         {
@@ -527,7 +537,7 @@ const Empresa: NextPage = () => {
                             <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto 20x 0px", borderRadius: "50%"}}/>
                             <div className={styles.actionContent}>
                               <Button variant="warning" onClick={()=> handleShowEditModal(contributor)}>Editar</Button>
-                              <Button variant="danger">Deletar</Button>
+                              <Button variant="danger" onClick={()=> handleShowDeleteModal(contributor)}>Deletar</Button>
                             </div>
                           </div>
                           <Card.Body>
