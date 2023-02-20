@@ -279,10 +279,40 @@ const Empresa: NextPage = () => {
         }
 
         break;
+      
       case "Deletar":
         setModalTitle("Deletar");
+        let dataDELETE = {
+          id: ID,
+          companyId: company.id,
+        }
+
+        if(dataDELETE.id > 0){
+          const url = "api/contribuitors/delete/[id]";
+          try {
+            const response = await fetch(url, {
+              method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if(response.ok){
+              const {contributerWasDeleted} = await response.json();
+              if(contributerWasDeleted){
+                refreshTeam(dataDELETE.companyId);
+                setShowModal(false);
+                setModalTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
 
         break;
+
       default:
         break;
     }
