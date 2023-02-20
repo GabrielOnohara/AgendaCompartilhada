@@ -292,6 +292,9 @@ const Empresa: NextPage = () => {
           try {
             const response = await fetch(url, {
               method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+              },
             });
             if(response.ok){
               const {contributerWasDeleted} = await response.json();

@@ -11,8 +11,6 @@ export default async function handler(
   await prisma.$connect()
   switch(req.method){
     case "DELETE":
-      break;
-    default:
       try{
         const contributorExists = await prisma.contribuitor.findFirst({
           where: {
@@ -40,6 +38,9 @@ export default async function handler(
         res.end();
         await prisma.$disconnect();
       }
+      break;
+    default:
+      res.status(200).json({ name: 'John Doe' });
       break;
   }
 }
