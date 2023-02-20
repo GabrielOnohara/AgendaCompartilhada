@@ -288,7 +288,7 @@ const Empresa: NextPage = () => {
         }
 
         if(dataDELETE.id > 0){
-          const url = "api/contribuitors/delete/[id]";
+          const url = "api/contribuitors/delete/"+ dataDELETE.id;
           try {
             const response = await fetch(url, {
               method: "DELETE",
