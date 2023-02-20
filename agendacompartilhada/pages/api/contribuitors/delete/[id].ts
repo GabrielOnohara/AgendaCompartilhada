@@ -5,8 +5,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { idSlug } = req.query;
-  const id = parseInt(idSlug?.at(0)??"-1")??0; 
+  const query = req.query;
+  const id = query["id"] as string; 
   const prisma = new PrismaClient();
   await prisma.$connect()
   switch(req.method){
@@ -14,26 +14,25 @@ export default async function handler(
       try{
         const contributorExists = await prisma.contribuitor.findUnique({
           where: {
-            id: +id
+            id: parseInt(id??"0")
           }
         });
         if(contributorExists){
           const deletedContributor = await prisma.contribuitor.delete({
             where: {
-              id: +id
+              id: parseInt(id??"0")
             }
           });
           if(deletedContributor){
             res.status(200).json({contributorWasDeleted:deletedContributor});
           }else{
-            res.status(400).json({error: "Não foi possível deletar contribuidor"});
+            res.status(400).json({error: "Não foi possível deletar contribuidor", query});
           }
         }else{
-          res.status(400).json({error: "Usuário não encontrado"});
+          res.status(400).json({error: "Usuário não encontrado", query});
         }
       }catch(error){  
-        throw error
-        res.status(400).json({error: id});
+        res.status(400).json({error: error});
       }finally{
         res.end();
         await prisma.$disconnect();
