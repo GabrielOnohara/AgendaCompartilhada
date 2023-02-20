@@ -10,7 +10,7 @@ export default async function handler(
   const prisma = new PrismaClient();
   await prisma.$connect()
   switch(req.method){
-    case "POST":
+    case "DELETE":
       break;
     default:
       try{
