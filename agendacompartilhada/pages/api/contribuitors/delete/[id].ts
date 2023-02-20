@@ -12,7 +12,7 @@ export default async function handler(
   switch(req.method){
     case "DELETE":
       try{
-        const contributorExists = await prisma.contribuitor.findFirst({
+        const contributorExists = await prisma.contribuitor.findUnique({
           where: {
             id: +id
           }
@@ -24,15 +24,15 @@ export default async function handler(
             }
           });
           if(deletedContributor){
-            res.status(200).json({contributerWasDeleted:true});
+            res.status(200).json({contributorWasDeleted:true});
           }else{
             res.status(400).json({error: "Não foi possível deletar contribuidor"});
           }
-          res.status(200).json({deletedContributor});
         }else{
           res.status(400).json({error: "Usuário não encontrado"});
         }
       }catch(error){
+        throw error
         res.status(400).json({error: error});
       }finally{
         res.end();

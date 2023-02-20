@@ -297,8 +297,8 @@ const Empresa: NextPage = () => {
               },
             });
             if(response.ok){
-              const {contributerWasDeleted} = await response.json();
-              if(contributerWasDeleted){
+              const {contributorWasDeleted} = await response.json();
+              if(contributorWasDeleted){
                 refreshTeam(dataDELETE.companyId);
                 setShowModal(false);
                 setModalTitle("");
