@@ -3,7 +3,6 @@ import '../styles/globals.css'
 
 import type { AppProps } from 'next/app'
 import { useEffect } from 'react';
-import UserStorage from '../src/context/UserContext';
 import TokenStorage from '../src/context/TokenContext';
 import CompanyStorage from '../src/context/CompanyContext';
 
