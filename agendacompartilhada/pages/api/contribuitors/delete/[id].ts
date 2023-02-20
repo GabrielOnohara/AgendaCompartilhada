@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { idSlug } = req.query;
-  const id = idSlug?.at(0) as string; 
+  const id = parseInt(idSlug?.at(0)??"-1")??0; 
   const prisma = new PrismaClient();
   await prisma.$connect()
   switch(req.method){
@@ -24,16 +24,16 @@ export default async function handler(
             }
           });
           if(deletedContributor){
-            res.status(200).json({contributorWasDeleted:true});
+            res.status(200).json({contributorWasDeleted:deletedContributor});
           }else{
             res.status(400).json({error: "Não foi possível deletar contribuidor"});
           }
         }else{
           res.status(400).json({error: "Usuário não encontrado"});
         }
-      }catch(error){
+      }catch(error){  
         throw error
-        res.status(400).json({error: error});
+        res.status(400).json({error: id});
       }finally{
         res.end();
         await prisma.$disconnect();
