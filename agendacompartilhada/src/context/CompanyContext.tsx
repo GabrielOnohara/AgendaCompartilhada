@@ -1,5 +1,4 @@
 import React from "react";
-import { TokenContext } from "./TokenContext";
 export const CompanyContext = React.createContext<any>({});
 
 const CompanyStorage = (props:any) => {

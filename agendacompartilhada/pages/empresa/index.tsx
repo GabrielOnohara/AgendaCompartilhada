@@ -36,7 +36,6 @@ const Empresa: NextPage = () => {
     setPassword("")
     setAdmin(false);
     setShowModal(true);
-
   }
   const handleShowEditModal = (contributor:any) => {
     setErrorMessageContribuitor([]);
@@ -49,7 +48,15 @@ const Empresa: NextPage = () => {
     setModalTitle("Editar");
     setShowModal(true);
   }
-
+  const handleShowDeleteModal = (contributor:any) => {
+    setErrorMessageContribuitor([]);
+    setID(contributor.id??-1)
+    setEmail(contributor.email??"");
+    setName(contributor.name??"");
+    setTelefone(contributor.phone??"")
+    setModalTitle("Deletar");
+    setShowModal(true);
+  }
 
   const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
@@ -120,6 +127,7 @@ const Empresa: NextPage = () => {
 
     switch (modalTitle) {
       case "Adicionar":
+
         let dataADD = {
           email,
           name,
@@ -129,7 +137,6 @@ const Empresa: NextPage = () => {
           companyId: company.id,
         }
     
-
         setModalTitle("Adicionar")
 
         if(password.length <= 5){
@@ -197,7 +204,9 @@ const Empresa: NextPage = () => {
           }
         }
         break;
+
       case "Editar":
+
         let dataEDIT = {
           id: ID,
           email,
@@ -207,7 +216,6 @@ const Empresa: NextPage = () => {
           companyId: company.id,
         }
     
-
         setModalTitle("Editar");
         if(password.length <= 5){
           validations.passwordLengthIsValid = false;
@@ -271,16 +279,44 @@ const Empresa: NextPage = () => {
         }
 
         break;
+      
       case "Deletar":
         setModalTitle("Deletar");
+        let dataDELETE = {
+          id: ID,
+          companyId: company.id,
+        }
+
+        if(dataDELETE.id > 0){
+          const url = "api/contribuitors/delete/"+ dataDELETE.id;
+          try {
+            const response = await fetch(url, {
+              method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if(response.ok){
+              const json = await response.json();
+              if(json.contributorWasDeleted){
+                refreshTeam(dataDELETE.companyId);
+                setShowModal(false);
+                setModalTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
 
         break;
+
       default:
         break;
     }
     
-    
-
   }
 
   async function refreshTeam(companyID:any) {
@@ -465,6 +501,7 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={email}
                             onChange={({ target }) => setEmail(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
@@ -475,6 +512,7 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={name}
                             onChange={({ target }) => setName(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
@@ -485,10 +523,11 @@ const Empresa: NextPage = () => {
                             className="bg-white"
                             value={telefone}
                             onChange={({ target }) => setTelefone(target.value)}
+                            disabled={modalTitle == "Deletar"}
                           />
                         </Form.Group>
                         {
-                          modalTitle != "Deletar" 
+                          modalTitle == "Adicionar" 
                           &&
                           <Form.Group className="mb-3" controlId="exampleForm.ControlInput4">
                             <Form.Label>Senha</Form.Label>
@@ -501,13 +540,17 @@ const Empresa: NextPage = () => {
                             />
                           </Form.Group> 
                         }
-                        <Form.Group className="mb-3" controlId="formBasicCheckbox">
+                        {
+                          modalTitle != "Deletar" 
+                          &&
+                          <Form.Group className="mb-3" controlId="formBasicCheckbox">
                           <Form.Check
                             type="checkbox" label="Usuário é administrador?"
                             onChange={toggleCheckbox}
                             checked={admin}  
                           />
                         </Form.Group>
+                        }
                         {errorMessageContribuitor && errorMessageContribuitor.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
                       </Form>
                     </Modal.Body>
@@ -528,14 +571,14 @@ const Empresa: NextPage = () => {
                             <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto 20x 0px", borderRadius: "50%"}}/>
                             <div className={styles.actionContent}>
                               <Button variant="warning" onClick={()=> handleShowEditModal(contributor)}>Editar</Button>
-                              <Button variant="danger">Deletar</Button>
+                              <Button variant="danger" onClick={()=> handleShowDeleteModal(contributor)}>Deletar</Button>
                             </div>
                           </div>
                           <Card.Body>
                             <Card.Title style={{fontWeight:"bold"}}>{contributor.name}</Card.Title>
                             <Card.Text>
-                              <div className={styles.teamPhone}><span>Telefone:</span><p>{contributor.phone}</p></div>
-                              <div className={styles.teamEmail}><span>Email:</span><p>{contributor.email}</p></div>
+                              <p className={styles.teamPhone}><span>Telefone:</span><p>{contributor.phone}</p></p>
+                              <p className={styles.teamEmail}><span>Email:</span><p>{contributor.email}</p></p>
                             </Card.Text>
                           </Card.Body>
                         </Card>
