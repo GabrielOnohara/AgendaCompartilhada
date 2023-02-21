@@ -18,6 +18,7 @@ model Company {
   password     String
   isAdmin      Boolean       @default(true)
   contribuitors Contribuitor[]
+  calendar Calendar?
 }
 
 model Contribuitor {
@@ -31,4 +32,38 @@ model Contribuitor {
   isAdmin   Boolean  @default(false)
   companyId Int      
   company   Company @relation(fields: [companyId], references: [id])
+  scheduleTimes ScheduleTime[]
+}
+
+model Calendar {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  startTime String
+  finishTime String
+  intervalTime Int
+  companyId Int @unique
+  company Company @relation(fields: [companyId], references: [id])
+}
+model Client {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique()
+  name      String
+  phone     String   @unique()
+  scheduleTimes ScheduleTime[]
+}
+
+model ScheduleTime {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  date      DateTime @db.Date
+  time      Int
+  duration  Int   
+  clientId Int 
+  client Client @relation(fields: [clientId], references: [id])
+  contribuitorId Int
+  contribuitor Contribuitor @relation(fields: [contribuitorId], references: [id])
 }
