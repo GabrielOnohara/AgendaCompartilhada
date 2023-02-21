@@ -21,12 +21,12 @@ const Empresa: NextPage = () => {
   const {company, setCompany} = React.useContext(CompanyContext)
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
   const [showModal, setShowModal] = React.useState(false);
+  const [showModalCalendar, setShowModalCalendar] = React.useState(false);
 
   const handleCloseModal = () => {
     setShowModal(false);
     setErrorMessageContribuitor([]);
   };
-
   const handleShowAddModal = () => {
     setErrorMessageContribuitor([]);
     setModalTitle("Adicionar");
@@ -57,7 +57,6 @@ const Empresa: NextPage = () => {
     setModalTitle("Deletar");
     setShowModal(true);
   }
-
   const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -68,6 +67,18 @@ const Empresa: NextPage = () => {
   const [errorMessageContribuitor, setErrorMessageContribuitor] = React.useState<String[]>([]);
   const [contribuitors, setContribuitors] = React.useState<any[]>([]);
   const [modalTitle, setModalTitle] = React.useState("Adicionar");
+  
+  const handleCloseCalendarModal = () => {
+    setShowModalCalendar(false);
+    setErrorMessageContribuitor([]);
+  };
+  const handleShowAddCalendar = () => {
+    setShowModalCalendar(true);
+  }
+
+  const [initialTime, setInitialTime] = React.useState("");
+  const [finishTime, setFinishTime] = React.useState("");
+  const [intervalTime, setIntervalTime] = React.useState("");
 
   function toggleCheckbox(event: any) {
     setAdmin(event.target.checked);
@@ -342,6 +353,10 @@ const Empresa: NextPage = () => {
     }
   }
 
+  async function onSubmitCalendarModalConfirm() {
+    console.log(initialTime);
+  }
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -474,7 +489,69 @@ const Empresa: NextPage = () => {
             :menuItemSelected == "agenda" 
             ?
             (
-              <div>agenda</div>
+              <div>
+                <div className={styles.initialCalendarContent}>
+                  <h1 className="darkBlueText ">Agenda</h1>
+                  <div className={styles.actionContent}>
+                    <Button variant="success" onClick={handleShowAddCalendar}>Adicionar Agenda</Button>
+                  </div>
+                </div>
+                <div>
+                <Modal show={showModalCalendar} onHide={handleCloseCalendarModal} style={{color: "#034078", fontWeight: "bold"}}>
+                    <Modal.Header closeButton >
+                      <Modal.Title>Adicionar Agenda</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body >
+                      <div style={{display: "block", padding: "5px 0px"}}>
+                        <p><span style={{fontWeight: "bold"}}>AM: </span>Primeiras 12 horas do dia</p>
+                        <p><span style={{fontWeight: "bold"}}>PM: </span>Últimas 12 horas do dia</p>
+                      </div>
+                      <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                          <Form.Label>Horário de Início</Form.Label>
+                          <Form.Control
+                            placeholder="ex: 8:00"
+                            autoFocus
+                            className="bg-white"
+                            type="time"
+                            value={initialTime}
+                            onChange={({ target }) => setInitialTime(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                          <Form.Label>Horário de Término</Form.Label>
+                          <Form.Control
+                            placeholder="ex: 18:00"
+                            className="bg-white"
+                            type="time"
+                            value={finishTime}
+                            onChange={({ target }) => setFinishTime(target.value)}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                          <Form.Label>Duração de agendamento (min)</Form.Label>
+                          <Form.Control
+                            placeholder="ex: 30"
+                            className="bg-white"
+                            value={intervalTime}
+                            type="number"
+                            onChange={({ target }) => setIntervalTime(target.value)}
+                          />
+                        </Form.Group>
+                        {errorMessageContribuitor && errorMessageContribuitor.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+                      </Form>
+                    </Modal.Body>
+                    <Modal.Footer >
+                      <Button variant="danger" onClick={handleCloseCalendarModal}>
+                        Cancelar
+                      </Button>
+                      <Button variant="success" onClick={onSubmitCalendarModalConfirm}>
+                        Confirmar
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                </div>
+              </div>
             ) 
             :
             (
