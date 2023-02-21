@@ -32,6 +32,7 @@ model Contribuitor {
   isAdmin   Boolean  @default(false)
   companyId Int      
   company   Company @relation(fields: [companyId], references: [id])
+  scheduleTimes ScheduleTime[]
 }
 
 model Calendar {
@@ -51,6 +52,7 @@ model Client {
   email     String   @unique()
   name      String
   phone     String   @unique()
+  scheduleTimes ScheduleTime[]
 }
 
 model ScheduleTime {
@@ -60,4 +62,8 @@ model ScheduleTime {
   date      DateTime @db.Date
   time      Int
   duration  Int   
+  clientId Int 
+  client Client @relation(fields: [clientId], references: [id])
+  contribuitorId Int
+  contribuitor Contribuitor @relation(fields: [contribuitorId], references: [id])
 }
