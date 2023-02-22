@@ -53,7 +53,6 @@
 }
 
 .logoSection .actionContent button {
-  color: white;
   margin-bottom: 10px;
 }
 
@@ -81,4 +80,39 @@
 
 .errorMessage {
   color: red;
+}
+
+.initialCalendarContent {
+  width: auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.calendarSection .actionContent {
+  display: flex;
+  flex-direction: column;
+  float: right;
+}
+
+.teamPhone {
+  display: flex;
+  justify-content: space-between;
+}
+
+.timeItem {
+  display: flex;
+}
+
+.timeItem p {
+  margin-bottom: 5px;
+}
+
+.timeItem span {
+  color: #034078;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.calendarSection .actionContent button:nth-child(1) {
+  margin-bottom: 10px;
 }
