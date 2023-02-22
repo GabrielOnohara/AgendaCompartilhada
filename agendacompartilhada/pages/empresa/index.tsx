@@ -25,6 +25,12 @@ const Empresa: NextPage = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setModalTitle("");
+    setEmail("");
+    setName("");
+    setTelefone("")
+    setPassword("")
+    setAdmin(false);
     setErrorMessageContribuitor([]);
   };
   const handleShowAddModal = () => {
@@ -232,7 +238,7 @@ const Empresa: NextPage = () => {
               const {newContribuitor} = await response.json();
               if(newContribuitor){
                 refreshTeam(dataADD.companyId);
-                handleCloseCalendarModal();
+                handleCloseModal();
                 setModalTitle("");
               }
             }else{
@@ -243,7 +249,6 @@ const Empresa: NextPage = () => {
           }
         }
         break;
-
       case "Editar":
 
         let dataEDIT = {
@@ -308,6 +313,7 @@ const Empresa: NextPage = () => {
                 refreshTeam(dataEDIT.companyId);
                 setShowModal(false);
                 setModalTitle("");
+                handleCloseModal();
               }
             }else{
               setErrorMessageContribuitor([response.statusText]);
@@ -318,7 +324,6 @@ const Empresa: NextPage = () => {
         }
 
         break;
-      
       case "Deletar":
         setModalTitle("Deletar");
         let dataDELETE = {
@@ -341,6 +346,7 @@ const Empresa: NextPage = () => {
                 refreshTeam(dataDELETE.companyId);
                 setShowModal(false);
                 setModalTitle("");
+                handleCloseModal();
               }
             }else{
               setErrorMessageContribuitor([response.statusText]);
@@ -351,7 +357,6 @@ const Empresa: NextPage = () => {
         }
 
         break;
-
       default:
         break;
     }
