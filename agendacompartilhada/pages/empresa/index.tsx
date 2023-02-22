@@ -487,7 +487,34 @@ const Empresa: NextPage = () => {
         }
         break;
       case "Deletar":
-
+        const dataDELETE = {
+          startTime: initialTime,
+          finishTime: finishTime,
+          intervalTime: parseInt(intervalTime),
+          companyId: company.id,
+        }
+        const url = "api/calendar/delete/"+ dataDELETE.companyId;
+          try {
+            const response = await fetch(url, {
+              method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if(response.ok){
+            const {calendarDeleted} = await response.json();
+            if(calendarDeleted){
+              refreshCalendar(dataDELETE.companyId);// verificar uso
+              setShowModalCalendar(false);
+              setModalCalendarTitle("");
+            }
+          }else{
+            setErrorMessageContribuitor([response.statusText]);
+          }
+        } catch (error) {
+          throw error;
+        }
+        
       default:
         break;
     }
