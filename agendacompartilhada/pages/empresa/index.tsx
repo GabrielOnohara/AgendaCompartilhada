@@ -568,7 +568,6 @@ const Empresa: NextPage = () => {
                 <div className={styles.initialCalendarContent}>
                   <h1 className="darkBlueText ">Agenda</h1>
                   <div className={styles.actionContent}>
-                    <Button variant="success" onClick={handleShowAddCalendar}>Adicionar Agenda</Button>
                   </div>
                 </div>
                 <div>
@@ -626,12 +625,35 @@ const Empresa: NextPage = () => {
                       </Button>
                     </Modal.Footer>
                   </Modal>
-                  {calendar.hasOwnProperty("startTime")
-                  ?
-                  <p>{calendar.startTime}</p>
-                  :
-                  <p className={styles.errorMessage}>Nenhuma agenda encontrada</p>
-                  }
+                  <Card style={{border: "1px solid #034078", color:"#034078"}}>
+                    <Card.Body>
+                      <Card.Title style={{fontWeight:"bold", marginBottom:"20px", display:"inline-block"}}>
+                        Horário de funcionamento
+                      </Card.Title>
+                      {
+                      !calendar.hasOwnProperty("startTime")
+                      ?<Button variant="success" style={{float:"right"}} onClick={handleShowAddCalendar}>Adicionar Agenda</Button>
+                      :<div></div>
+                      }
+                      {calendar.hasOwnProperty("startTime") &&
+                        (
+                          <div>
+                            <div className={styles.calendarSection}>
+                              <div className={styles.actionContent}>
+                                <Button variant="warning" onClick={()=> handleShowEditModal(calendar)}>Editar</Button>
+                                <Button variant="danger" onClick={()=> handleShowDeleteModal(calendar)}>Deletar</Button>
+                              </div>
+                            </div>
+                            <Card.Text style={{float:"left"}}>
+                              <p className={styles.timeItem}><span>Horário de Início:</span><p>{calendar.startTime}</p></p>
+                              <p className={styles.timeItem}><span>Horário de Término:</span><p>{calendar.finishTime}</p></p>
+                              <p className={styles.timeItem}><span>Duração de agendamento</span><p>{calendar.intervalTime} min</p></p>
+                            </Card.Text>
+                          </div>
+                        )
+                      }                   
+                    </Card.Body>
+                  </Card>
                 </div>
               </div>
             ) 
