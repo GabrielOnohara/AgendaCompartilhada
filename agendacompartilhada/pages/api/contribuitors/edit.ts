@@ -47,8 +47,6 @@ export default async function handler(
         }
       } catch (error) {
         throw error;
-        res.statusMessage = "Não foi possível editar contribuidor";
-        res.status(400).json({ error:error });
       }finally{
         res.end();
         await prisma.$disconnect()
