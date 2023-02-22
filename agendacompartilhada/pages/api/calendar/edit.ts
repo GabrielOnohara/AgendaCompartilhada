@@ -29,7 +29,7 @@ export default async function handler(
             })
             let calendarEdited = await prisma.calendar.update({
               where: {
-                id: jsonData.id
+                companyId: jsonData.companyId
               },
               data: changedProperties
             });
