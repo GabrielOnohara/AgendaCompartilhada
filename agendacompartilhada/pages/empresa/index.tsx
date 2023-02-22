@@ -81,6 +81,26 @@ const Empresa: NextPage = () => {
     setShowModalCalendar(true);
   }
 
+  const handleShowEditCalendar = (calendar:any) =>{
+    setErrorMessageCalendar([]);
+    setInitialTime(calendar.startTime);
+    setFinishTime(calendar.finishTime)
+    setIntervalTime(calendar.intervalTime)
+    setModalCalendarTitle("Editar");
+    setShowModalCalendar(true);
+
+  }
+
+  const handleShowDeleteCalendar = (calendar:any) =>{
+    setErrorMessageCalendar([]);
+    setInitialTime(calendar.startTime);
+    setFinishTime(calendar.finishTime)
+    setIntervalTime(calendar.intervalTime)
+    setModalCalendarTitle("Deletar");
+    setShowModalCalendar(true);
+    
+  }
+
   const [initialTime, setInitialTime] = React.useState("");
   const [finishTime, setFinishTime] = React.useState("");
   const [intervalTime, setIntervalTime] = React.useState("");
@@ -425,7 +445,49 @@ const Empresa: NextPage = () => {
           }
         }
         break;
-    
+      case "Editar":
+        const dataEDIT = {
+          startTime: initialTime,
+          finishTime: finishTime,
+          intervalTime: parseInt(intervalTime),
+          companyId: company.id,
+        }
+
+        if(initialTime == "" || finishTime == "" || intervalTime == ""){
+          setErrorMessageCalendar((oldValue) => {
+            const index = oldValue.indexOf("Preencha todos os campos");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Preencha todos os campos"]);
+          })
+        }else{
+          const url = "api/calendar/edit";
+          try {
+            const response = await fetch(url, {
+              method: "PATCH",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(dataEDIT),
+            });
+            if(response.ok){
+              const {calendarEdited} = await response.json();
+              if(calendarEdited){
+                refreshCalendar(dataEDIT.companyId);// verificar uso
+                setShowModalCalendar(false);
+                setModalCalendarTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
+        break;
+      case "Deletar":
+
       default:
         break;
     }
@@ -591,6 +653,7 @@ const Empresa: NextPage = () => {
                             type="time"
                             value={initialTime}
                             onChange={({ target }) => setInitialTime(target.value)}
+                            disabled={modalCalendarTitle=="Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
@@ -601,6 +664,7 @@ const Empresa: NextPage = () => {
                             type="time"
                             value={finishTime}
                             onChange={({ target }) => setFinishTime(target.value)}
+                            disabled={modalCalendarTitle=="Deletar"}
                           />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
@@ -611,6 +675,7 @@ const Empresa: NextPage = () => {
                             value={intervalTime}
                             type="number"
                             onChange={({ target }) => setIntervalTime(target.value)}
+                            disabled={modalCalendarTitle=="Deletar"}
                           />
                         </Form.Group>
                         {errorMessageCalendar && errorMessageCalendar.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
@@ -640,8 +705,8 @@ const Empresa: NextPage = () => {
                           <div>
                             <div className={styles.calendarSection}>
                               <div className={styles.actionContent}>
-                                <Button variant="warning" onClick={()=> handleShowEditModal(calendar)}>Editar</Button>
-                                <Button variant="danger" onClick={()=> handleShowDeleteModal(calendar)}>Deletar</Button>
+                                <Button variant="warning" onClick={()=> handleShowEditCalendar(calendar)}>Editar</Button>
+                                <Button variant="danger" onClick={()=> handleShowDeleteCalendar(calendar)}>Deletar</Button>
                               </div>
                             </div>
                             <Card.Text style={{float:"left"}}>
