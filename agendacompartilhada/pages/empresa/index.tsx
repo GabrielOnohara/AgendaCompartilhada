@@ -69,13 +69,15 @@ const Empresa: NextPage = () => {
   const [contribuitors, setContribuitors] = React.useState<any[]>([]);
   const [modalTitle, setModalTitle] = React.useState("Adicionar");
   const [modalCalendarTitle, setModalCalendarTitle] = React.useState("Adicionar");
-  const [calendar, setCalendar] = React.useState<Object>({});
+  const [calendar, setCalendar] = React.useState<any>({});
 
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
-    setErrorMessageContribuitor([]);
+    setErrorMessageCalendar([]);
   };
   const handleShowAddCalendar = () => {
+    setErrorMessageCalendar([]);
+    setModalCalendarTitle("Adicionar");
     setShowModalCalendar(true);
   }
 
@@ -357,7 +359,7 @@ const Empresa: NextPage = () => {
   }
 
   async function refreshCalendar(companyID:any) {
-    const url = "api/calendars/create";
+    const url = "api/calendar/show";
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -380,6 +382,7 @@ const Empresa: NextPage = () => {
   }
 
   async function onSubmitCalendarModalConfirm(e:any) {
+    e.preventDefault();
     switch (modalCalendarTitle) {
       case "Adicionar":
         const dataADD = {
@@ -389,7 +392,7 @@ const Empresa: NextPage = () => {
           companyId: company.id,
         }
 
-        if(initialTime != "" || finishTime != "" || intervalTime != ""){
+        if(initialTime == "" || finishTime == "" || intervalTime == ""){
           setErrorMessageCalendar((oldValue) => {
             const index = oldValue.indexOf("Preencha todos os campos");
             if(index >= 0){
@@ -398,7 +401,7 @@ const Empresa: NextPage = () => {
             return ([...oldValue, "Preencha todos os campos"]);
           })
         }else{
-          const url = "api/calendars/create";
+          const url = "api/calendar/create";
           try {
             const response = await fetch(url, {
               method: "POST",
@@ -622,6 +625,12 @@ const Empresa: NextPage = () => {
                       </Button>
                     </Modal.Footer>
                   </Modal>
+                  {calendar.hasOwnProperty("startTime")
+                  ?
+                  <p>{calendar.startTime}</p>
+                  :
+                  <p className={styles.errorMessage}>Nenhuma agenda encontrada</p>
+                  }
                 </div>
               </div>
             ) 
