@@ -65,9 +65,12 @@ const Empresa: NextPage = () => {
   const [admin, setAdmin] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [errorMessageContribuitor, setErrorMessageContribuitor] = React.useState<String[]>([]);
+  const [errorMessageCalendar, setErrorMessageCalendar] = React.useState<String[]>([]);
   const [contribuitors, setContribuitors] = React.useState<any[]>([]);
   const [modalTitle, setModalTitle] = React.useState("Adicionar");
-  
+  const [modalCalendarTitle, setModalCalendarTitle] = React.useState("Adicionar");
+  const [calendar, setCalendar] = React.useState<Object>({});
+
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
     setErrorMessageContribuitor([]);
@@ -353,8 +356,76 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function onSubmitCalendarModalConfirm() {
-    console.log(initialTime);
+  async function refreshCalendar(companyID:any) {
+    const url = "api/calendars/create";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id:companyID}),
+      });
+      if(response.ok){
+        const {calendar} = await response.json();
+        if(calendar){
+          setCalendar(contribuitors)
+        }
+      }else{
+        setErrorMessageCalendar([response.statusText])
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async function onSubmitCalendarModalConfirm(e:any) {
+    switch (modalCalendarTitle) {
+      case "Adicionar":
+        const dataADD = {
+          startTime: initialTime,
+          finishTime: finishTime,
+          intervalTime: parseInt(intervalTime),
+          companyId: company.id,
+        }
+
+        if(initialTime != "" || finishTime != "" || intervalTime != ""){
+          setErrorMessageCalendar((oldValue) => {
+            const index = oldValue.indexOf("Preencha todos os campos");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Preencha todos os campos"]);
+          })
+        }else{
+          const url = "api/calendars/create";
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(dataADD),
+            });
+            if(response.ok){
+              const {newCalendar} = await response.json();
+              if(newCalendar){
+                refreshCalendar(dataADD.companyId);// verificar uso
+                setShowModalCalendar(false);
+                setModalCalendarTitle("");
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
+        break;
+    
+      default:
+        break;
+    }
   }
 
   React.useEffect(()=>{
@@ -499,12 +570,12 @@ const Empresa: NextPage = () => {
                 <div>
                 <Modal show={showModalCalendar} onHide={handleCloseCalendarModal} style={{color: "#034078", fontWeight: "bold"}}>
                     <Modal.Header closeButton >
-                      <Modal.Title>Adicionar Agenda</Modal.Title>
+                      <Modal.Title>{modalCalendarTitle} Agenda</Modal.Title>
                     </Modal.Header>
                     <Modal.Body >
-                      <div style={{display: "block", padding: "5px 0px"}}>
-                        <p><span style={{fontWeight: "bold"}}>AM: </span>Primeiras 12 horas do dia</p>
-                        <p><span style={{fontWeight: "bold"}}>PM: </span>Últimas 12 horas do dia</p>
+                      <div style={{display: "block", padding: "0px 0px 10px 0px"}}>
+                        <p>Ex: 11:00 AM = 11:00</p>
+                        <p>Ex: 11:00 PM = 23:00</p>
                       </div>
                       <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -513,6 +584,7 @@ const Empresa: NextPage = () => {
                             placeholder="ex: 8:00"
                             autoFocus
                             className="bg-white"
+                            color="034078"
                             type="time"
                             value={initialTime}
                             onChange={({ target }) => setInitialTime(target.value)}
@@ -538,7 +610,7 @@ const Empresa: NextPage = () => {
                             onChange={({ target }) => setIntervalTime(target.value)}
                           />
                         </Form.Group>
-                        {errorMessageContribuitor && errorMessageContribuitor.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+                        {errorMessageCalendar && errorMessageCalendar.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
                       </Form>
                     </Modal.Body>
                     <Modal.Footer >
