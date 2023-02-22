@@ -371,7 +371,7 @@ const Empresa: NextPage = () => {
       if(response.ok){
         const {calendar} = await response.json();
         if(calendar){
-          setCalendar(contribuitors)
+          setCalendar(calendar)
         }
       }else{
         setErrorMessageCalendar([response.statusText])
@@ -466,7 +466,8 @@ const Empresa: NextPage = () => {
       case "resumo": 
 
         break;
-      case "agenda":   
+      case "agenda":  
+        refreshCalendar(company.id).then(()=> setShowModalCalendar(false)) 
         break;
       case "equipe":  
         refreshTeam(company.id).then(()=>setShowModal(false)) 
