@@ -25,6 +25,12 @@ const Empresa: NextPage = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setModalTitle("");
+    setEmail("");
+    setName("");
+    setTelefone("")
+    setPassword("")
+    setAdmin(false);
     setErrorMessageContribuitor([]);
   };
   const handleShowAddModal = () => {
@@ -73,12 +79,35 @@ const Empresa: NextPage = () => {
 
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
+    setInitialTime("");
+    setFinishTime("")
+    setIntervalTime("")
     setErrorMessageCalendar([]);
   };
   const handleShowAddCalendar = () => {
     setErrorMessageCalendar([]);
     setModalCalendarTitle("Adicionar");
     setShowModalCalendar(true);
+  }
+
+  const handleShowEditCalendar = (calendar:any) =>{
+    setErrorMessageCalendar([]);
+    setInitialTime(calendar.startTime);
+    setFinishTime(calendar.finishTime)
+    setIntervalTime(calendar.intervalTime)
+    setModalCalendarTitle("Editar");
+    setShowModalCalendar(true);
+
+  }
+
+  const handleShowDeleteCalendar = (calendar:any) =>{
+    setErrorMessageCalendar([]);
+    setInitialTime(calendar.startTime);
+    setFinishTime(calendar.finishTime)
+    setIntervalTime(calendar.intervalTime)
+    setModalCalendarTitle("Deletar");
+    setShowModalCalendar(true);
+    
   }
 
   const [initialTime, setInitialTime] = React.useState("");
@@ -209,7 +238,7 @@ const Empresa: NextPage = () => {
               const {newContribuitor} = await response.json();
               if(newContribuitor){
                 refreshTeam(dataADD.companyId);
-                setShowModal(false);
+                handleCloseModal();
                 setModalTitle("");
               }
             }else{
@@ -220,7 +249,6 @@ const Empresa: NextPage = () => {
           }
         }
         break;
-
       case "Editar":
 
         let dataEDIT = {
@@ -285,6 +313,7 @@ const Empresa: NextPage = () => {
                 refreshTeam(dataEDIT.companyId);
                 setShowModal(false);
                 setModalTitle("");
+                handleCloseModal();
               }
             }else{
               setErrorMessageContribuitor([response.statusText]);
@@ -295,7 +324,6 @@ const Empresa: NextPage = () => {
         }
 
         break;
-      
       case "Deletar":
         setModalTitle("Deletar");
         let dataDELETE = {
@@ -318,6 +346,7 @@ const Empresa: NextPage = () => {
                 refreshTeam(dataDELETE.companyId);
                 setShowModal(false);
                 setModalTitle("");
+                handleCloseModal();
               }
             }else{
               setErrorMessageContribuitor([response.statusText]);
@@ -328,7 +357,6 @@ const Empresa: NextPage = () => {
         }
 
         break;
-
       default:
         break;
     }
@@ -371,9 +399,13 @@ const Empresa: NextPage = () => {
       if(response.ok){
         const {calendar} = await response.json();
         if(calendar){
+          setErrorMessageCalendar([response.statusText])
           setCalendar(calendar)
+        }else{
+          setCalendar({})
         }
       }else{
+        setCalendar({})
         setErrorMessageCalendar([response.statusText])
       }
     } catch (error) {
@@ -416,6 +448,7 @@ const Empresa: NextPage = () => {
                 refreshCalendar(dataADD.companyId);// verificar uso
                 setShowModalCalendar(false);
                 setModalCalendarTitle("");
+                handleCloseCalendarModal();
               }
             }else{
               setErrorMessageContribuitor([response.statusText]);
@@ -425,7 +458,78 @@ const Empresa: NextPage = () => {
           }
         }
         break;
-    
+      case "Editar":
+        const dataEDIT = {
+          startTime: initialTime,
+          finishTime: finishTime,
+          intervalTime: parseInt(intervalTime),
+          companyId: company.id,
+        }
+
+        if(initialTime == "" || finishTime == "" || intervalTime == ""){
+          setErrorMessageCalendar((oldValue) => {
+            const index = oldValue.indexOf("Preencha todos os campos");
+            if(index >= 0){
+              oldValue.splice(index, 1);
+            }
+            return ([...oldValue, "Preencha todos os campos"]);
+          })
+        }else{
+          const url = "api/calendar/edit";
+          try {
+            const response = await fetch(url, {
+              method: "PATCH",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(dataEDIT),
+            });
+            if(response.ok){
+              const {calendarEdited} = await response.json();
+              if(calendarEdited){
+                refreshCalendar(dataEDIT.companyId);// verificar uso
+                setShowModalCalendar(false);
+                setModalCalendarTitle("");
+                handleCloseCalendarModal();
+              }
+            }else{
+              setErrorMessageContribuitor([response.statusText]);
+            }
+          } catch (error) {
+            throw error;
+          }
+        }
+        break;
+      case "Deletar":
+        const dataDELETE = {
+          startTime: initialTime,
+          finishTime: finishTime,
+          intervalTime: parseInt(intervalTime),
+          companyId: company.id,
+        }
+        const url = "api/calendar/delete/"+ dataDELETE.companyId;
+          try {
+            const response = await fetch(url, {
+              method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if(response.ok){
+            const json = await response.json();
+            if(json.deletedCalendar){
+              refreshCalendar(dataDELETE.companyId);// verificar uso
+              setShowModalCalendar(false);
+              setModalCalendarTitle("");
+              handleCloseCalendarModal();
+            }
+          }else{
+            setErrorMessageContribuitor([response.statusText]);
+          }
+        } catch (error) {
+          throw error;
+        }
+        break;
       default:
         break;
     }
@@ -572,88 +676,91 @@ const Empresa: NextPage = () => {
                 </div>
                 <div>
                 <Modal show={showModalCalendar} onHide={handleCloseCalendarModal} style={{color: "#034078", fontWeight: "bold"}}>
-                    <Modal.Header closeButton >
-                      <Modal.Title>{modalCalendarTitle} Agenda</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body >
-                      <div style={{display: "block", padding: "0px 0px 10px 0px"}}>
-                        <p>Ex: 11:00 AM = 11:00</p>
-                        <p>Ex: 11:00 PM = 23:00</p>
-                      </div>
-                      <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                          <Form.Label>Horário de Início</Form.Label>
-                          <Form.Control
-                            placeholder="ex: 8:00"
-                            autoFocus
-                            className="bg-white"
-                            color="034078"
-                            type="time"
-                            value={initialTime}
-                            onChange={({ target }) => setInitialTime(target.value)}
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
-                          <Form.Label>Horário de Término</Form.Label>
-                          <Form.Control
-                            placeholder="ex: 18:00"
-                            className="bg-white"
-                            type="time"
-                            value={finishTime}
-                            onChange={({ target }) => setFinishTime(target.value)}
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                          <Form.Label>Duração de agendamento (min)</Form.Label>
-                          <Form.Control
-                            placeholder="ex: 30"
-                            className="bg-white"
-                            value={intervalTime}
-                            type="number"
-                            onChange={({ target }) => setIntervalTime(target.value)}
-                          />
-                        </Form.Group>
-                        {errorMessageCalendar && errorMessageCalendar.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
-                      </Form>
-                    </Modal.Body>
-                    <Modal.Footer >
-                      <Button variant="danger" onClick={handleCloseCalendarModal}>
-                        Cancelar
-                      </Button>
-                      <Button variant="success" onClick={onSubmitCalendarModalConfirm}>
-                        Confirmar
-                      </Button>
-                    </Modal.Footer>
-                  </Modal>
-                  <Card style={{border: "1px solid #034078", color:"#034078"}}>
-                    <Card.Body>
-                      <Card.Title style={{fontWeight:"bold", marginBottom:"20px", display:"inline-block"}}>
-                        Horário de funcionamento
-                      </Card.Title>
-                      {
-                      !calendar.hasOwnProperty("startTime")
-                      ?<Button variant="success" style={{float:"right"}} onClick={handleShowAddCalendar}>Adicionar Agenda</Button>
-                      :<div></div>
-                      }
-                      {calendar.hasOwnProperty("startTime") &&
-                        (
-                          <div>
-                            <div className={styles.calendarSection}>
-                              <div className={styles.actionContent}>
-                                <Button variant="warning" onClick={()=> handleShowEditModal(calendar)}>Editar</Button>
-                                <Button variant="danger" onClick={()=> handleShowDeleteModal(calendar)}>Deletar</Button>
-                              </div>
+                  <Modal.Header closeButton >
+                    <Modal.Title>{modalCalendarTitle} Agenda</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body >
+                    <div style={{display: "block", padding: "0px 0px 10px 0px"}}>
+                      <p>Ex: 11:00 AM = 11:00</p>
+                      <p>Ex: 11:00 PM = 23:00</p>
+                    </div>
+                    <Form>
+                      <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Label>Horário de Início</Form.Label>
+                        <Form.Control
+                          placeholder="ex: 8:00"
+                          autoFocus
+                          className="bg-white"
+                          color="034078"
+                          type="time"
+                          value={initialTime}
+                          onChange={({ target }) => setInitialTime(target.value)}
+                          disabled={modalCalendarTitle=="Deletar"}
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                        <Form.Label>Horário de Término</Form.Label>
+                        <Form.Control
+                          placeholder="ex: 18:00"
+                          className="bg-white"
+                          type="time"
+                          value={finishTime}
+                          onChange={({ target }) => setFinishTime(target.value)}
+                          disabled={modalCalendarTitle=="Deletar"}
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                        <Form.Label>Duração de agendamento (min)</Form.Label>
+                        <Form.Control
+                          placeholder="ex: 30"
+                          className="bg-white"
+                          value={intervalTime}
+                          type="number"
+                          onChange={({ target }) => setIntervalTime(target.value)}
+                          disabled={modalCalendarTitle=="Deletar"}
+                        />
+                      </Form.Group>
+                      {errorMessageCalendar && errorMessageCalendar.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+                    </Form>
+                  </Modal.Body>
+                  <Modal.Footer >
+                    <Button variant="danger" onClick={handleCloseCalendarModal}>
+                      Cancelar
+                    </Button>
+                    <Button variant="success" onClick={onSubmitCalendarModalConfirm}>
+                      Confirmar
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+                <Card style={{border: "1px solid #034078", color:"#034078"}}>
+                  <Card.Body>
+                    <Card.Title style={{fontWeight:"bold", marginBottom:"20px", display:"inline-block"}}>
+                      Horário de funcionamento
+                    </Card.Title>
+                    {
+                    !calendar.hasOwnProperty("startTime")
+                    ?<Button variant="success" style={{float:"right"}} onClick={handleShowAddCalendar}>Adicionar</Button>
+                    :<div></div>
+                    }
+                    {calendar.hasOwnProperty("startTime") &&
+                      (
+                        <div>
+                          <div className={styles.calendarSection}>
+                            <div className={styles.actionContent}>
+                              <Button variant="warning" onClick={()=> handleShowEditCalendar(calendar)}>Editar</Button>
+                              <Button variant="danger" onClick={()=> handleShowDeleteCalendar(calendar)}>Deletar</Button>
                             </div>
-                            <Card.Text style={{float:"left"}}>
-                              <p className={styles.timeItem}><span>Horário de Início:</span><p>{calendar.startTime}</p></p>
-                              <p className={styles.timeItem}><span>Horário de Término:</span><p>{calendar.finishTime}</p></p>
-                              <p className={styles.timeItem}><span>Duração de agendamento</span><p>{calendar.intervalTime} min</p></p>
-                            </Card.Text>
                           </div>
-                        )
-                      }                   
-                    </Card.Body>
-                  </Card>
+                          <Card.Text style={{float:"left"}}>
+                            <p className={styles.timeItem}><span>Horário de Início:</span><p>{calendar.startTime}</p></p>
+                            <p className={styles.timeItem}><span>Horário de Término:</span><p>{calendar.finishTime}</p></p>
+                            <p className={styles.timeItem}><span>Duração de agendamento</span><p>{calendar.intervalTime} min</p></p>
+                          </Card.Text>
+                        </div>
+                      )
+                    }                   
+                  </Card.Body>
+                </Card>
                 </div>
               </div>
             ) 

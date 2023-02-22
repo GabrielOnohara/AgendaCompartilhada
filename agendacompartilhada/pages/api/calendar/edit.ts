@@ -13,41 +13,41 @@ export default async function handler(
       const prisma = new PrismaClient();
       await prisma.$connect()
       try {
-        const contributorExists:any = await prisma.contribuitor.findUnique({
+        const calendarExists:any = await prisma.calendar.findUnique({
           where: {
-            id: jsonData.id,
+            companyId: jsonData.companyId,
           }
         });
-        if (contributorExists) {
+        if (calendarExists) {
             let changedProperties:any = {}
-            Object.keys(contributorExists).forEach((key)=>{
+            Object.keys(calendarExists).forEach((key)=>{
               if(jsonData.hasOwnProperty(key)){
-                if(jsonData[key] != contributorExists[key]){
+                if(jsonData[key] != calendarExists[key]){
                   changedProperties[key]= jsonData[key];
                 }
               }
             })
-            let contributorEdited = await prisma.contribuitor.update({
+            let calendarEdited = await prisma.calendar.update({
               where: {
-                id: jsonData.id
+                companyId: jsonData.companyId
               },
               data: changedProperties
             });
-            if(contributorEdited){
-              res.statusMessage = "Contribuidores editado com sucesso";
-              res.status(200).json({contributorEdited});
+            if(calendarEdited){
+              res.statusMessage = "Agenda editada com sucesso";
+              res.status(200).json({calendarEdited});
             }else{
               res.statusMessage = "Edição inválida";
               res.status(400);
             }
         
         } else {
-          res.statusMessage = "Nenhum contribuidor encontrado";
+          res.statusMessage = "Nenhuma agenda encontrada";
           res.status(400);
         }
       } catch (error) {
         throw error;
-      }finally{
+      } finally{
         res.end();
         await prisma.$disconnect()
       }
