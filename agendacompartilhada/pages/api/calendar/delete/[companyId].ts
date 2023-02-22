@@ -32,7 +32,7 @@ export default async function handler(
           res.status(400).json({error: "Agenda não encontrada", query});
         }
       }catch(error){  
-        res.status(400).json({error: error});
+        throw error;
       }finally{
         res.end();
         await prisma.$disconnect();
