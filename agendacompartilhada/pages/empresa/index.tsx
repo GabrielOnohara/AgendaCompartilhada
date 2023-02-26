@@ -11,8 +11,14 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
+import Table from 'react-bootstrap/Table';
 import styles from "../../styles/Company.module.css";
 var bcrypt = require('bcryptjs');
+import { Dayjs } from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import TextField from '@mui/material/TextField';
 
 const Empresa: NextPage = () => {
 
@@ -63,6 +69,7 @@ const Empresa: NextPage = () => {
     setModalTitle("Deletar");
     setShowModal(true);
   }
+
   const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -76,7 +83,7 @@ const Empresa: NextPage = () => {
   const [modalTitle, setModalTitle] = React.useState("Adicionar");
   const [modalCalendarTitle, setModalCalendarTitle] = React.useState("Adicionar");
   const [calendar, setCalendar] = React.useState<any>({});
-
+  const [date, setDate] = React.useState<Date | null>(new Date());
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
     setInitialTime("");
@@ -89,7 +96,6 @@ const Empresa: NextPage = () => {
     setModalCalendarTitle("Adicionar");
     setShowModalCalendar(true);
   }
-
   const handleShowEditCalendar = (calendar:any) =>{
     setErrorMessageCalendar([]);
     setInitialTime(calendar.startTime);
@@ -99,7 +105,6 @@ const Empresa: NextPage = () => {
     setShowModalCalendar(true);
 
   }
-
   const handleShowDeleteCalendar = (calendar:any) =>{
     setErrorMessageCalendar([]);
     setInitialTime(calendar.startTime);
@@ -535,6 +540,12 @@ const Empresa: NextPage = () => {
     }
   }
 
+  const [scheduleTimeContributor, setScheduleTimeContributor] = React.useState("");
+
+  async function searchScheduleTimes(e:any){
+    e.preventDefault();
+  }
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -580,6 +591,11 @@ const Empresa: NextPage = () => {
         break;
     }
   },[menuItemSelected,company.id])
+
+  React.useEffect(()=>{
+    refreshCalendar(company.id).then(()=> setShowModalCalendar(false))   
+    refreshTeam(company.id).then(()=>setShowModal(false)) 
+  },[company.id])
 
   if(token == ""){
     return (
@@ -663,7 +679,72 @@ const Empresa: NextPage = () => {
             menuItemSelected == "resumo" 
             ?
             (
-              <div>resumo</div>
+              <div>
+                <h1 className="darkBlueText">Resumo</h1>
+                  <Row>
+                    <Col>
+                    <Card >
+                      <Card.Body>
+                        <Card.Title style={{marginBottom:"20px",textAlign:"center"}}>Consultar agendamentos</Card.Title>
+                        <Card.Text>
+                         <Form>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="darkBlueText">Selecione contribuidor</Form.Label>
+                            <Form.Select onChange={({target})=>{
+                                setScheduleTimeContributor(target.value);
+                              }}>
+                               <option></option>
+                              {
+                                contribuitors.map((contribuitor) => (
+                                  <option className={styles.option} key={contribuitor.id}>{contribuitor.name}</option>
+                                ))
+                              }
+                            </Form.Select>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="darkBlueText">Selecione a data (mês/dia/ano)</Form.Label>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                label=""
+                                value={date}
+                                onChange={(newValue) => {                                  
+                                  setDate(newValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} />}
+                                inputFormat="DD/MM/YYYY"
+                              />
+                            </LocalizationProvider>
+                          </Form.Group>
+                         </Form>
+                        </Card.Text>
+                        <Button variant="success" onClick={searchScheduleTimes} >Confirmar</Button>
+                      </Card.Body>
+                    </Card>
+                    </Col>
+                    <Col>
+                    <Card >
+                      <Card.Body>
+                        <Card.Title style={{marginBottom:"20px",textAlign:"center"}}>Últimos avisos</Card.Title>
+                        <Card.Text>
+                        </Card.Text>
+                        <Card >
+                          <Card.Body>
+                            <Card.Text>
+                              <div style={{display:"flex", justifyContent:"space-between"}}>
+                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Contribuidor:</span> Teste Completo</p>
+                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Data:</span> 01/01/2001</p>
+                              </div>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Cliente:</span> Adam</p>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Mensagem:</span><br /> Vou me atrasar 5 min, se tiver horario mais cedo por favor me avise</p>
+                              <Button  variant="primary" className="mt-3 btn-sm" style={{float:"right"}} onClick={searchScheduleTimes} >Marcar como lida</Button>  
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                      </Card.Body>
+                    </Card>
+                    </Col>
+                  </Row>
+              </div>
             )
             :menuItemSelected == "agenda" 
             ?
@@ -710,7 +791,7 @@ const Empresa: NextPage = () => {
                         />
                       </Form.Group>
                       <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                        <Form.Label>Duração de agendamento (min)</Form.Label>
+                        <Form.Label>Duração média de agendamento (min)</Form.Label>
                         <Form.Control
                           placeholder="ex: 30"
                           className="bg-white"
@@ -754,7 +835,7 @@ const Empresa: NextPage = () => {
                           <Card.Text style={{float:"left"}}>
                             <p className={styles.timeItem}><span>Horário de Início:</span><p>{calendar.startTime}</p></p>
                             <p className={styles.timeItem}><span>Horário de Término:</span><p>{calendar.finishTime}</p></p>
-                            <p className={styles.timeItem}><span>Duração de agendamento</span><p>{calendar.intervalTime} min</p></p>
+                            <p className={styles.timeItem}><span>Duração média de agendamento</span><p>{calendar.intervalTime} min</p></p>
                           </Card.Text>
                         </div>
                       )
