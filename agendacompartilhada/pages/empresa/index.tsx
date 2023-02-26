@@ -541,6 +541,10 @@ const Empresa: NextPage = () => {
 
   const [scheduleTimeContributor, setScheduleTimeContributor] = React.useState("");
 
+  async function searchScheduleTimes(e:any){
+    e.preventDefault();
+  }
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -712,7 +716,7 @@ const Empresa: NextPage = () => {
                           </Form.Group>
                          </Form>
                         </Card.Text>
-                        <Button variant="primary" >Go somewhere</Button>
+                        <Button variant="success" onClick={searchScheduleTimes}>Confirmar</Button>
                       </Card.Body>
                     </Card>
                     </Col>
