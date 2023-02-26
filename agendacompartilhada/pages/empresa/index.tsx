@@ -19,6 +19,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Container from 'react-bootstrap/Container';
 
 const Empresa: NextPage = () => {
 
@@ -627,7 +631,7 @@ const Empresa: NextPage = () => {
           />
           <link rel="icon" href="/calendario.ico" />
         </Head>
-        <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
+        {/* <nav className={`navbar navbar-dark navbar-exwpand-lg bg-body-tertiary ${styles.navbar}`} >
           <div className={`container-fluid ${styles.applySpaceBetween}`}>
             {company && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHome" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -672,7 +676,53 @@ const Empresa: NextPage = () => {
               </button>
             </div>
           </div>
-        </nav>
+        </nav> */}
+        <Navbar fixed="top" style={{backgroundColor: "#034078"}}  expand="lg" variant="dark">
+          <Container fluid>
+            <Navbar.Brand href="/empresa" style={{color: "#FACE54"}}>
+            {company.name}
+            </Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="mx-auto">
+              <li className="nav-item">
+                  <button
+                    className={`nav-link mx-2 ${menuItemSelected == "resumo" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={companyMenuClick}
+                  >
+                    Resumo
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link mx-2  ${menuItemSelected == "agenda" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={scheduleMenuClick}
+                  >
+                    Agenda
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link mx-2  ${menuItemSelected == "equipe" ?'active':''} ${styles.menuButton}`}
+                    type="button"
+                    onClick={teamMenuClick}
+                  >
+                    Equipe
+                  </button>
+                </li>
+              </Nav>
+              <button
+                className={`navbar-link ${styles.logoutButton} yellowText`}
+                type="button"
+                onClick={onSubmitLogoutHandler}
+              >
+                Sair
+              </button>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
         <main className={styles.mainContainer}>
           {
             menuItemSelected == "resumo" 
