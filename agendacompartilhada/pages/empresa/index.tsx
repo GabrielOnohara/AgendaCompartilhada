@@ -627,7 +627,6 @@ const Empresa: NextPage = () => {
           />
           <link rel="icon" href="/calendario.ico" />
         </Head>
-  
         <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
           <div className={`container-fluid ${styles.applySpaceBetween}`}>
             {company && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
