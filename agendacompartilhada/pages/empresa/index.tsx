@@ -12,6 +12,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import styles from "../../styles/Company.module.css";
+import { Container } from "react-bootstrap";
 var bcrypt = require('bcryptjs');
 
 const Empresa: NextPage = () => {
@@ -664,6 +665,32 @@ const Empresa: NextPage = () => {
             (
               <div>
                 <h1 className="darkBlueText">Resumo</h1>
+                  <Row>
+                    <Col>
+                    <Card >
+                      <Card.Body>
+                        <Card.Title>Horários</Card.Title>
+                        <Card.Text>
+                          Some quick example text to build on the card title and make up the
+                          bulk of the cards content.
+                        </Card.Text>
+                        <Button variant="primary">Go somewhere</Button>
+                      </Card.Body>
+                    </Card>
+                    </Col>
+                    <Col>
+                    <Card >
+                      <Card.Body>
+                        <Card.Title>Últimos avisos</Card.Title>
+                        <Card.Text>
+                          Some quick example text to build on the card title and make up the
+                          bulk of the cards content.
+                        </Card.Text>
+                        <Button variant="primary">Go somewhere</Button>
+                      </Card.Body>
+                    </Card>
+                    </Col>
+                  </Row>
               </div>
             )
             :menuItemSelected == "agenda" 
@@ -711,7 +738,7 @@ const Empresa: NextPage = () => {
                         />
                       </Form.Group>
                       <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                        <Form.Label>Duração de agendamento (min)</Form.Label>
+                        <Form.Label>Duração média de agendamento (min)</Form.Label>
                         <Form.Control
                           placeholder="ex: 30"
                           className="bg-white"
@@ -755,7 +782,7 @@ const Empresa: NextPage = () => {
                           <Card.Text style={{float:"left"}}>
                             <p className={styles.timeItem}><span>Horário de Início:</span><p>{calendar.startTime}</p></p>
                             <p className={styles.timeItem}><span>Horário de Término:</span><p>{calendar.finishTime}</p></p>
-                            <p className={styles.timeItem}><span>Duração de agendamento</span><p>{calendar.intervalTime} min</p></p>
+                            <p className={styles.timeItem}><span>Duração média de agendamento</span><p>{calendar.intervalTime} min</p></p>
                           </Card.Text>
                         </div>
                       )
