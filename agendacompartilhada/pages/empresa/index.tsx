@@ -63,6 +63,7 @@ const Empresa: NextPage = () => {
     setModalTitle("Deletar");
     setShowModal(true);
   }
+
   const [ID, setID] = React.useState<number>(-1);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -89,7 +90,6 @@ const Empresa: NextPage = () => {
     setModalCalendarTitle("Adicionar");
     setShowModalCalendar(true);
   }
-
   const handleShowEditCalendar = (calendar:any) =>{
     setErrorMessageCalendar([]);
     setInitialTime(calendar.startTime);
@@ -99,7 +99,6 @@ const Empresa: NextPage = () => {
     setShowModalCalendar(true);
 
   }
-
   const handleShowDeleteCalendar = (calendar:any) =>{
     setErrorMessageCalendar([]);
     setInitialTime(calendar.startTime);
@@ -663,7 +662,9 @@ const Empresa: NextPage = () => {
             menuItemSelected == "resumo" 
             ?
             (
-              <div>resumo</div>
+              <div>
+                <h1 className="darkBlueText">Resumo</h1>
+              </div>
             )
             :menuItemSelected == "agenda" 
             ?
