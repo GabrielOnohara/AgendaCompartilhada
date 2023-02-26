@@ -702,7 +702,7 @@ const Empresa: NextPage = () => {
                             </Form.Select>
                           </Form.Group>
                           <Form.Group className="mb-3">
-                            <Form.Label className="darkBlueText">Selecione a data (mês/dia/ano)</Form.Label>
+                            <Form.Label className="darkBlueText" style={{display:"block"}}>Selecione a data</Form.Label>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                               <DatePicker
                                 label=""
