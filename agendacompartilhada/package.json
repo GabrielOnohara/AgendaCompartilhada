@@ -9,9 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@date-io/dayjs": "^2.16.0",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/material": "^5.11.10",
+    "@mui/x-date-pickers": "^5.0.20",
     "@prisma/client": "^4.10.1",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.2.3",
+    "dayjs": "^1.11.7",
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^9.0.0",
     "next": "^13.1.4",
@@ -25,6 +31,7 @@
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "18.7.14",
     "@types/react": "18.0.18",
+    "@types/react-datepicker": "^4.8.0",
     "@types/react-dom": "18.0.6",
     "eslint": "8.23.0",
     "eslint-config-next": "^13.1.4",

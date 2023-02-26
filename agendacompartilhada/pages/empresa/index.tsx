@@ -12,8 +12,12 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import styles from "../../styles/Company.module.css";
-import { Container } from "react-bootstrap";
 var bcrypt = require('bcryptjs');
+import { Dayjs } from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import TextField from '@mui/material/TextField';
 
 const Empresa: NextPage = () => {
 
@@ -78,7 +82,7 @@ const Empresa: NextPage = () => {
   const [modalTitle, setModalTitle] = React.useState("Adicionar");
   const [modalCalendarTitle, setModalCalendarTitle] = React.useState("Adicionar");
   const [calendar, setCalendar] = React.useState<any>({});
-
+  const [date, setDate] = React.useState<Date | null>(new Date());
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
     setInitialTime("");
@@ -535,6 +539,8 @@ const Empresa: NextPage = () => {
     }
   }
 
+  const [scheduleTimeContributor, setScheduleTimeContributor] = React.useState("");
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -580,6 +586,11 @@ const Empresa: NextPage = () => {
         break;
     }
   },[menuItemSelected,company.id])
+
+  React.useEffect(()=>{
+    refreshCalendar(company.id).then(()=> setShowModalCalendar(false))   
+    refreshTeam(company.id).then(()=>setShowModal(false)) 
+  },[company.id])
 
   if(token == ""){
     return (
@@ -669,12 +680,39 @@ const Empresa: NextPage = () => {
                     <Col>
                     <Card >
                       <Card.Body>
-                        <Card.Title>Horários</Card.Title>
+                        <Card.Title style={{marginBottom:"20px"}}>Consultar agendamentos</Card.Title>
                         <Card.Text>
-                          Some quick example text to build on the card title and make up the
-                          bulk of the cards content.
+                         <Form>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="darkBlueText">Selecione contribuidor</Form.Label>
+                            <Form.Select onChange={({target})=>{
+                                setScheduleTimeContributor(target.value);
+                              }}>
+                               <option></option>
+                              {
+                                contribuitors.map((contribuitor) => (
+                                  <option className={styles.option} key={contribuitor.id}>{contribuitor.name}</option>
+                                ))
+                              }
+                            </Form.Select>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="darkBlueText">Selecione a data (mês/dia/ano)</Form.Label>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                label=""
+                                value={date}
+                                onChange={(newValue) => {
+                                  setDate(newValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} />}
+                                inputFormat="DD/MM/YYYY"
+                              />
+                            </LocalizationProvider>
+                          </Form.Group>
+                         </Form>
                         </Card.Text>
-                        <Button variant="primary">Go somewhere</Button>
+                        <Button variant="primary" >Go somewhere</Button>
                       </Card.Body>
                     </Card>
                     </Col>

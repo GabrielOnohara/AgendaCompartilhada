@@ -7,13 +7,6 @@ import TokenStorage from '../src/context/TokenContext';
 import CompanyStorage from '../src/context/CompanyContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
-
-  useEffect(() => {
-    typeof document !== undefined 
-    ? require('bootstrap/dist/js/bootstrap') 
-    : null
-  }, [])
-
   return (
   <TokenStorage>
     <CompanyStorage>
