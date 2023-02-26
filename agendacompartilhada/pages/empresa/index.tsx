@@ -684,7 +684,7 @@ const Empresa: NextPage = () => {
                     <Col>
                     <Card >
                       <Card.Body>
-                        <Card.Title style={{marginBottom:"20px"}}>Consultar agendamentos</Card.Title>
+                        <Card.Title style={{marginBottom:"20px",textAlign:"center"}}>Consultar agendamentos</Card.Title>
                         <Card.Text>
                          <Form>
                           <Form.Group className="mb-3">
@@ -706,7 +706,7 @@ const Empresa: NextPage = () => {
                               <DatePicker
                                 label=""
                                 value={date}
-                                onChange={(newValue) => {
+                                onChange={(newValue) => {                                  
                                   setDate(newValue);
                                 }}
                                 renderInput={(params) => <TextField {...params} />}
@@ -716,14 +716,14 @@ const Empresa: NextPage = () => {
                           </Form.Group>
                          </Form>
                         </Card.Text>
-                        <Button variant="success" onClick={searchScheduleTimes}>Confirmar</Button>
+                        <Button variant="success" onClick={searchScheduleTimes} >Confirmar</Button>
                       </Card.Body>
                     </Card>
                     </Col>
                     <Col>
                     <Card >
                       <Card.Body>
-                        <Card.Title>Últimos avisos</Card.Title>
+                        <Card.Title style={{marginBottom:"20px",textAlign:"center"}}>Últimos avisos</Card.Title>
                         <Card.Text>
                           Some quick example text to build on the card title and make up the
                           bulk of the cards content.
