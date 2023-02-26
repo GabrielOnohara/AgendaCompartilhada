@@ -11,6 +11,7 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
+import Table from 'react-bootstrap/Table';
 import styles from "../../styles/Company.module.css";
 var bcrypt = require('bcryptjs');
 import { Dayjs } from 'dayjs';
@@ -725,10 +726,20 @@ const Empresa: NextPage = () => {
                       <Card.Body>
                         <Card.Title style={{marginBottom:"20px",textAlign:"center"}}>Últimos avisos</Card.Title>
                         <Card.Text>
-                          Some quick example text to build on the card title and make up the
-                          bulk of the cards content.
                         </Card.Text>
-                        <Button variant="primary">Go somewhere</Button>
+                        <Card >
+                          <Card.Body>
+                            <Card.Text>
+                              <div style={{display:"flex", justifyContent:"space-between"}}>
+                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Contribuidor:</span> Teste Completo</p>
+                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Data:</span> 01/01/2001</p>
+                              </div>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Cliente:</span> Adam</p>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Mensagem:</span><br /> Vou me atrasar 5 min, se tiver horario mais cedo por favor me avise</p>
+                              <Button  variant="primary" className="mt-3 btn-sm" style={{float:"right"}} onClick={searchScheduleTimes} >Marcar como lida</Button>  
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
                       </Card.Body>
                     </Card>
                     </Col>
