@@ -104,17 +104,17 @@ const Home: NextPage = () => {
               <Card style={{border: "1px solid #034078"}}>
               <Card.Body>
                 <Row xs={12} md={12}>
-                  <Col xs={2} md={2}>
+                  <Col xs={12} sm={4} md={2}>
                     <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
                   </Col>
-                  <Col  xs={10} md={10}>
+                  <Col  xs={12} sm={8} md={10}>
                     <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}</Card.Title>
                     <Card.Text style={{float: "left",}}>
                       <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
                       <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
                       
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
                   </Col>
                 </Row>
               </Card.Body>
@@ -127,17 +127,17 @@ const Home: NextPage = () => {
             <Card style={{border: "1px solid #034078"}}>
               <Card.Body>
                 <Row xs={12} md={12}>
-                  <Col xs={2} md={2}>
+                  <Col xs={12} sm={3} md={2}>
                   <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
                   </Col>
-                  <Col  xs={10} md={10}>
+                  <Col  xs={12} sm={9} md={10}>
                     <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
                     <Card.Text style={{float: "left",}}>
                       <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
                       <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
                       
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3">Acessar</Button>
                   </Col>
                 </Row>
               </Card.Body>
