@@ -20,19 +20,22 @@ const Home: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string>("");
   const [searchValue, setSearchValue] = React.useState<string>("");
 
-  async function getCompanyByEmail(name:string){
+  async function handleSearchCompany(event:any){
+    event.preventDefault();
+
     try {
-      const url = "api/companies/" + name;
+      const url = "api/companies/" + searchValue;
       const response = await fetch(url, {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+      const json = await response.json();
       if(response.status == 200){
-        const {companies} = await response.json();
-        setCompanies(companies);
+        setCompanies(json.companies);
       }else {
         setCompanies([]);
+        setErrorMessage(json.error)
       }
     } catch (error) {
       console.log(error)
