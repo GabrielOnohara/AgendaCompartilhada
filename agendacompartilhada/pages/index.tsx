@@ -16,6 +16,33 @@ import Button from 'react-bootstrap/Button';
 
 const Home: NextPage = () => {
 
+  const [companies, setCompanies] = React.useState<any[]>([])
+  const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
+  const [searchValue, setSearchValue] = React.useState<string>("");
+
+  async function handleSearchCompany(event:any){
+    event.preventDefault();
+
+    try {
+      const url = "api/companies/searchByName/" + searchValue;
+      const response = await fetch(url, {
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      const json = await response.json();
+      if(response.status == 200){
+        setCompanies(json.companies);
+        setErrorMessage((value) => [])
+      }else {
+        setCompanies([]);
+        setErrorMessage([json.error])
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -27,31 +54,6 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/calendario.ico" />
       </Head>
-      {/* <nav className={`navbar navbar-dark navbar-expand-lg bg-body-tertiary ${styles.navbar}`} >
-          <div className={`container-fluid`}>
-            <Link className={`navbar-brand yellowText`} href="/">Agenda Compartilhada</Link>
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHome" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarHome">
-              <ul className="navbar-nav ms-auto  mb-lg-2 mt-lg-2">
-                <li className="nav-item">
-                <Dropdown >
-                  <Dropdown.Toggle variant="secondary" style={{backgroundColor: "#034078"}} id="dropdown-basic">
-                    Login
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu style={{backgroundColor:"#E3E5F7"}}>
-                    <Dropdown.Item href="/">Sou cliente</Dropdown.Item>
-                    <Dropdown.Item href="/login">Sou empresa</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-                </li>
-              </ul>
-
-            </div>
-          </div>
-      </nav> */}
       <Navbar fixed="top" style={{backgroundColor: "#034078"}}  expand="lg" variant="dark">
         <Container fluid>
           <Navbar.Brand href="/" style={{color: "#FACE54"}}>
@@ -80,50 +82,66 @@ const Home: NextPage = () => {
       </Navbar>
       <main className={styles.mainContainer}>
         <Container>
-          <Form>
+          <Form onSubmit={handleSearchCompany}>
             <Form.Group className="mb-3">
               <Form.Label className="darkBlueText mb-3"><h2>Pesquisar empresa</h2></Form.Label>
-              <Form.Control type="text" placeholder="Digite o nome da empresa" />
+              <Row  xs={12} md={12} sm={12}>
+                <Col xs={8} md={10} sm={9} >
+                  <Form.Control type="text" placeholder="Digite o nome" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
+                </Col>
+                <Col xs={4} md={2} sm={3} >
+                  <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Buscar</Button>
+                </Col>
+              </Row>
             </Form.Group>
           </Form>
-          <hr className="mb-3" />
+          <hr />
           <h2 className="darkBlueText mt-4 mb-3">Resultados</h2>
+          {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={`${styles.errorMessage} my-3`}>{errorMessage}</p>)}
+          <Row xs={1} md={1} className="g-4">
+          {companies.map((company,index) => (
+            <Col key={index}> 
+              <Card style={{border: "1px solid #034078"}}>
+              <Card.Body>
+                <Row xs={12} md={12}>
+                  <Col xs={12} sm={4} md={2}>
+                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
+                  </Col>
+                  <Col  xs={12} sm={8} md={10}>
+                    <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}</Card.Title>
+                    <Card.Text style={{float: "left",}}>
+                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
+                      <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
+                      
+                    </Card.Text>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card> 
+            </Col>
+          ))}
+          </Row>
           <hr />
           <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
-          <Row xs={1} md={1} className="g-4">
-              <Col >
-              <Card style={{border: "1px solid #034078"}}>
-                <Card.Body>
-                  <Row xs={12} md={12}>
-                    <Col xs={2} md={2}>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                    </Col>
-                    <Col  xs={10} md={10}>
-                      <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
-                      <Card.Text style={{float: "left",}}>
-                        <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
-                        <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
-                        
-                      </Card.Text>
-                      <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-              {/* <Card className="mt-3" style={{border: "1px solid #034078", color:"#034078" }}>
-                <div className={styles.logoSection}>
-                  <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "200px", margin: "20px auto 20x 0px", borderRadius: "50%"}}/>
-                </div>
-                <Card.Body>
-                  <Card.Title style={{fontWeight:"bold"}}>Nome</Card.Title>
-                  <Card.Text>
-                    <p className={styles.teamPhone}><span>Telefone:</span></p>
-                    <p className={styles.teamEmail}><span>Email:</span></p>
-                  </Card.Text>
-                </Card.Body>
-              </Card> */}
-              </Col>
-          </Row>
+            <Card style={{border: "1px solid #034078"}}>
+              <Card.Body>
+                <Row xs={12} md={12}>
+                  <Col xs={12} sm={3} md={2}>
+                  <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
+                  </Col>
+                  <Col  xs={12} sm={9} md={10}>
+                    <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
+                    <Card.Text style={{float: "left",}}>
+                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
+                      <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
+                      
+                    </Card.Text>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3">Acessar</Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
         </Container> 
       </main>
     </div>
