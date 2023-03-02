@@ -24,7 +24,7 @@ const Home: NextPage = () => {
     event.preventDefault();
 
     try {
-      const url = "api/companies/" + searchValue;
+      const url = "api/companies/searchByName/" + searchValue;
       const response = await fetch(url, {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -33,6 +33,7 @@ const Home: NextPage = () => {
       const json = await response.json();
       if(response.status == 200){
         setCompanies(json.companies);
+        setErrorMessage((value) => [])
       }else {
         setCompanies([]);
         setErrorMessage([json.error])
@@ -81,16 +82,16 @@ const Home: NextPage = () => {
       </Navbar>
       <main className={styles.mainContainer}>
         <Container>
-          <Form>
+          <Form onSubmit={handleSearchCompany}>
             <Form.Group className="mb-3">
               <Form.Label className="darkBlueText mb-3"><h2>Pesquisar empresa</h2></Form.Label>
-              <Row xs={12} md={12} sm={12}>
-                <Col xs={11} md={11} sm={10}>
-                  <Form.Control type="text" placeholder="Digite o nome da empresa" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
+              <Row  xs={12} md={12} sm={12}>
+                <Col xs={8} md={10} sm={9} >
+                  <Form.Control type="text" placeholder="Digite o nome" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
                 </Col>
-                <Col xs={1} md={1} sm={1}>
-                  <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
-                  </Col>
+                <Col xs={4} md={2} sm={3} >
+                  <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Buscar</Button>
+                </Col>
               </Row>
             </Form.Group>
           </Form>
@@ -107,13 +108,13 @@ const Home: NextPage = () => {
                     <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
                   </Col>
                   <Col  xs={10} md={10}>
-                    <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}t</Card.Title>
+                    <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}</Card.Title>
                     <Card.Text style={{float: "left",}}>
-                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.adress}</p>
-                      <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999 {company.phone}</p>
+                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
+                      <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
                       
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Acessar</Button>
                   </Col>
                 </Row>
               </Card.Body>
