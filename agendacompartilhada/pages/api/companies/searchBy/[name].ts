@@ -14,13 +14,13 @@ export default async function handler(
       break;
     default:
       try{
-        const company = await prisma.company.findFirst({
+        const companies = await prisma.company.findMany({
           where: { name: { endsWith: name} }
         });
-        if(company){
-          res.status(200).json({company});
+        if(companies.length > 0){
+          res.status(200).json({companies});
         }else{
-          res.status(400).json({error: "Usuário não encontrado"});
+          res.status(400).json({error: "Nenhuma empresa encontrada"});
         }
       }catch(error){
         res.status(400).json({error: error});
