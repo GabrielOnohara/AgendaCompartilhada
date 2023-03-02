@@ -9,6 +9,10 @@
   background-color: #034078;
 }
 
-.darkBlueBtn{
+.darkBlueBtn {
   background-color: #034078;
+}
+
+.errorMessage {
+  color: red;
 }

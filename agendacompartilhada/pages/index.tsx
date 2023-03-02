@@ -17,7 +17,7 @@ import Button from 'react-bootstrap/Button';
 const Home: NextPage = () => {
 
   const [companies, setCompanies] = React.useState<any[]>([])
-  const [errorMessage, setErrorMessage] = React.useState<string>("");
+  const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
 
   async function handleSearchCompany(event:any){
@@ -35,7 +35,7 @@ const Home: NextPage = () => {
         setCompanies(json.companies);
       }else {
         setCompanies([]);
-        setErrorMessage(json.error)
+        setErrorMessage([json.error])
       }
     } catch (error) {
       console.log(error)
@@ -96,6 +96,7 @@ const Home: NextPage = () => {
           </Form>
           <hr />
           <h2 className="darkBlueText mt-4 mb-3">Resultados</h2>
+          {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={`${styles.errorMessage} my-3`}>{errorMessage}</p>)}
           <Row xs={1} md={1} className="g-4">
           {companies.map((company,index) => (
             <Col key={index}> 
