@@ -16,6 +16,29 @@ import Button from 'react-bootstrap/Button';
 
 const Home: NextPage = () => {
 
+  const [companies, setCompanies] = React.useState<any[]>([])
+  const [errorMessage, setErrorMessage] = React.useState<string>("");
+  const [searchValue, setSearchValue] = React.useState<string>("");
+
+  async function getCompanyByEmail(name:string){
+    try {
+      const url = "api/companies/" + name;
+      const response = await fetch(url, {
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      if(response.status == 200){
+        const {companies} = await response.json();
+        setCompanies(companies);
+      }else {
+        setCompanies([]);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -55,44 +78,65 @@ const Home: NextPage = () => {
       </Navbar>
       <main className={styles.mainContainer}>
         <Container>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label className="darkBlueText mb-3"><h2>Pesquisar empresa</h2></Form.Label>
+              <Row xs={12} md={12} sm={12}>
+                <Col xs={11} md={11} sm={10}>
+                  <Form.Control type="text" placeholder="Digite o nome da empresa" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
+                </Col>
+                <Col xs={1} md={1} sm={1}>
+                  <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
+                  </Col>
+              </Row>
+            </Form.Group>
+          </Form>
+          <hr />
+          <h2 className="darkBlueText mt-4 mb-3">Resultados</h2>
           <Row xs={1} md={1} className="g-4">
-              <Col>
-                <Form>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="darkBlueText mb-3"><h2>Pesquisar empresa</h2></Form.Label>
-                    <Form.Control type="text" placeholder="Digite o nome da empresa" />
-                  </Form.Group>
-                </Form>
-                <div>
-                  <hr className="mb-3" />
-                  <h2 className="darkBlueText mt-4 mb-3">Resultados</h2>
-                </div>
-                <div>
-                  <hr />
-                  <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
-                </div>
-              </Col>
-              <Col >
-                <Card style={{border: "1px solid #034078"}}>
-                  <Card.Body>
-                    <Row xs={12} md={12}>
-                      <Col xs={2} md={2}>
-                      <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                      </Col>
-                      <Col  xs={10} md={10}>
-                        <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
-                        <Card.Text style={{float: "left",}}>
-                          <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
-                          <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
-                          
-                        </Card.Text>
-                        <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              </Col>
+          {companies.map((company,index) => (
+            <Col key={index}> 
+              <Card style={{border: "1px solid #034078"}}>
+              <Card.Body>
+                <Row xs={12} md={12}>
+                  <Col xs={2} md={2}>
+                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
+                  </Col>
+                  <Col  xs={10} md={10}>
+                    <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}t</Card.Title>
+                    <Card.Text style={{float: "left",}}>
+                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.adress}</p>
+                      <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999 {company.phone}</p>
+                      
+                    </Card.Text>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card> 
+            </Col>
+          ))}
           </Row>
+          <hr />
+          <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
+            <Card style={{border: "1px solid #034078"}}>
+              <Card.Body>
+                <Row xs={12} md={12}>
+                  <Col xs={2} md={2}>
+                  <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
+                  </Col>
+                  <Col  xs={10} md={10}>
+                    <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
+                    <Card.Text style={{float: "left",}}>
+                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
+                      <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
+                      
+                    </Card.Text>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto">Acessar</Button>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
         </Container> 
       </main>
     </div>
