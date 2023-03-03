@@ -4,8 +4,6 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import logo from "../public/calendario.png";
 import React from "react";
-import Dropdown from 'react-bootstrap/Dropdown'
-import Link from "next/link";
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -13,6 +11,7 @@ import Container from 'react-bootstrap/Container';
 import { Card,Row,Col, } from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
 
@@ -41,6 +40,11 @@ const Home: NextPage = () => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const router = useRouter();
+  function redirectToCompanyPage(id:Number){
+    router.push(`/empresas/${id}`);
   }
 
   return (
@@ -112,9 +116,8 @@ const Home: NextPage = () => {
                     <Card.Text style={{float: "left",}}>
                       <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
                       <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
-                      
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={() => redirectToCompanyPage(company.id)}>Acessar</Button>
                   </Col>
                 </Row>
               </Card.Body>

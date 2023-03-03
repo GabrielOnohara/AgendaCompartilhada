@@ -86,6 +86,7 @@ const Company: NextPage = () => {
       </Navbar>
       <main className={styles.mainContainer}>
         <Container>
+          <h1 className="mb-5 darkBlueText">Nome da empresa</h1>
           <div className="d-flex justify-content-between">
             <h2 className="darkBlueText mb-5">Agende seu horário</h2>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -107,14 +108,14 @@ const Company: NextPage = () => {
             <Col>
               <Card style={{border: "1px solid #034078"}}>
                 <Card.Body>
-                  <Card.Header className="darkBlueText text-center mb-4">{date.locale('pt').format('ddd')} {date.format('DD/MM')}</Card.Header>
-                    <Card.Title className="text-center my-3"> Horários</Card.Title>
+                  <Card.Header className="darkBlueText text-center mb-4"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
+                    <Card.Title className="text-center my-4"> Horários</Card.Title>
                     <Card.Text className="d-flex my-3">
-                      <span className={`darkBlueText py-2`}>08:00:</span>                     
+                      <span className={`darkBlueText py-2 t-bold`}>08:00</span>                     
                       <Button variant="outline-success" className="ms-auto" onClick={handleSearchCompany}>agendar</Button>
                     </Card.Text>
                     <Card.Text className="d-flex my-3">
-                      <span className={`darkBlueText py-2`}>08:30:</span>                     
+                      <span className={`darkBlueText py-2`}>08:30</span>                     
                       <Button variant="outline-success" className="ms-auto" onClick={handleSearchCompany}>agendar</Button>
                     </Card.Text>
                 </Card.Body>
