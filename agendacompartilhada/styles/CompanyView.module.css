@@ -1,0 +1,10 @@
+.mainContainer {
+  min-height: 100vh;
+  padding-top: 150px;
+  background-color: #E3E5F7;
+  color: black;
+}
+
+.datePicker div{
+  background-color: #fff;
+}
