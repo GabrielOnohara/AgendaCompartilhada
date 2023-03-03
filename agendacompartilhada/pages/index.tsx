@@ -70,8 +70,8 @@ const Home: NextPage = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <NavDropdown align={{ lg: 'end' }} drop="down" title="Login" id="basic-nav-dropdown" >
-                <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
-                <NavDropdown.Divider />
+                {/* <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
+                <NavDropdown.Divider /> */}
                 <NavDropdown.Item href="/login">
                   Sou empresa
                 </NavDropdown.Item>
