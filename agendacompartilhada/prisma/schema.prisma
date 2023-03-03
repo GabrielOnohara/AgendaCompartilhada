@@ -19,6 +19,7 @@ model Company {
   isAdmin      Boolean       @default(true)
   contribuitors Contribuitor[]
   calendar Calendar?
+  address     String 
 }
 
 model Contribuitor {
