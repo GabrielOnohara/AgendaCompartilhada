@@ -16,6 +16,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
+import { useRouter } from "next/router";
 
 const Company: NextPage = () => {
 
@@ -23,12 +24,13 @@ const Company: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
+  const [company, setCompany] = React.useState({});
 
   async function handleSearchCompany(event:any){
     event.preventDefault();
 
     try {
-      const url = "api/companies/searchByName/" + searchValue;
+      const url = "api/companies/searchById/" + searchValue;
       const response = await fetch(url, {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -47,6 +49,37 @@ const Company: NextPage = () => {
     }
   }
 
+  const router = useRouter()
+  const path =router.basePath;
+  const queryId = router.query.id ?? '0';
+  React.useEffect(()=>{
+    const id = queryId as string;
+    async function getCompanyByID(id:Number){
+      try {
+        const url = path + "/api/companies/searchById/" + id;
+        const response = await fetch(url, {
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+        if(response.status == 200){
+          const {company} = await response.json();
+          setCompany(company);   
+        }else {
+          setCompany({});
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    if(parseInt(id) > 0){
+      getCompanyByID(parseInt(id))
+    }
+
+
+  },[path, queryId])
+  
   return (
     <div>
       <Head>
