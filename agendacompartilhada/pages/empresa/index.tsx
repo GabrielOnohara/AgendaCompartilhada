@@ -11,7 +11,6 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import Table from 'react-bootstrap/Table';
 import styles from "../../styles/Company.module.css";
 var bcrypt = require('bcryptjs');
 import { Dayjs } from 'dayjs';
@@ -21,7 +20,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 
 const Empresa: NextPage = () => {
