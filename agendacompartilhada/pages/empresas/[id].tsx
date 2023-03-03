@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "../../styles/CompanyView.module.css";
 import logo from "../../public/calendario.png";
 import React from "react";
@@ -23,31 +24,9 @@ const Company: NextPage = () => {
   const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
+  const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
-  const [company, setCompany] = React.useState({});
-
-  async function handleSearchCompany(event:any){
-    event.preventDefault();
-
-    try {
-      const url = "api/companies/searchById/" + searchValue;
-      const response = await fetch(url, {
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      });
-      const json = await response.json();
-      if(response.status == 200){
-        setCompanies(json.companies);
-        setErrorMessage((value) => [])
-      }else {
-        setCompanies([]);
-        setErrorMessage([json.error])
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  const [company, setCompany] = React.useState<any >({});
 
   const router = useRouter()
   const path =router.basePath;
@@ -63,8 +42,8 @@ const Company: NextPage = () => {
           },
         });
         if(response.status == 200){
-          const {company} = await response.json();
-          setCompany(company);   
+          const {newCompany} = await response.json();
+          setCompany(newCompany);   
         }else {
           setCompany({});
         }
@@ -74,7 +53,9 @@ const Company: NextPage = () => {
     }
 
     if(parseInt(id) > 0){
-      getCompanyByID(parseInt(id))
+      getCompanyByID(parseInt(id)).then(()=>{
+        setViewIsReady(true);
+      });
     }
 
 
@@ -117,18 +98,21 @@ const Company: NextPage = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+      {company.hasOwnProperty('name')
+        ?
       <main className={styles.mainContainer}>
-        <Container>
-          <h1 className="mb-5 darkBlueText">Nome da empresa</h1>
+        
+        <Container >
+          <h1 className={`mb-5 darkBlueText ${styles.principalTitle}`}>{company.name}</h1>
           <div className="d-flex justify-content-between">
-            <h2 className="darkBlueText mb-5">Agende seu horário</h2>
+          <h2 className="darkBlueText mb-5">Agende seu horário</h2>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Selecione um dia"
                 value={date}
                 onChange={(newValue) => {         
                   console.log(dayjs(newValue));
-                                           
+                                          
                   setDate(dayjs(newValue));
                 }}
                 renderInput={(params) => <TextField {...params} />}
@@ -145,11 +129,11 @@ const Company: NextPage = () => {
                     <Card.Title className="text-center my-4"> Horários</Card.Title>
                     <Card.Text className="d-flex my-3">
                       <span className={`darkBlueText py-2 t-bold`}>08:00</span>                     
-                      <Button variant="outline-success" className="ms-auto" onClick={handleSearchCompany}>agendar</Button>
+                      <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
                     </Card.Text>
                     <Card.Text className="d-flex my-3">
                       <span className={`darkBlueText py-2`}>08:30</span>                     
-                      <Button variant="outline-success" className="ms-auto" onClick={handleSearchCompany}>agendar</Button>
+                      <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
                     </Card.Text>
                 </Card.Body>
               </Card>
@@ -162,7 +146,7 @@ const Company: NextPage = () => {
                     <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
                     <Card.Text style={{float: "left",}}>
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -174,7 +158,7 @@ const Company: NextPage = () => {
                     <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
                     <Card.Text style={{float: "left",}}>
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -186,7 +170,7 @@ const Company: NextPage = () => {
                     <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
                     <Card.Text style={{float: "left",}}>
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -198,7 +182,7 @@ const Company: NextPage = () => {
                     <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
                     <Card.Text style={{float: "left",}}>
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -263,8 +247,25 @@ const Company: NextPage = () => {
               </Row>
             </Card.Body>
           </Card> */}
-        </Container> 
+        </Container>
+        
+         
       </main>
+      :
+      <div className={"tokenExpired"}>
+        {viewIsReady 
+          ?
+          <div>
+            <h1>Empresa não encontrada!</h1>
+            <Link className={` yellowText`} href="/">Voltar </Link>
+          </div>
+          :
+          <div>
+            <h1>Carregando ...</h1>
+          </div>
+        }
+      </div>
+      }
     </div>
   );
 };
