@@ -71,13 +71,13 @@ const Company: NextPage = () => {
         let hourString;
         let minuteString;
   
-        if(hourAsNumber < 9){
+        if(hourAsNumber <= 9){
           hourString = '0' + hourAsNumber.toString();
         }else{
           hourString = hourAsNumber.toString();
         }
   
-        if(minuteAsNumber < 9){
+        if(minuteAsNumber <= 9){
           minuteString = '0' + minuteAsNumber.toString();
         }else{
           minuteString = minuteAsNumber.toString();
