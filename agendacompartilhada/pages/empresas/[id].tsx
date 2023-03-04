@@ -18,6 +18,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
+import { menuItemUnstyledClasses } from "@mui/base";
 require('dayjs/locale/pt')
 
 const Company: NextPage = () => {
@@ -26,12 +27,49 @@ const Company: NextPage = () => {
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
+  const [calendar, setCalendar] = React.useState<any >({});
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
 
   const router = useRouter()
   const path =router.basePath;
   const queryId = router.query.id ?? '0';
+
+  let totalIntervals = 0;
+
+  function calculateIntervals(calendar:any){
+    setCalendar(calendar);
+    const [startHour, startMinute] = (calendar.startTime.split(":"));
+    const [finishHour, finishtMinute] = (calendar.finishTime.split(":"));
+    const intervalTime = calendar.intervalTime;
+    let hour  = parseInt(finishHour) - parseInt(startHour);
+    let minute = parseInt(finishtMinute) - parseInt(startMinute);;
+    let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+    let intervalTimeList = [];
+    for (let index = 0; index < totalMinutesDifference; index++) {
+      let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
+      let minuteAsNumber =  (index*intervalTime)%60;
+      let hourString;
+      let minuteString;
+
+      if(hourAsNumber < 9){
+        hourString = '0' + hourAsNumber.toString();
+      }else{
+        hourString = hourAsNumber.toString();
+      }
+
+      if(minuteAsNumber < 9){
+        minuteString = '0' + minuteAsNumber.toString();
+      }else{
+        minuteString = minuteAsNumber.toString();
+      }
+      
+      let lastString = hourString + ':' + minuteString;
+      intervalTimeList[index] = [lastString]; 
+    }
+    
+  }
+
   React.useEffect(()=>{
     const id = queryId as string;
     async function getCompanyByID(id:Number){
@@ -43,8 +81,9 @@ const Company: NextPage = () => {
           },
         });
         if(response.status == 200){
-          const {newCompany} = await response.json();
-          setCompany(newCompany);   
+          const {newCompany, calendar} = await response.json();
+          setCompany(newCompany);  
+          calculateIntervals(calendar);          
         }else {
           setCompany({});
         }
@@ -69,8 +108,6 @@ const Company: NextPage = () => {
           initialDate,
           endDate,
         }
-        console.log(data);
-        
         const url = path + "/api/companies/scheduleTimes/show";
         const response = await fetch(url, {
           method: 'POST',
