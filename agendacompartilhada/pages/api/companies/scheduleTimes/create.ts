@@ -14,10 +14,10 @@ export default async function handler(
   //   },
   //   companyId: company.id,
   //   contributorId: contributorId, 
-  //   sheduleTime: {
+  //   scheduleTime: {
   //     date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
   //     time: selectedScheduleTime,
-  //     duaration: calendar.intervalTime,
+  //     duration: calendar.intervalTime,
   //   },
   // }
   const clientData = jsonData.client;

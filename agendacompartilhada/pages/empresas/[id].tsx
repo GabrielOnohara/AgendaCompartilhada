@@ -28,6 +28,7 @@ const Company: NextPage = () => {
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
   const [calendar, setCalendar] = React.useState<any >({});
+  const [scheduleTime, setScheduleTime] = React.useState<any >({});
   const [contributors, setContributors] = React.useState<any[] >([]);
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
@@ -44,7 +45,7 @@ const Company: NextPage = () => {
   const [clientEmail, setClientEmail] = React.useState<string>("");
   const [clientPhone, setClientPhone] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
-
+  
 
   const handleCloseModal =
    () => {
@@ -57,7 +58,7 @@ const Company: NextPage = () => {
     setSelectedScheduleDay(day);
   }
 
-  const  handleModalConfirm = () => {
+  const  handleModalConfirm = async () => {
 
     const validations = {
       emailIsValid: false,
@@ -105,7 +106,6 @@ const Company: NextPage = () => {
         return oldValue.splice(index, 1);
       })
     }
-
 
     if(!(clientName.length > 0)){
       setErrorMessage((oldValue) => {
@@ -158,13 +158,37 @@ const Company: NextPage = () => {
         },
         companyId: company.id,
         contributorId: contributorId, 
-        sheduleTime: {
+        scheduleTime: {
           date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
           time: selectedScheduleTime,
-          duaration: calendar.intervalTime,
+          duration: calendar.intervalTime,
         },
       }
+      
+      try {
+        const url = path + "/api/companies/scheduleTimes/create";
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        if(response.status == 200){
+          const json = await response.json();
+          console.log(json.newScheduleTime);
+          
+          setScheduleTime(json.newScheduleTime);
+        }else {
+          const json = await response.json();
+          setErrorMessage([json.error]);
+        }
+      } catch (error) {
+        console.log(error)
+      }
     }
+      
+  }
   //   async function createScheduleTime(){
 
       // const data = {
@@ -203,7 +227,6 @@ const Company: NextPage = () => {
     //     console.log(error)
     //   }
     // }
-  }
 
   React.useEffect(()=>{
     const id = queryId as string;
@@ -268,7 +291,7 @@ const Company: NextPage = () => {
         setViewIsReady(true);
       });
     }
-  },[path, queryId,calendar,intervalTimes])
+  },[path, queryId])
   
   React.useEffect(()=>{
     const id = queryId as string;
