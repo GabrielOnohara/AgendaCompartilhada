@@ -19,6 +19,7 @@ import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
 import { menuItemUnstyledClasses } from "@mui/base";
+import { style } from "@mui/system";
 require('dayjs/locale/pt')
 
 const Company: NextPage = () => {
@@ -38,7 +39,7 @@ const Company: NextPage = () => {
   
   React.useEffect(()=>{
     const id = queryId as string;
-    async function getCompanyByID(id:Number){
+    async function getCompanyAndCalendarByID(id:Number){
       try {
         const url = path + "/api/companies/searchById/" + id;
         const response = await fetch(url, {
@@ -50,6 +51,7 @@ const Company: NextPage = () => {
           const {newCompany, calendar} = await response.json();
           setCompany(newCompany);  
           setCalendar(calendar);
+          calculateIntervals(calendar)
         }else {
           setCompany({});
         }
@@ -59,39 +61,41 @@ const Company: NextPage = () => {
     }
 
     function calculateIntervals(calendar:any){
-      const [startHour, startMinute] = (calendar.startTime.split(":"));
-      const [finishHour, finishtMinute] = (calendar.finishTime.split(":"));
+    
+      const [startHour, startMinute] = calendar?.startTime.split(":");
+      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
       const intervalTime = calendar.intervalTime;
       let hour  = parseInt(finishHour) - parseInt(startHour);
       let minute = parseInt(finishtMinute) - parseInt(startMinute);;
       let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+      let intervalTimesList = [];
       for (let index = 0; index < totalMinutesDifference; index++) {
         let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
         let minuteAsNumber =  (index*intervalTime)%60;
         let hourString;
         let minuteString;
-  
+
         if(hourAsNumber <= 9){
           hourString = '0' + hourAsNumber.toString();
         }else{
           hourString = hourAsNumber.toString();
         }
-  
+
         if(minuteAsNumber <= 9){
           minuteString = '0' + minuteAsNumber.toString();
         }else{
           minuteString = minuteAsNumber.toString();
         }
-  
+
         let lastString = hourString + ':' + minuteString;
-        intervalTimes[index] = lastString; 
+        intervalTimesList[index] = lastString; 
       }
+      setIntervalTimes(intervalTimesList)
       setIntervalsWasCalculated(true);
     }
 
     if(parseInt(id) > 0){
-      getCompanyByID(parseInt(id)).then(()=>{
-        calculateIntervals(calendar);  
+      getCompanyAndCalendarByID(parseInt(id)).then(()=>{
         setViewIsReady(true);
       });
     }
@@ -200,6 +204,7 @@ const Company: NextPage = () => {
                 <Card.Body>
                   <Card.Header className="darkBlueText text-center mb-4"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
                     <Card.Title className="text-center my-4"> Horários</Card.Title>
+                    <div className={styles.scrolledCardSection}>
                     {
                       intervalsWasCalculated
                       ?
@@ -213,7 +218,8 @@ const Company: NextPage = () => {
                       <Card.Text className="d-flex my-3">
                         <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
                       </Card.Text>
-                    }     
+                    }   
+                    </div>  
                 </Card.Body>
               </Card>
             </Col>
