@@ -15,7 +15,7 @@ export default async function handler(
     default:
       try{
         const companies = await prisma.company.findMany({
-          where: { name: { endsWith: name} }
+          where: { name: { startsWith: name} }
         });
         if(companies.length > 0){
           res.status(200).json({companies});
