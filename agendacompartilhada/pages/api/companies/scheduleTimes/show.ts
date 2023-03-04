@@ -16,8 +16,8 @@ export default async function handler(
         const scheduleTimes = await prisma.scheduleTime.findMany({
           where: {
             AND:[
-              {companyId: {equals: companyId}},
-              {date: {equals: date}}
+              {companyId: parseInt(companyId)},
+              {date: {gt: new Date(date)}}
             ]
           }
         });
@@ -27,6 +27,7 @@ export default async function handler(
           res.status(200).json({scheduleTimes:[]});
         }
       }catch(error){
+        throw error
         res.status(400).json({error: error});
       }finally{
         res.end();
