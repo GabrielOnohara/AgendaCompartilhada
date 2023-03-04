@@ -30,46 +30,12 @@ const Company: NextPage = () => {
   const [calendar, setCalendar] = React.useState<any >({});
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
-
+  const [intervalsWasCalculated, setIntervalsWasCalculated] = React.useState(false);
+  const [intervalTimes, setIntervalTimes] = React.useState<any[]>([])
   const router = useRouter()
   const path =router.basePath;
   const queryId = router.query.id ?? '0';
-
-  let totalIntervals = 0;
-
-  function calculateIntervals(calendar:any){
-    setCalendar(calendar);
-    const [startHour, startMinute] = (calendar.startTime.split(":"));
-    const [finishHour, finishtMinute] = (calendar.finishTime.split(":"));
-    const intervalTime = calendar.intervalTime;
-    let hour  = parseInt(finishHour) - parseInt(startHour);
-    let minute = parseInt(finishtMinute) - parseInt(startMinute);;
-    let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
-    let intervalTimeList = [];
-    for (let index = 0; index < totalMinutesDifference; index++) {
-      let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
-      let minuteAsNumber =  (index*intervalTime)%60;
-      let hourString;
-      let minuteString;
-
-      if(hourAsNumber < 9){
-        hourString = '0' + hourAsNumber.toString();
-      }else{
-        hourString = hourAsNumber.toString();
-      }
-
-      if(minuteAsNumber < 9){
-        minuteString = '0' + minuteAsNumber.toString();
-      }else{
-        minuteString = minuteAsNumber.toString();
-      }
-      
-      let lastString = hourString + ':' + minuteString;
-      intervalTimeList[index] = [lastString]; 
-    }
-    
-  }
-
+  
   React.useEffect(()=>{
     const id = queryId as string;
     async function getCompanyByID(id:Number){
@@ -83,7 +49,7 @@ const Company: NextPage = () => {
         if(response.status == 200){
           const {newCompany, calendar} = await response.json();
           setCompany(newCompany);  
-          calculateIntervals(calendar);          
+          setCalendar(calendar);
         }else {
           setCompany({});
         }
@@ -92,12 +58,44 @@ const Company: NextPage = () => {
       }
     }
 
+    function calculateIntervals(calendar:any){
+      const [startHour, startMinute] = (calendar.startTime.split(":"));
+      const [finishHour, finishtMinute] = (calendar.finishTime.split(":"));
+      const intervalTime = calendar.intervalTime;
+      let hour  = parseInt(finishHour) - parseInt(startHour);
+      let minute = parseInt(finishtMinute) - parseInt(startMinute);;
+      let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+      for (let index = 0; index < totalMinutesDifference; index++) {
+        let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
+        let minuteAsNumber =  (index*intervalTime)%60;
+        let hourString;
+        let minuteString;
+  
+        if(hourAsNumber < 9){
+          hourString = '0' + hourAsNumber.toString();
+        }else{
+          hourString = hourAsNumber.toString();
+        }
+  
+        if(minuteAsNumber < 9){
+          minuteString = '0' + minuteAsNumber.toString();
+        }else{
+          minuteString = minuteAsNumber.toString();
+        }
+  
+        let lastString = hourString + ':' + minuteString;
+        intervalTimes[index] = lastString; 
+      }
+      setIntervalsWasCalculated(true);
+    }
+
     if(parseInt(id) > 0){
       getCompanyByID(parseInt(id)).then(()=>{
+        calculateIntervals(calendar);  
         setViewIsReady(true);
       });
     }
-  },[path, queryId])
+  },[path, queryId,calendar,intervalTimes])
   
   React.useEffect(()=>{
     const id = queryId as string;
@@ -202,14 +200,20 @@ const Company: NextPage = () => {
                 <Card.Body>
                   <Card.Header className="darkBlueText text-center mb-4"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
                     <Card.Title className="text-center my-4"> Horários</Card.Title>
-                    <Card.Text className="d-flex my-3">
-                      <span className={`darkBlueText py-2 t-bold`}>08:00</span>                     
-                      <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
-                    </Card.Text>
-                    <Card.Text className="d-flex my-3">
-                      <span className={`darkBlueText py-2`}>08:30</span>                     
-                      <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
-                    </Card.Text>
+                    {
+                      intervalsWasCalculated
+                      ?
+                        intervalTimes.map((timeString,index) => (
+                          <Card.Text key={index} className="d-flex my-3">
+                            <span className={`darkBlueText py-2`}>{timeString}</span>                     
+                            <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
+                          </Card.Text>
+                        ))
+                      :
+                      <Card.Text className="d-flex my-3">
+                        <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
+                      </Card.Text>
+                    }     
                 </Card.Body>
               </Card>
             </Col>
