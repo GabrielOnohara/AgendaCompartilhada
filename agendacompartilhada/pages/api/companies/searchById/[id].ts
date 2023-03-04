@@ -21,7 +21,12 @@ export default async function handler(
         });
         if(company){
           const {password, ...newCompany} = company;
-          res.status(200).json({newCompany});
+          const calendar = await prisma.calendar.findUnique({
+            where: {
+              companyId: parseInt(id??'0')
+            }
+          });
+          res.status(200).json({newCompany, calendar});
         }else{
           res.status(400).json({error: "Empresa não encontrada",});
         }
