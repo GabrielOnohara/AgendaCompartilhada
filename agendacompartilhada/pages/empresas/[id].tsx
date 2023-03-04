@@ -27,7 +27,7 @@ const Company: NextPage = () => {
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
-  const [calendar, setCalendar] = React.useState<any[] >([]);
+  const [calendar, setCalendar] = React.useState<any >({});
   const [contributors, setContributors] = React.useState<any[] >([]);
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
@@ -58,6 +58,113 @@ const Company: NextPage = () => {
   }
 
   const  handleModalConfirm = () => {
+
+    const validations = {
+      emailIsValid: false,
+      nameIsValid: false,
+      phoneIsValid: false,
+      contributorIsValid: false
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
+    if(!validateEmail(clientEmail)){
+      validations.emailIsValid = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Email inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Email inválido"]);
+      })
+    }else{
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Email inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+    
+    if(!(clientPhone.length >= 10)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Telefone inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Telefone inválido"]);
+      })
+    }else{
+      validations.phoneIsValid = true;
+      const index = errorMessage.indexOf("Telefone inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+
+    if(!(clientName.length > 0)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Nome inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Nome inválido"]);
+      })
+    }else{
+      validations.nameIsValid = true;
+      const index = errorMessage.indexOf("Nome inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!(selectedContributor.length>0)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Contribuidor inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Contribuidor inválido"]);
+      })
+    }else{
+      validations.contributorIsValid = true;
+      const index = errorMessage.indexOf("Contribuidor inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(validations.contributorIsValid && validations.nameIsValid && validations.emailIsValid && validations.phoneIsValid){
+
+      let contributorId = 0;
+      contributors.forEach(contributor => {
+        if(contributor.name == selectedContributor){
+          contributorId = contributor.id;
+        }
+      })
+
+      const data = {
+        client: {
+          email: clientEmail,
+          name: clientName,
+          phone: clientPhone,
+        },
+        companyId: company.id,
+        contributorId: contributorId, 
+        sheduleTime: {
+          date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
+          time: selectedScheduleTime,
+          duaration: calendar.intervalTime,
+        },
+      }
+    }
   //   async function createScheduleTime(){
 
       // const data = {
@@ -300,7 +407,7 @@ const Company: NextPage = () => {
                   className="bg-white"
                   value={clientName}
                   type="text"
-                  onChange={({ target }) => setClientEmail(target.value)}
+                  onChange={({ target }) => setClientName(target.value)}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
@@ -310,7 +417,7 @@ const Company: NextPage = () => {
                   className="bg-white"
                   value={clientPhone}
                   type="tel"
-                  onChange={({ target }) => setClientEmail(target.value)}
+                  onChange={({ target }) => setClientPhone(target.value)}
                 />
               </Form.Group>
               {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}

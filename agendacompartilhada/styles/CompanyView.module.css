@@ -26,3 +26,7 @@
   background-color: #034078;
   border-radius: 5%;
 }
+
+.errorMessage {
+  color: red;
+}
