@@ -19,10 +19,11 @@ import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
 require('dayjs/locale/pt')
+import Modal from 'react-bootstrap/Modal';
 
 const Company: NextPage = () => {
 
-  const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
+  const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
@@ -34,7 +35,26 @@ const Company: NextPage = () => {
   const router = useRouter()
   const path =router.basePath;
   const queryId = router.query.id ?? '0';
-  
+
+  const [showModalScheduleTime, setShowModalScheduleTime] = React.useState(false);
+  const [selectedlScheduleTime, setSelectedlScheduleTime] = React.useState<string>("");
+  const [selectedlScheduleDay, setSelectedlScheduleDay] = React.useState<string>("");
+
+  const handleCloseModal =
+   () => {
+    setShowModalScheduleTime(false);
+  }
+
+  const handleShowModalScheduleTime = (sheduleTime:string, day: string) => {
+    setShowModalScheduleTime(true);
+    setSelectedlScheduleTime(sheduleTime);
+    setSelectedlScheduleDay(day);
+  }
+
+  const  handleModalConfirm = () => {
+
+  }
+
   React.useEffect(()=>{
     const id = queryId as string;
     async function getCompanyAndCalendarByID(id:Number){
@@ -176,7 +196,58 @@ const Company: NextPage = () => {
       {company.hasOwnProperty('name')
       ?
       <main className={styles.mainContainer}>
-        
+        <Modal show={showModalScheduleTime} onHide={handleCloseModal} style={{color: "#034078", fontWeight: "bold"}}>
+          <Modal.Header closeButton >
+            <Modal.Title>Agende seu horário</Modal.Title>
+          </Modal.Header>
+          <Modal.Body >
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                    <Form.Label>Data</Form.Label>
+                    <Form.Control
+                      className="bg-white"
+                      value={selectedlScheduleDay}
+                      disabled
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Label>Horário</Form.Label>
+                    <Form.Control
+                      autoFocus
+                      className="bg-white"
+                      value={selectedlScheduleTime}
+                      disabled
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Duração média de agendamento (min)</Form.Label>
+                <Form.Control
+                  placeholder="ex: 30"
+                  className="bg-white"
+                  value={intervalTime}
+                  type="number"
+                  onChange={({ target }) => setIntervalTime(target.value)}
+                  disabled={modalCalendarTitle=="Deletar"}
+                />
+              </Form.Group> */}
+              {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+            </Form>
+          </Modal.Body>
+          <Modal.Footer >
+            <Button variant="danger" onClick={handleCloseModal}>
+              Cancelar
+            </Button>
+            <Button variant="success" onClick={handleModalConfirm}>
+              Confirmar
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Container >
           <h1 className={`mb-5 darkBlueText ${styles.principalTitle}`}>{company.name}</h1>
           <div className="d-flex justify-content-between">
@@ -209,7 +280,7 @@ const Company: NextPage = () => {
                       
                       intervalTimes.map((timeString,index) => (
                         <Card.Text key={index} className="my-3">                   
-                          <Button variant="outline-success" className="text-center" onClick={()=>{}}>{timeString}</Button>
+                          <Button variant="outline-success" className="text-center" onClick={() => {handleShowModalScheduleTime(timeString,(`${date.locale('pt').format('ddd')} ${date.format('DD/MM/YYYY')}`))}}>{timeString}</Button>
                         </Card.Text>
                       ))
                     :
