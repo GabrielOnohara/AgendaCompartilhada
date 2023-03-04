@@ -18,15 +18,16 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
+require('dayjs/locale/pt')
 
 const Company: NextPage = () => {
 
-  const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
-  const [searchValue, setSearchValue] = React.useState<string>("");
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
+  const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
+  const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
 
   const router = useRouter()
   const path =router.basePath;
@@ -57,10 +58,42 @@ const Company: NextPage = () => {
         setViewIsReady(true);
       });
     }
-
-
   },[path, queryId])
   
+  React.useEffect(()=>{
+    const id = queryId as string;
+    async function getScheduleTimeNextFiveDaysByDate(date:String, id:Number){
+      try {
+        const data = {
+          companyId: id,
+          date: date,
+        }
+        console.log(data);
+        
+        const url = path + "/api/companies/scheduleTimes/";
+        const response = await fetch(url, {
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data)
+        });
+        if(response.status == 200){
+          const {scheduleTimes} = await response.json();
+          setScheduleTimes(scheduleTimes);   
+        }else {
+          setScheduleTimes([]);
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    const dateFormatted = date.format('YYYY-MM-DD');
+    getScheduleTimeNextFiveDaysByDate(dateFormatted, parseInt(id)).then(()=>{
+      setSearchedScheduleTimes(true);
+    })
+  },[queryId,date,path])
+
   return (
     <div>
       <Head>
