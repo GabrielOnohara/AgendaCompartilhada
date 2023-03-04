@@ -6,7 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const jsonData =  req.body;
-  const date = jsonData.date;
+  const initialDate = jsonData.initialDate;
+  const endDate = jsonData.endDate;
   const companyId = jsonData.companyId;
   const prisma = new PrismaClient();
   await prisma.$connect()
@@ -17,7 +18,12 @@ export default async function handler(
           where: {
             AND:[
               {companyId: parseInt(companyId)},
-              {date: {gt: new Date(date)}}
+              {
+                AND:[
+                  {date: {gt: new Date(initialDate)}},
+                  {date: {lt: new Date(endDate)}},
+                ]
+              }
             ]
           }
         });
