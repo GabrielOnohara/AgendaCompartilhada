@@ -62,16 +62,18 @@ const Company: NextPage = () => {
   
   React.useEffect(()=>{
     const id = queryId as string;
-    async function getScheduleTimeNextFiveDaysByDate(date:String, id:Number){
+    async function getScheduleTimeNextFiveDaysByDate(initialDate:String, endDate:String, id:Number){
       try {
         const data = {
           companyId: id,
-          date: date,
+          initialDate,
+          endDate,
         }
         console.log(data);
         
-        const url = path + "/api/companies/scheduleTimes/";
+        const url = path + "/api/companies/scheduleTimes/show";
         const response = await fetch(url, {
+          method: 'POST',
           headers: {
             "Content-type": "application/json; charset=UTF-8",
           },
@@ -79,6 +81,7 @@ const Company: NextPage = () => {
         });
         if(response.status == 200){
           const {scheduleTimes} = await response.json();
+          console.log(scheduleTimes);
           setScheduleTimes(scheduleTimes);   
         }else {
           setScheduleTimes([]);
@@ -88,8 +91,10 @@ const Company: NextPage = () => {
       }
     }
 
-    const dateFormatted = date.format('YYYY-MM-DD');
-    getScheduleTimeNextFiveDaysByDate(dateFormatted, parseInt(id)).then(()=>{
+    const initialDateFormatted = date.subtract(1,'day').format('YYYY-MM-DD');
+    const endDateFormatted = date.add(5,'day').format('YYYY-MM-DD');
+    
+    getScheduleTimeNextFiveDaysByDate(initialDateFormatted, endDateFormatted, parseInt(id)).then(()=>{
       setSearchedScheduleTimes(true);
     })
   },[queryId,date,path])
@@ -132,7 +137,7 @@ const Company: NextPage = () => {
         </Container>
       </Navbar>
       {company.hasOwnProperty('name')
-        ?
+      ?
       <main className={styles.mainContainer}>
         
         <Container >
