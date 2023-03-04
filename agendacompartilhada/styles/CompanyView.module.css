@@ -24,5 +24,6 @@
  
 .scrolledCardSection::-webkit-scrollbar-thumb {
   background-color: #034078;
-  outline: 1px solid white;
+  outline: 1px solid #FACE54;
+  border-radius: 10%;
 }

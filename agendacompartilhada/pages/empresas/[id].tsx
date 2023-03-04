@@ -201,25 +201,25 @@ const Company: NextPage = () => {
           <Row className="g-4">
             <Col>
               <Card style={{border: "1px solid #034078"}}>
+              <Card.Header className="darkBlueText text-center"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
                 <Card.Body>
-                  <Card.Header className="darkBlueText text-center mb-4"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
-                    <Card.Title className="text-center my-3"> Horários</Card.Title>
-                    <div className={`${styles.scrolledCardSection} text-center`}>
-                    {
-                      intervalsWasCalculated
-                      ? 
-                        
-                        intervalTimes.map((timeString,index) => (
-                          <Card.Text key={index} className="my-3">                   
-                            <Button variant="outline-success" className="text-center" onClick={()=>{}}>{timeString}</Button>
-                          </Card.Text>
-                        ))
-                      :
-                      <Card.Text className="d-flex my-3">
-                        <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
-                      </Card.Text>
-                    }   
-                    </div>  
+                  <Card.Title className="text-center my-2"> Horários</Card.Title>
+                  <div className={`${styles.scrolledCardSection} text-center`}>
+                  {
+                    intervalsWasCalculated
+                    ? 
+                      
+                      intervalTimes.map((timeString,index) => (
+                        <Card.Text key={index} className="my-3">                   
+                          <Button variant="outline-success" className="text-center" onClick={()=>{}}>{timeString}</Button>
+                        </Card.Text>
+                      ))
+                    :
+                    <Card.Text className="d-flex my-3">
+                      <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
+                    </Card.Text>
+                  }   
+                  </div>  
                 </Card.Body>
               </Card>
             </Col>
