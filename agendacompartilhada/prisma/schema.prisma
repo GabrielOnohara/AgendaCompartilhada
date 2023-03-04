@@ -19,7 +19,8 @@ model Company {
   isAdmin      Boolean       @default(true)
   contribuitors Contribuitor[]
   calendar Calendar?
-  address     String 
+  address     String         @default("")
+  scheduleTimes ScheduleTime[]
 }
 
 model Contribuitor {
@@ -67,4 +68,6 @@ model ScheduleTime {
   client Client @relation(fields: [clientId], references: [id])
   contribuitorId Int
   contribuitor Contribuitor @relation(fields: [contribuitorId], references: [id])
+  companyId Int
+  company Company @relation(fields:[companyId],references: [id])
 }
