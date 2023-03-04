@@ -27,7 +27,8 @@ const Company: NextPage = () => {
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
-  const [calendar, setCalendar] = React.useState<any >({});
+  const [calendar, setCalendar] = React.useState<any[] >([]);
+  const [contributors, setContributors] = React.useState<any[] >([]);
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
   const [intervalsWasCalculated, setIntervalsWasCalculated] = React.useState(false);
@@ -37,8 +38,13 @@ const Company: NextPage = () => {
   const queryId = router.query.id ?? '0';
 
   const [showModalScheduleTime, setShowModalScheduleTime] = React.useState(false);
-  const [selectedlScheduleTime, setSelectedlScheduleTime] = React.useState<string>("");
-  const [selectedlScheduleDay, setSelectedlScheduleDay] = React.useState<string>("");
+  const [selectedScheduleTime, setSelectedScheduleTime] = React.useState<string>("");
+  const [selectedScheduleDay, setSelectedScheduleDay] = React.useState<string>("");
+  const [selectedContributor, setSelectedContributor] = React.useState<string>("");
+  const [clientEmail, setClientEmail] = React.useState<string>("");
+  const [clientPhone, setClientPhone] = React.useState<string>("");
+  const [clientName, setClientName] = React.useState<string>("");
+
 
   const handleCloseModal =
    () => {
@@ -47,12 +53,49 @@ const Company: NextPage = () => {
 
   const handleShowModalScheduleTime = (sheduleTime:string, day: string) => {
     setShowModalScheduleTime(true);
-    setSelectedlScheduleTime(sheduleTime);
-    setSelectedlScheduleDay(day);
+    setSelectedScheduleTime(sheduleTime);
+    setSelectedScheduleDay(day);
   }
 
   const  handleModalConfirm = () => {
+  //   async function createScheduleTime(){
 
+      // const data = {
+      //   client: {
+      //     email: clientEmail,
+      //     name: clientName,
+      //     phone: clientPhone,
+      //   },
+      //   companyId: company.id,
+      //   contributorId: 
+      //   sheduleTime: {
+      //     date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
+      //     time: selectedScheduleTime,
+      //     duaration: calendar.intervalTime,
+      //   },
+      // }
+
+    //   try {
+    //     const url = path + "/api/companies/scheduleTimes/create";
+    //     const response = await fetch(url, {
+    //       method: 'POST',
+    //       headers: {
+    //         "Content-type": "application/json; charset=UTF-8",
+    //       },
+    //       body: JSON.stringify(),
+    //     });
+    //     if(response.status == 200){
+    //       const {newCompany, calendar} = await response.json();
+    //       setCompany(newCompany);  
+    //       setCalendar(calendar);
+    //       calculateIntervals(calendar)
+    //     }else {
+    //       setCompany({});
+    //     }
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // }
   }
 
   React.useEffect(()=>{
@@ -66,9 +109,10 @@ const Company: NextPage = () => {
           },
         });
         if(response.status == 200){
-          const {newCompany, calendar} = await response.json();
+          const {newCompany, calendar, contributors} = await response.json();
           setCompany(newCompany);  
           setCalendar(calendar);
+          setContributors(contributors);
           calculateIntervals(calendar)
         }else {
           setCompany({});
@@ -208,7 +252,7 @@ const Company: NextPage = () => {
                     <Form.Label>Data</Form.Label>
                     <Form.Control
                       className="bg-white"
-                      value={selectedlScheduleDay}
+                      value={selectedScheduleDay}
                       disabled
                     />
                   </Form.Group>
@@ -219,23 +263,56 @@ const Company: NextPage = () => {
                     <Form.Control
                       autoFocus
                       className="bg-white"
-                      value={selectedlScheduleTime}
+                      value={selectedScheduleTime}
                       disabled
                     />
                   </Form.Group>
                 </Col>
               </Row>
-              {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                <Form.Label>Duração média de agendamento (min)</Form.Label>
+              <Form.Group className="mb-3">
+                <Form.Label className="darkBlueText">Selecione profissional</Form.Label>
+                <Form.Select onChange={({target})=>{
+                    console.log(target.value);
+                    setSelectedContributor(target.value);
+                  }}>
+                    <option></option>
+                  {
+                    contributors.map((contribuitor,index) => (
+                      <option className={styles.option} key={index}>{contribuitor.name}</option>
+                    ))
+                  }
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Email</Form.Label>
                 <Form.Control
-                  placeholder="ex: 30"
+                  placeholder="Digite seu email"
                   className="bg-white"
-                  value={intervalTime}
-                  type="number"
-                  onChange={({ target }) => setIntervalTime(target.value)}
-                  disabled={modalCalendarTitle=="Deletar"}
+                  value={clientEmail}
+                  type="email"
+                  onChange={({ target }) => setClientEmail(target.value)}
                 />
-              </Form.Group> */}
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                  placeholder="Digite seu nome"
+                  className="bg-white"
+                  value={clientName}
+                  type="text"
+                  onChange={({ target }) => setClientEmail(target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Telefone</Form.Label>
+                <Form.Control
+                  placeholder="Digite seu telefone ex: 1199999999"
+                  className="bg-white"
+                  value={clientPhone}
+                  type="tel"
+                  onChange={({ target }) => setClientEmail(target.value)}
+                />
+              </Form.Group>
               {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             </Form>
           </Modal.Body>
