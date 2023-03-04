@@ -199,7 +199,7 @@ const Company: NextPage = () => {
           <Row className="g-4">
             <Col>
               <Card style={{border: "1px solid #034078"}}>
-              <Card.Header className="darkBlueText text-center"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
+              <Card.Header className="darkBlueBg text-white text-center"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
                 <Card.Body>
                   <Card.Title className="text-center my-2"> Horários</Card.Title>
                   <div className={`${styles.scrolledCardSection} text-center`}>
