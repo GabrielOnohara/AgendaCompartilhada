@@ -18,16 +18,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
-import { menuItemUnstyledClasses } from "@mui/base";
 require('dayjs/locale/pt')
+import Modal from 'react-bootstrap/Modal';
 
 const Company: NextPage = () => {
 
-  const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
+  const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [company, setCompany] = React.useState<any >({});
   const [calendar, setCalendar] = React.useState<any >({});
+  const [scheduleTime, setScheduleTime] = React.useState<any >({});
+  const [contributors, setContributors] = React.useState<any[] >([]);
   const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
   const [intervalsWasCalculated, setIntervalsWasCalculated] = React.useState(false);
@@ -35,10 +37,200 @@ const Company: NextPage = () => {
   const router = useRouter()
   const path =router.basePath;
   const queryId = router.query.id ?? '0';
+
+  const [showModalScheduleTime, setShowModalScheduleTime] = React.useState(false);
+  const [selectedScheduleTime, setSelectedScheduleTime] = React.useState<string>("");
+  const [selectedScheduleDay, setSelectedScheduleDay] = React.useState<string>("");
+  const [selectedContributor, setSelectedContributor] = React.useState<string>("");
+  const [clientEmail, setClientEmail] = React.useState<string>("");
+  const [clientPhone, setClientPhone] = React.useState<string>("");
+  const [clientName, setClientName] = React.useState<string>("");
   
+
+  const handleCloseModal =
+   () => {
+    setShowModalScheduleTime(false);
+  }
+
+  const handleShowModalScheduleTime = (sheduleTime:string, day: string) => {
+    setShowModalScheduleTime(true);
+    setSelectedScheduleTime(sheduleTime);
+    setSelectedScheduleDay(day);
+  }
+
+  const  handleModalConfirm = async () => {
+
+    const validations = {
+      emailIsValid: false,
+      nameIsValid: false,
+      phoneIsValid: false,
+      contributorIsValid: false
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
+    if(!validateEmail(clientEmail)){
+      validations.emailIsValid = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Email inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Email inválido"]);
+      })
+    }else{
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Email inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+    
+    if(!(clientPhone.length >= 10)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Telefone inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Telefone inválido"]);
+      })
+    }else{
+      validations.phoneIsValid = true;
+      const index = errorMessage.indexOf("Telefone inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!(clientName.length > 0)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Nome inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Nome inválido"]);
+      })
+    }else{
+      validations.nameIsValid = true;
+      const index = errorMessage.indexOf("Nome inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(!(selectedContributor.length>0)){
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Contribuidor inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Contribuidor inválido"]);
+      })
+    }else{
+      validations.contributorIsValid = true;
+      const index = errorMessage.indexOf("Contribuidor inválido");
+      if(index >= 0)
+      setErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+    if(validations.contributorIsValid && validations.nameIsValid && validations.emailIsValid && validations.phoneIsValid){
+
+      let contributorId = 0;
+      contributors.forEach(contributor => {
+        if(contributor.name == selectedContributor){
+          contributorId = contributor.id;
+        }
+      })
+
+      const data = {
+        client: {
+          email: clientEmail,
+          name: clientName,
+          phone: clientPhone,
+        },
+        companyId: company.id,
+        contributorId: contributorId, 
+        scheduleTime: {
+          date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
+          time: selectedScheduleTime,
+          duration: calendar.intervalTime,
+        },
+      }
+      
+      try {
+        const url = path + "/api/companies/scheduleTimes/create";
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        if(response.status == 200){
+          const json = await response.json();
+          console.log(json.newScheduleTime);
+          
+          setScheduleTime(json.newScheduleTime);
+        }else {
+          const json = await response.json();
+          setErrorMessage([json.error]);
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+      
+  }
+  //   async function createScheduleTime(){
+
+      // const data = {
+      //   client: {
+      //     email: clientEmail,
+      //     name: clientName,
+      //     phone: clientPhone,
+      //   },
+      //   companyId: company.id,
+      //   contributorId: 
+      //   sheduleTime: {
+      //     date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
+      //     time: selectedScheduleTime,
+      //     duaration: calendar.intervalTime,
+      //   },
+      // }
+
+    //   try {
+    //     const url = path + "/api/companies/scheduleTimes/create";
+    //     const response = await fetch(url, {
+    //       method: 'POST',
+    //       headers: {
+    //         "Content-type": "application/json; charset=UTF-8",
+    //       },
+    //       body: JSON.stringify(),
+    //     });
+    //     if(response.status == 200){
+    //       const {newCompany, calendar} = await response.json();
+    //       setCompany(newCompany);  
+    //       setCalendar(calendar);
+    //       calculateIntervals(calendar)
+    //     }else {
+    //       setCompany({});
+    //     }
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // }
+
   React.useEffect(()=>{
     const id = queryId as string;
-    async function getCompanyByID(id:Number){
+    async function getCompanyAndCalendarByID(id:Number){
       try {
         const url = path + "/api/companies/searchById/" + id;
         const response = await fetch(url, {
@@ -47,9 +239,11 @@ const Company: NextPage = () => {
           },
         });
         if(response.status == 200){
-          const {newCompany, calendar} = await response.json();
+          const {newCompany, calendar, contributors} = await response.json();
           setCompany(newCompany);  
           setCalendar(calendar);
+          setContributors(contributors);
+          calculateIntervals(calendar)
         }else {
           setCompany({});
         }
@@ -59,43 +253,45 @@ const Company: NextPage = () => {
     }
 
     function calculateIntervals(calendar:any){
-      const [startHour, startMinute] = (calendar.startTime.split(":"));
-      const [finishHour, finishtMinute] = (calendar.finishTime.split(":"));
+    
+      const [startHour, startMinute] = calendar?.startTime.split(":");
+      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
       const intervalTime = calendar.intervalTime;
       let hour  = parseInt(finishHour) - parseInt(startHour);
       let minute = parseInt(finishtMinute) - parseInt(startMinute);;
       let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+      let intervalTimesList = [];
       for (let index = 0; index < totalMinutesDifference; index++) {
         let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
         let minuteAsNumber =  (index*intervalTime)%60;
         let hourString;
         let minuteString;
-  
-        if(hourAsNumber < 9){
+
+        if(hourAsNumber <= 9){
           hourString = '0' + hourAsNumber.toString();
         }else{
           hourString = hourAsNumber.toString();
         }
-  
-        if(minuteAsNumber < 9){
+
+        if(minuteAsNumber <= 9){
           minuteString = '0' + minuteAsNumber.toString();
         }else{
           minuteString = minuteAsNumber.toString();
         }
-  
+
         let lastString = hourString + ':' + minuteString;
-        intervalTimes[index] = lastString; 
+        intervalTimesList[index] = lastString; 
       }
+      setIntervalTimes(intervalTimesList)
       setIntervalsWasCalculated(true);
     }
 
     if(parseInt(id) > 0){
-      getCompanyByID(parseInt(id)).then(()=>{
-        calculateIntervals(calendar);  
+      getCompanyAndCalendarByID(parseInt(id)).then(()=>{
         setViewIsReady(true);
       });
     }
-  },[path, queryId,calendar,intervalTimes])
+  },[path, queryId])
   
   React.useEffect(()=>{
     const id = queryId as string;
@@ -174,7 +370,91 @@ const Company: NextPage = () => {
       {company.hasOwnProperty('name')
       ?
       <main className={styles.mainContainer}>
-        
+        <Modal show={showModalScheduleTime} onHide={handleCloseModal} style={{color: "#034078", fontWeight: "bold"}}>
+          <Modal.Header closeButton >
+            <Modal.Title>Agende seu horário</Modal.Title>
+          </Modal.Header>
+          <Modal.Body >
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                    <Form.Label>Data</Form.Label>
+                    <Form.Control
+                      className="bg-white"
+                      value={selectedScheduleDay}
+                      disabled
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Label>Horário</Form.Label>
+                    <Form.Control
+                      autoFocus
+                      className="bg-white"
+                      value={selectedScheduleTime}
+                      disabled
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Form.Group className="mb-3">
+                <Form.Label className="darkBlueText">Selecione profissional</Form.Label>
+                <Form.Select onChange={({target})=>{
+                    console.log(target.value);
+                    setSelectedContributor(target.value);
+                  }}>
+                    <option></option>
+                  {
+                    contributors.map((contribuitor,index) => (
+                      <option className={styles.option} key={index}>{contribuitor.name}</option>
+                    ))
+                  }
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  placeholder="Digite seu email"
+                  className="bg-white"
+                  value={clientEmail}
+                  type="email"
+                  onChange={({ target }) => setClientEmail(target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Nome</Form.Label>
+                <Form.Control
+                  placeholder="Digite seu nome"
+                  className="bg-white"
+                  value={clientName}
+                  type="text"
+                  onChange={({ target }) => setClientName(target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                <Form.Label>Telefone</Form.Label>
+                <Form.Control
+                  placeholder="Digite seu telefone ex: 1199999999"
+                  className="bg-white"
+                  value={clientPhone}
+                  type="tel"
+                  onChange={({ target }) => setClientPhone(target.value)}
+                />
+              </Form.Group>
+              {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+            </Form>
+          </Modal.Body>
+          <Modal.Footer >
+            <Button variant="danger" onClick={handleCloseModal}>
+              Cancelar
+            </Button>
+            <Button variant="success" onClick={handleModalConfirm}>
+              Confirmar
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Container >
           <h1 className={`mb-5 darkBlueText ${styles.principalTitle}`}>{company.name}</h1>
           <div className="d-flex justify-content-between">
@@ -197,23 +477,25 @@ const Company: NextPage = () => {
           <Row className="g-4">
             <Col>
               <Card style={{border: "1px solid #034078"}}>
+              <Card.Header className="darkBlueBg text-white text-center"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
                 <Card.Body>
-                  <Card.Header className="darkBlueText text-center mb-4"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
-                    <Card.Title className="text-center my-4"> Horários</Card.Title>
-                    {
-                      intervalsWasCalculated
-                      ?
-                        intervalTimes.map((timeString,index) => (
-                          <Card.Text key={index} className="d-flex my-3">
-                            <span className={`darkBlueText py-2`}>{timeString}</span>                     
-                            <Button variant="outline-success" className="ms-auto" onClick={()=>{}}>agendar</Button>
-                          </Card.Text>
-                        ))
-                      :
-                      <Card.Text className="d-flex my-3">
-                        <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
-                      </Card.Text>
-                    }     
+                  <Card.Title className="text-center my-2"> Horários</Card.Title>
+                  <div className={`${styles.scrolledCardSection} text-center`}>
+                  {
+                    intervalsWasCalculated
+                    ? 
+                      
+                      intervalTimes.map((timeString,index) => (
+                        <Card.Text key={index} className="my-3">                   
+                          <Button variant="outline-success" className="text-center" onClick={() => {handleShowModalScheduleTime(timeString,(`${date.locale('pt').format('ddd')} ${date.format('DD/MM/YYYY')}`))}}>{timeString}</Button>
+                        </Card.Text>
+                      ))
+                    :
+                    <Card.Text className="d-flex my-3">
+                      <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
+                    </Card.Text>
+                  }   
+                  </div>  
                 </Card.Body>
               </Card>
             </Col>
