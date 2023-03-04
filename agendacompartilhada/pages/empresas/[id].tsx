@@ -18,8 +18,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from "next/router";
-import { menuItemUnstyledClasses } from "@mui/base";
-import { style } from "@mui/system";
 require('dayjs/locale/pt')
 
 const Company: NextPage = () => {
