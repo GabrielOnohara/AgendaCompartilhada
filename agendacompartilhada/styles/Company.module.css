@@ -21,7 +21,7 @@
 .mainContainer {
   width: calc(100vw - 15px);
   min-height: 100vh;
-  padding: 75px 100px;
+  padding: 150px 100px;
   background-color: #E3E5F7;
 }
 

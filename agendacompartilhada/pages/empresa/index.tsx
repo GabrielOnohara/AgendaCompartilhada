@@ -11,7 +11,6 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-import Table from 'react-bootstrap/Table';
 import styles from "../../styles/Company.module.css";
 var bcrypt = require('bcryptjs');
 import { Dayjs } from 'dayjs';
@@ -21,7 +20,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 
 const Empresa: NextPage = () => {
@@ -32,7 +30,7 @@ const Empresa: NextPage = () => {
   const [menuItemSelected, setMenuItemSelected] = React.useState<string>("resumo");
   const [showModal, setShowModal] = React.useState(false);
   const [showModalCalendar, setShowModalCalendar] = React.useState(false);
-
+  
   const handleCloseModal = () => {
     setShowModal(false);
     setModalTitle("");
@@ -550,6 +548,8 @@ const Empresa: NextPage = () => {
     e.preventDefault();
   }
 
+  const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
+
   React.useEffect(()=>{
     async function getCompanyByEmail(email:string){
       try {
@@ -569,15 +569,25 @@ const Empresa: NextPage = () => {
         console.log(error)
       }
     }
-    const token =  window.localStorage.getItem("token");
-    const companyEmail =  window.localStorage.getItem("email");
-    if(token){
-      if(companyEmail){
-        getCompanyByEmail(companyEmail)
-      }else{
-        setCompany({});
+    try {
+      const token =  window.localStorage.getItem("token");
+      const companyEmail =  window.localStorage.getItem("email");
+      if(token){
+        if(companyEmail){
+          getCompanyByEmail(companyEmail).then(()=>{
+            setViewIsReady(true);
+          })
+        }else{
+          setCompany({});
+        }
       }
+    } catch (error) {
+      console.log(error);
+      
+    }finally{
+      
     }
+    
   },[router,setCompany])  
 
   React.useEffect(()=>{
@@ -601,7 +611,7 @@ const Empresa: NextPage = () => {
     refreshTeam(company.id).then(()=>setShowModal(false)) 
   },[company.id])
 
-  if(token == ""){
+  if(!token){
     return (
       <div>
         <Head>
@@ -614,8 +624,17 @@ const Empresa: NextPage = () => {
           <link rel="icon" href="/calendario.ico" />
         </Head>
         <div className={"tokenExpired"}>
-          <h1>Seu token expirou!</h1>
-          <Link className={` yellowText`} href="/login">Voltar ao login </Link>
+          {viewIsReady 
+            ?
+            <div>
+              <h1>Seu token expirou!</h1>
+              <Link className={` yellowText`} href="/login">Voltar ao login </Link>
+            </div>
+            :
+            <div>
+              <h1>Carregando ...</h1>
+            </div>
+          }
         </div>
       </div> 
     )

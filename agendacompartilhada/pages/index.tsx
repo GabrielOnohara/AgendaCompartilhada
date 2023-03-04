@@ -4,8 +4,6 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import logo from "../public/calendario.png";
 import React from "react";
-import Dropdown from 'react-bootstrap/Dropdown'
-import Link from "next/link";
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -13,6 +11,7 @@ import Container from 'react-bootstrap/Container';
 import { Card,Row,Col, } from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
 
@@ -43,6 +42,11 @@ const Home: NextPage = () => {
     }
   }
 
+  const router = useRouter();
+  function redirectToCompanyPage(id:Number){
+    router.push(`/empresas/${id}`);
+  }
+
   return (
     <div>
       <Head>
@@ -70,8 +74,8 @@ const Home: NextPage = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <NavDropdown align={{ lg: 'end' }} drop="down" title="Login" id="basic-nav-dropdown" >
-                <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
-                <NavDropdown.Divider />
+                {/* <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
+                <NavDropdown.Divider /> */}
                 <NavDropdown.Item href="/login">
                   Sou empresa
                 </NavDropdown.Item>
@@ -112,9 +116,8 @@ const Home: NextPage = () => {
                     <Card.Text style={{float: "left",}}>
                       <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
                       <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
-                      
                     </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
+                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={() => redirectToCompanyPage(company.id)}>Acessar</Button>
                   </Col>
                 </Row>
               </Card.Body>
@@ -123,25 +126,25 @@ const Home: NextPage = () => {
           ))}
           </Row>
           <hr />
-          <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
-            <Card style={{border: "1px solid #034078"}}>
-              <Card.Body>
-                <Row xs={12} md={12}>
-                  <Col xs={12} sm={3} md={2}>
-                  <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                  </Col>
-                  <Col  xs={12} sm={9} md={10}>
-                    <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
-                      <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
-                      
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3">Acessar</Button>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
+          {/* <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
+          <Card style={{border: "1px solid #034078"}}>
+            <Card.Body>
+              <Row xs={12} md={12}>
+                <Col xs={12} sm={3} md={2}>
+                <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
+                </Col>
+                <Col  xs={12} sm={9} md={10}>
+                  <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
+                  <Card.Text style={{float: "left",}}>
+                    <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
+                    <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
+                    
+                  </Card.Text>
+                  <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3">Acessar</Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card> */}
         </Container> 
       </main>
     </div>
