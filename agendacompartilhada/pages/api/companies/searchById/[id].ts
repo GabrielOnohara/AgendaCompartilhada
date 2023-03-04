@@ -26,7 +26,12 @@ export default async function handler(
               companyId: parseInt(id??'0')
             }
           });
-          res.status(200).json({newCompany, calendar});
+          const contributors = await prisma.contribuitor.findMany({
+            where: {
+              companyId: parseInt(id??'0')
+            }
+          });
+          res.status(200).json({newCompany, calendar, contributors});
         }else{
           res.status(400).json({error: "Empresa não encontrada",});
         }
