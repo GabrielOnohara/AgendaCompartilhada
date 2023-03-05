@@ -18,20 +18,11 @@ export default async function handler(
             date: {
                 gt: new Date(jsonData.initialDate),
                 lt:  new Date(jsonData.endDate)
-              },
-            // dateYear: {
-            //   gt: parseInt(initialYear),
-            //   lt: parseInt(endYear)
-            // },
-            // dateMonth:{
-            //   gt: parseInt(initialMonth),
-            //   lt: parseInt(endMonth)
-            // },
-            // dateDay:{
-            //   gt: parseInt(initialDay),
-            //   lt: parseInt(endDay)
-            // }
-          }
+            },
+          },
+          orderBy:[
+            {date: 'asc'},
+          ]
         }
         );
 
