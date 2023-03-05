@@ -70,7 +70,7 @@ const Company: NextPage = () => {
     setSelectedScheduleTime(sheduleTime);
     setSelectedScheduleDay(day);
   }
-
+  
   const  handleModalConfirm = async () => {
 
     const validations = {
@@ -189,8 +189,6 @@ const Company: NextPage = () => {
         });
         if(response.status == 200){
           const json = await response.json();
-          setShowModalScheduleTime(false);
-          
           setScheduleTime(json.newScheduleTime);
         }else {
           const json = await response.json();
@@ -323,7 +321,7 @@ const Company: NextPage = () => {
           },
           body: JSON.stringify(data)
         });
-        if(response.status == 200){
+        if(response.ok){
           const {scheduleTimes} = await response.json();
           console.log(scheduleTimes);
           setScheduleTimes(scheduleTimes);   
@@ -331,7 +329,7 @@ const Company: NextPage = () => {
           setScheduleTimes([]);
         }
       } catch (error) {
-        console.log(error)
+        throw error
       }
     }
 
@@ -512,31 +510,35 @@ const Company: NextPage = () => {
             </LocalizationProvider>
           </div>
           <Row className="g-4">
-            <Col>
-              <Card style={{border: "1px solid #034078"}}>
-              <Card.Header className="darkBlueBg text-white text-center"><b>{date.locale('pt').format('ddd')} {date.format('DD/MM')}</b></Card.Header>
-                <Card.Body>
-                  <Card.Title className="text-center my-2"> Horários</Card.Title>
-                  <div className={`${styles.scrolledCardSection} text-center`}>
-                  {
-                    intervalsWasCalculated
-                    ? 
-                      
-                      intervalTimes.map((timeString,index) => (
-                        <Card.Text key={index} className="my-3">                   
-                          <Button variant="outline-success" className="text-center" onClick={() => {handleShowModalScheduleTime(timeString,(`${date.locale('pt').format('ddd')} ${date.format('DD/MM/YYYY')}`))}}>{timeString}</Button>
+            {
+              Array.from(Array(5).keys()).map(num=>(
+                <Col key={num}>
+                  <Card style={{border: "1px solid #034078"}}>
+                  <Card.Header className="darkBlueBg text-white text-center"><b>{date.add(num,'day').locale('pt').format('ddd')} {date.add(num,'day').format('DD/MM')}</b></Card.Header>
+                    <Card.Body>
+                      <Card.Title className="text-center my-2"> Horários</Card.Title>
+                      <div className={`${styles.scrolledCardSection} text-center`}>
+                      {
+                        intervalsWasCalculated
+                        ? 
+                          
+                          intervalTimes.map((timeString,index) => (
+                            <Card.Text key={index} className="my-3">                   
+                              <Button variant="outline-success" className="text-center" onClick={() => {handleShowModalScheduleTime(timeString,date.add(num,'day').format("YYYY-MM-DD"))}}>{timeString}</Button>
+                            </Card.Text>
+                          ))
+                        :
+                        <Card.Text className="d-flex my-3">
+                          <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
                         </Card.Text>
-                      ))
-                    :
-                    <Card.Text className="d-flex my-3">
-                      <span className={`darkBlueText py-2`}>Verificando horarios</span>                     
-                    </Card.Text>
-                  }   
-                  </div>  
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col>
+                      }   
+                      </div>  
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            }
+            {/* <Col>
               <Card style={{border: "1px solid #034078"}}>
                 <Card.Body>
                 <Card.Header className="darkBlueText text-center">{date.add(1,'day').locale('pt').format('ddd')} {date.add(1,'day').format('DD/MM')}</Card.Header>
@@ -583,7 +585,7 @@ const Company: NextPage = () => {
                     <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </Col> */}
           </Row>
           {/* <Form onSubmit={handleSearchCompany}>
             <Form.Group className="mb-3">
