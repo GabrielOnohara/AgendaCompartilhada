@@ -50,7 +50,7 @@ export default async function handler(
             if(client){
               const scheduleTime = await prisma.scheduleTime.findFirst({
                 where: {
-                  clientId: client.id,
+                  contribuitorId: contribuitor.id,
                   companyId: companyId,
                   date: new Date(scheduleTimeData.date),
                   time: scheduleTimeData.time,
