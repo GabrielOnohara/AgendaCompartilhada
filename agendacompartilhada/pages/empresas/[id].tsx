@@ -49,9 +49,11 @@ const Company: NextPage = () => {
 
   const handleCloseModal =() => {
     setShowModalScheduleTime(false);
+    setScheduleTime({});
+    setErrorMessage([""]);
   }
 
-  const handleCloseModaAfterCreatedl = () => {
+  const handleCloseModaAfterCreated = () => {
     setShowModalScheduleTime(false);
     setSelectedScheduleTime("");
     setSelectedScheduleDay("");
@@ -60,6 +62,7 @@ const Company: NextPage = () => {
     setClientPhone("");
     setClientName("");
     setScheduleTime({});
+    setErrorMessage([""]);
   }
 
   const handleShowModalScheduleTime = (sheduleTime:string, day: string) => {
@@ -473,7 +476,7 @@ const Company: NextPage = () => {
             scheduleTime.hasOwnProperty("id")
             ?
             <div>
-              <Button variant="danger" onClick={handleCloseModaAfterCreatedl}>
+              <Button variant="danger" onClick={handleCloseModaAfterCreated}>
                 Fechar
               </Button>
             </div>
