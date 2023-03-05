@@ -60,7 +60,7 @@ export default async function handler(
               if(scheduleTime){
                 res.status(400).json({error: "Horário indisponível, atualize a página."});
               }else{
-                const newScheduleTime = await prisma.scheduleTime.create({
+                  const newScheduleTime = await prisma.scheduleTime.create({
                   data: {
                     companyId: company.id,
                     date: new Date(scheduleTimeData.date),
@@ -98,7 +98,7 @@ export default async function handler(
                 });
                 if(scheduleTime){
                   res.status(400).json({error: "Horário indisponível, atualize a página."});
-                }else{  
+                }else{ 
                   const newScheduleTime = await prisma.scheduleTime.create({
                   data: {
                     companyId: company.id,
