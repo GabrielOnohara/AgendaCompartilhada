@@ -47,9 +47,19 @@ const Company: NextPage = () => {
   const [clientName, setClientName] = React.useState<string>("");
   
 
-  const handleCloseModal =
-   () => {
+  const handleCloseModal =() => {
     setShowModalScheduleTime(false);
+  }
+
+  const handleCloseModaAfterCreatedl = () => {
+    setShowModalScheduleTime(false);
+    setSelectedScheduleTime("");
+    setSelectedScheduleDay("");
+    setSelectedContributor("");
+    setClientEmail("");
+    setClientPhone("");
+    setClientName("");
+    setScheduleTime({});
   }
 
   const handleShowModalScheduleTime = (sheduleTime:string, day: string) => {
@@ -176,7 +186,7 @@ const Company: NextPage = () => {
         });
         if(response.status == 200){
           const json = await response.json();
-          console.log(json.newScheduleTime);
+          setShowModalScheduleTime(false);
           
           setScheduleTime(json.newScheduleTime);
         }else {
@@ -399,60 +409,84 @@ const Company: NextPage = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              <Form.Group className="mb-3">
-                <Form.Label className="darkBlueText">Selecione profissional</Form.Label>
-                <Form.Select onChange={({target})=>{
-                    console.log(target.value);
-                    setSelectedContributor(target.value);
-                  }}>
-                    <option></option>
-                  {
-                    contributors.map((contribuitor,index) => (
-                      <option className={styles.option} key={index}>{contribuitor.name}</option>
-                    ))
-                  }
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  placeholder="Digite seu email"
-                  className="bg-white"
-                  value={clientEmail}
-                  type="email"
-                  onChange={({ target }) => setClientEmail(target.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                <Form.Label>Nome</Form.Label>
-                <Form.Control
-                  placeholder="Digite seu nome"
-                  className="bg-white"
-                  value={clientName}
-                  type="text"
-                  onChange={({ target }) => setClientName(target.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                <Form.Label>Telefone</Form.Label>
-                <Form.Control
-                  placeholder="Digite seu telefone ex: 1199999999"
-                  className="bg-white"
-                  value={clientPhone}
-                  type="tel"
-                  onChange={({ target }) => setClientPhone(target.value)}
-                />
-              </Form.Group>
+              {
+                scheduleTime.hasOwnProperty("id")
+                ?
+                <div>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Label className="text-success mt-2"><b>Horário marcado com sucesso</b></Form.Label>
+                  </Form.Group>
+                </div>
+                :
+                <div>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="darkBlueText">Selecione profissional</Form.Label>
+                    <Form.Select onChange={({target})=>{
+                        console.log(target.value);
+                        setSelectedContributor(target.value);
+                      }}>
+                        <option></option>
+                      {
+                        contributors.map((contribuitor,index) => (
+                          <option className={styles.option} key={index}>{contribuitor.name}</option>
+                        ))
+                      }
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      placeholder="Digite seu email"
+                      className="bg-white"
+                      value={clientEmail}
+                      type="email"
+                      onChange={({ target }) => setClientEmail(target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                    <Form.Label>Nome</Form.Label>
+                    <Form.Control
+                      placeholder="Digite seu nome"
+                      className="bg-white"
+                      value={clientName}
+                      type="text"
+                      onChange={({ target }) => setClientName(target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                    <Form.Label>Telefone</Form.Label>
+                    <Form.Control
+                      placeholder="Digite seu telefone ex: 1199999999"
+                      className="bg-white"
+                      value={clientPhone}
+                      type="tel"
+                      onChange={({ target }) => setClientPhone(target.value)}
+                    />
+                  </Form.Group>
+                </div>
+              }
               {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
             </Form>
           </Modal.Body>
           <Modal.Footer >
-            <Button variant="danger" onClick={handleCloseModal}>
-              Cancelar
-            </Button>
-            <Button variant="success" onClick={handleModalConfirm}>
-              Confirmar
-            </Button>
+          {
+            scheduleTime.hasOwnProperty("id")
+            ?
+            <div>
+              <Button variant="danger" onClick={handleCloseModaAfterCreatedl}>
+                Fechar
+              </Button>
+            </div>
+            :
+            <div>
+              <Button variant="danger" onClick={handleCloseModal}>
+                Cancelar
+              </Button>
+              <Button variant="success" onClick={handleModalConfirm}>
+                Confirmar
+              </Button>
+            </div>
+          }
           </Modal.Footer>
         </Modal>
         <Container >
