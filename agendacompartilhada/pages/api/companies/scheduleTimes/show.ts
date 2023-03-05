@@ -6,8 +6,6 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const jsonData =  req.body;
-  const initialDate = jsonData.initialDate;
-  const endDate = jsonData.endDate;
   const companyId = jsonData.companyId;
   const prisma = new PrismaClient();
   await prisma.$connect()
@@ -16,32 +14,34 @@ export default async function handler(
       try{
         const scheduleTimes = await prisma.scheduleTime.findMany({
           where: {
-            AND:[
-              {companyId: parseInt(companyId)},
-              {
-                AND:[
-                  {date: {gt: new Date(initialDate)}},
-                  {date: {lt: new Date(endDate)}},
-                ]
-              }
-            ]
+            companyId: parseInt(companyId),
+            date: {
+                gt: new Date(jsonData.initialDate),
+                lt:  new Date(jsonData.endDate)
+              },
+            // dateYear: {
+            //   gt: parseInt(initialYear),
+            //   lt: parseInt(endYear)
+            // },
+            // dateMonth:{
+            //   gt: parseInt(initialMonth),
+            //   lt: parseInt(endMonth)
+            // },
+            // dateDay:{
+            //   gt: parseInt(initialDay),
+            //   lt: parseInt(endDay)
+            // }
           }
-        });
-        
-        const scheduleTimesSortedByDate = scheduleTimes.sort( (a: ScheduleTime, b:ScheduleTime)=>{
-          if(new Date(a.date) < new Date(b.date)){
-            return 1;
-          }else{
-            return 0;
-          }
-        })
+        }
+        );
 
         if(scheduleTimes.length > 0){
-          res.status(200).json({scheduleTimes: scheduleTimesSortedByDate});
+          res.status(200).json({scheduleTimes: scheduleTimes});
         }else{
-          res.status(200).json({scheduleTimes:[]});
-        }
-        
+          res.status(400).json({
+            scheduleTimes:[],
+          });
+        }   
       }catch(error){
         throw error
         res.status(400).json({error: error});
