@@ -30,14 +30,13 @@ const Company: NextPage = () => {
   const [calendar, setCalendar] = React.useState<any >({});
   const [scheduleTime, setScheduleTime] = React.useState<any >({});
   const [contributors, setContributors] = React.useState<any[] >([]);
-  const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([])
   const [searchedScheduleTimes, setSearchedScheduleTimes] = React.useState<boolean>(false);
-  const [intervalsWasCalculated, setIntervalsWasCalculated] = React.useState(false);
-  const [intervalTimes, setIntervalTimes] = React.useState<any[]>([])
-  const router = useRouter()
+  const [intervalsAreUpdated, setIntervalsAreUpdated] = React.useState<boolean>(false);
+
+  const router = useRouter();
   const path =router.basePath;
   const queryId = router.query.id ?? '0';
-
+  const id = queryId as string;
   const [showModalScheduleTime, setShowModalScheduleTime] = React.useState(false);
   const [selectedScheduleTime, setSelectedScheduleTime] = React.useState<string>("");
   const [selectedScheduleDay, setSelectedScheduleDay] = React.useState<string>("");
@@ -45,7 +44,7 @@ const Company: NextPage = () => {
   const [clientEmail, setClientEmail] = React.useState<string>("");
   const [clientPhone, setClientPhone] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
-  
+  const [schedulesGroupByDay, setSchedulesGroupByDay] = React.useState<any>({});
 
   const handleCloseModal =() => {
     setShowModalScheduleTime(false);
@@ -200,48 +199,12 @@ const Company: NextPage = () => {
     }
       
   }
-  //   async function createScheduleTime(){
-
-      // const data = {
-      //   client: {
-      //     email: clientEmail,
-      //     name: clientName,
-      //     phone: clientPhone,
-      //   },
-      //   companyId: company.id,
-      //   contributorId: 
-      //   sheduleTime: {
-      //     date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
-      //     time: selectedScheduleTime,
-      //     duaration: calendar.intervalTime,
-      //   },
-      // }
-
-    //   try {
-    //     const url = path + "/api/companies/scheduleTimes/create";
-    //     const response = await fetch(url, {
-    //       method: 'POST',
-    //       headers: {
-    //         "Content-type": "application/json; charset=UTF-8",
-    //       },
-    //       body: JSON.stringify(),
-    //     });
-    //     if(response.status == 200){
-    //       const {newCompany, calendar} = await response.json();
-    //       setCompany(newCompany);  
-    //       setCalendar(calendar);
-    //       calculateIntervals(calendar)
-    //     }else {
-    //       setCompany({});
-    //     }
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // }
+    
+  
 
   React.useEffect(()=>{
-    const id = queryId as string;
     async function getCompanyAndCalendarByID(id:Number){
+
       try {
         const url = path + "/api/companies/searchById/" + id;
         const response = await fetch(url, {
@@ -254,59 +217,75 @@ const Company: NextPage = () => {
           setCompany(newCompany);  
           setCalendar(calendar);
           setContributors(contributors);
-          calculateIntervals(calendar)
         }else {
           setCompany({});
         }
       } catch (error) {
-        console.log(error)
+        throw error;
       }
-    }
-
-    function calculateIntervals(calendar:any){
-    
-      const [startHour, startMinute] = calendar?.startTime.split(":");
-      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
-      const intervalTime = calendar.intervalTime;
-      let hour  = parseInt(finishHour) - parseInt(startHour);
-      let minute = parseInt(finishtMinute) - parseInt(startMinute);;
-      let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
-      let intervalTimesList = [];
-      for (let index = 0; index < totalMinutesDifference; index++) {
-        let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
-        let minuteAsNumber =  (index*intervalTime)%60;
-        let hourString;
-        let minuteString;
-
-        if(hourAsNumber <= 9){
-          hourString = '0' + hourAsNumber.toString();
-        }else{
-          hourString = hourAsNumber.toString();
-        }
-
-        if(minuteAsNumber <= 9){
-          minuteString = '0' + minuteAsNumber.toString();
-        }else{
-          minuteString = minuteAsNumber.toString();
-        }
-
-        let lastString = hourString + ':' + minuteString;
-        intervalTimesList[index] = lastString; 
-      }
-      setIntervalTimes(intervalTimesList)
-      setIntervalsWasCalculated(true);
     }
 
     if(parseInt(id) > 0){
-      getCompanyAndCalendarByID(parseInt(id)).then(()=>{
-        setViewIsReady(true);
-      });
+      getCompanyAndCalendarByID(parseInt(id));
     }
-  },[path, queryId])
-  
-  React.useEffect(()=>{
-    const id = queryId as string;
+  },[id,path])
+
+  React.useEffect(() => {
+
+    function updateIntervals(calendar:any, scheduleTimes:any[]){
+    
+    const [startHour, startMinute] = calendar?.startTime?.split(":");
+    const [finishHour, finishtMinute] = calendar?.finishTime?.split(":");
+    const intervalTime = calendar.intervalTime;
+    let hour  = parseInt(finishHour) - parseInt(startHour);
+    let minute = parseInt(finishtMinute) - parseInt(startMinute);;
+    let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+    let intervalTimesList:any[] = [];
+    for (let index = 0; index < totalMinutesDifference; index++) {
+      let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
+      let minuteAsNumber =  (index*intervalTime)%60;
+      let hourString;
+      let minuteString;
+
+      if(hourAsNumber <= 9){
+        hourString = '0' + hourAsNumber.toString();
+      }else{
+        hourString = hourAsNumber.toString();
+      }
+
+      if(minuteAsNumber <= 9){
+        minuteString = '0' + minuteAsNumber.toString();
+      }else{
+        minuteString = minuteAsNumber.toString();
+      }
+
+      let lastString = hourString + ':' + minuteString;
+      intervalTimesList[index] = lastString; 
+    }
+
+    let weekIntervalTimesList:any = {};
+    
+    for (let index = 0; index < 5; index++) {
+      weekIntervalTimesList[date.add(index, 'day').format('DD-MM-YYYY')] = intervalTimesList;
+    }
+
+    scheduleTimes.map(scheduleTime => {
+      const dateAsKey = dayjs(new Date(scheduleTime.date)).add(1, 'day').format('DD-MM-YYYY'); //necessario adicionar 1 dia
+      
+      if(weekIntervalTimesList[dateAsKey].includes(scheduleTime.time) ){
+        weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[dateAsKey].filter(function(item:any){
+          return item != scheduleTime.time;
+        });
+      }
+    });
+    
+    setSchedulesGroupByDay(weekIntervalTimesList);
+    setIntervalsAreUpdated(true);
+  }
+    
     async function getScheduleTimeNextFiveDaysByDate(initialDate:String, endDate:String, id:Number){
+
+      let scheduleTimesList = []
       try {
         const data = {
           companyId: id,
@@ -321,26 +300,67 @@ const Company: NextPage = () => {
           },
           body: JSON.stringify(data)
         });
-        if(response.ok){
+        if(response.status == 200){
           const {scheduleTimes} = await response.json();
-          console.log(scheduleTimes);
-          setScheduleTimes(scheduleTimes);   
-        }else {
-          setScheduleTimes([]);
+          setSearchedScheduleTimes(true);
+          scheduleTimesList = scheduleTimes;
         }
       } catch (error) {
         throw error
+      }finally{
+        return scheduleTimesList;
       }
     }
 
-    const initialDateFormatted = date.subtract(1,'day').format('YYYY-MM-DD');
-    const endDateFormatted = date.add(5,'day').format('YYYY-MM-DD');
-    
-    getScheduleTimeNextFiveDaysByDate(initialDateFormatted, endDateFormatted, parseInt(id)).then(()=>{
-      setSearchedScheduleTimes(true);
+    if(parseInt(id) > 0){
+      const initialDateFormatted = date.subtract(1,'day').format('YYYY-MM-DD');
+      const endDateFormatted = date.add(5,'day').format('YYYY-MM-DD');
+      getScheduleTimeNextFiveDaysByDate(initialDateFormatted, endDateFormatted, parseInt(id)).then((scheduleTimesList)=>{
+        if(!intervalsAreUpdated){
+          updateIntervals(calendar,scheduleTimesList);
+        }  
     })
-  },[queryId,date,path])
+    }
 
+  },[id,path,date,calendar,intervalsAreUpdated]);
+     // if(searchedScheduleTimes){
+        //   let sheduleDaysGroupByData:any = {};
+        //   for (let index = 0; index < 5; index++) {
+        //     sheduleDaysGroupByData[date.add(index,'day').format("DD-MM-YYYY")] = calculateIntervals(calendar);
+        //   }
+        //   scheduleTimes.forEach(scheduleTime => {
+        //     const key = dayjs(scheduleTime.date).format('DD-MM-YYYY');
+        //     if(sheduleDaysGroupByData[key].includes(scheduleTime.time)){
+        //       const timeIndex = sheduleDaysGroupByData[key].indexOf(scheduleTime.time);
+        //       sheduleDaysGroupByData[key].splice(timeIndex,1);
+        //     }
+        //   });
+      
+        //   setSchedulesGroupByDay(sheduleDaysGroupByData);    
+        // }
+    // function updatingScheduleIntervals(){
+    //   let sheduleDaysGroupByData:any = {};
+    //   for (let index = 0; index < 5; index++) {
+    //     sheduleDaysGroupByData[date.add(index,'day').format("DD-MM-YYYY")] = intervalTimes;
+    //   }
+    //   scheduleTimes.forEach(scheduleTime => {
+    //     const key = dayjs(scheduleTime.date).format('DD-MM-YYYY');
+    //     if(sheduleDaysGroupByData[key].includes(scheduleTime.time)){
+    //       const timeIndex = sheduleDaysGroupByData[key].indexOf(scheduleTime.time);
+    //       sheduleDaysGroupByData[key].splice(timeIndex,1);
+    //     }
+    //   });
+      
+    //   setSchedulesGroupByDay(sheduleDaysGroupByData); 
+         
+    // } 
+  
+  React.useEffect(()=>{
+    
+    if(searchedScheduleTimes){
+
+    }
+  },[searchedScheduleTimes,date,])
   return (
     <div>
       <Head>
@@ -498,9 +518,8 @@ const Company: NextPage = () => {
               <DatePicker
                 label="Selecione um dia"
                 value={date}
-                onChange={(newValue) => {         
-                  console.log(dayjs(newValue));
-                                          
+                onChange={(newValue) => {    
+                  setIntervalsAreUpdated(false);
                   setDate(dayjs(newValue));
                 }}
                 renderInput={(params) => <TextField {...params} />}
@@ -519,10 +538,10 @@ const Company: NextPage = () => {
                       <Card.Title className="text-center my-2"> Horários</Card.Title>
                       <div className={`${styles.scrolledCardSection} text-center`}>
                       {
-                        intervalsWasCalculated
+                        intervalsAreUpdated
                         ? 
                           
-                          intervalTimes.map((timeString,index) => (
+                          schedulesGroupByDay[date.add(num,'day').format("DD-MM-YYYY")].map((timeString:string,index:any) => (
                             <Card.Text key={index} className="my-3">                   
                               <Button variant="outline-success" className="text-center" onClick={() => {handleShowModalScheduleTime(timeString,date.add(num,'day').format("YYYY-MM-DD"))}}>{timeString}</Button>
                             </Card.Text>
@@ -538,117 +557,8 @@ const Company: NextPage = () => {
                 </Col>
               ))
             }
-            {/* <Col>
-              <Card style={{border: "1px solid #034078"}}>
-                <Card.Body>
-                <Card.Header className="darkBlueText text-center">{date.add(1,'day').locale('pt').format('ddd')} {date.add(1,'day').format('DD/MM')}</Card.Header>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                    <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col>
-              <Card style={{border: "1px solid #034078"}}>
-                <Card.Body>
-                <Card.Header className="darkBlueText text-center">{date.add(2,'day').locale('pt').format('ddd')} {date.add(2,'day').format('DD/MM')}</Card.Header>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                    <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col>
-              <Card style={{border: "1px solid #034078"}}>
-                <Card.Body>
-                <Card.Header className="darkBlueText text-center">{date.add(3,'day').locale('pt').format('ddd')} {date.add(3,'day').format('DD/MM')}</Card.Header>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                    <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col>
-              <Card style={{border: "1px solid #034078"}}>
-                <Card.Body>
-                <Card.Header className="darkBlueText text-center">{date.add(4,'day').locale('pt').format('ddd')} {date.add(4,'day').format('DD/MM')}</Card.Header>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                    <Card.Title className="darkBlueText  mt-2 mb-3"></Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="m=>{}s-auto mt-3" onClick={()=>{}}>Acessar</Button>
-                </Card.Body>
-              </Card>
-            </Col> */}
           </Row>
-          {/* <Form onSubmit={handleSearchCompany}>
-            <Form.Group className="mb-3">
-              <Form.Label className="darkBlueText mb-3"><h2>Agende seu horário</h2></Form.Label>
-              <Row  xs={12} md={12} sm={12}>
-                <Col xs={8} md={10} sm={9} >
-                  <Form.Control type="text" placeholder="Digite o nome" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
-                </Col>
-                <Col xs={4} md={2} sm={3} >
-                  <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Buscar</Button>
-                </Col>
-              </Row>
-            </Form.Group>
-          </Form>
-          <hr />
-          <h2 className="darkBlueText mt-4 mb-3">Resultados</h2>
-          {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={`${styles.errorMessage} my-3`}>{errorMessage}</p>)}
-          <Row xs={1} md={1} className="g-4">
-          {companies.map((company,index) => (
-            <Col key={index}> 
-              <Card style={{border: "1px solid #034078"}}>
-              <Card.Body>
-                <Row xs={12} md={12}>
-                  <Col xs={12} sm={4} md={2}>
-                    <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                  </Col>
-                  <Col  xs={12} sm={8} md={10}>
-                    <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}</Card.Title>
-                    <Card.Text style={{float: "left",}}>
-                      <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
-                      <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
-                      
-                    </Card.Text>
-                    <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={handleSearchCompany}>Acessar</Button>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card> 
-            </Col>
-          ))}
-          </Row>
-          <hr /> */}
-          {/* <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
-          <Card style={{border: "1px solid #034078"}}>
-            <Card.Body>
-              <Row xs={12} md={12}>
-                <Col xs={12} sm={3} md={2}>
-                <Card.Img variant="top" src="/avatarimage.jpg" style={{width: "130px", borderRadius: "80%"}} className="mx-auto"/>
-                </Col>
-                <Col  xs={12} sm={9} md={10}>
-                  <Card.Title className="darkBlueText  mt-2 mb-3">Special title treatment</Card.Title>
-                  <Card.Text style={{float: "left",}}>
-                    <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP</p>
-                    <p className=""><span className={`darkBlueText`}>Telefone:</span> 1199999999</p>
-                    
-                  </Card.Text>
-                  <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3">Acessar</Button>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card> */}
         </Container>
-        
          
       </main>
       :
