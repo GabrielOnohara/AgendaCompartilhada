@@ -189,6 +189,7 @@ const Company: NextPage = () => {
         if(response.status == 200){
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
+          setIntervalsAreUpdated(false);
         }else {
           const json = await response.json();
           setErrorMessage([json.error]);
