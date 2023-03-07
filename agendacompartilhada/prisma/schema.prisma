@@ -62,7 +62,7 @@ model ScheduleTime {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   date      DateTime @db.Date
-  time      String @default("")
+  time  String @default("")
   duration  Int   
   clientId Int 
   client Client @relation(fields: [clientId], references: [id])

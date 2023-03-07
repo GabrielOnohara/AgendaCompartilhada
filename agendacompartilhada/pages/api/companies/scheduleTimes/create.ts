@@ -50,6 +50,7 @@ export default async function handler(
             if(client){
               const scheduleTime = await prisma.scheduleTime.findFirst({
                 where: {
+                  contribuitorId: contribuitor.id,
                   companyId: companyId,
                   date: new Date(scheduleTimeData.date),
                   time: scheduleTimeData.time,
@@ -59,7 +60,7 @@ export default async function handler(
               if(scheduleTime){
                 res.status(400).json({error: "Horário indisponível, atualize a página."});
               }else{
-                const newScheduleTime = await prisma.scheduleTime.create({
+                  const newScheduleTime = await prisma.scheduleTime.create({
                   data: {
                     companyId: company.id,
                     date: new Date(scheduleTimeData.date),
@@ -76,6 +77,7 @@ export default async function handler(
                 }
               }
             }else{
+              
               const newClient = await prisma.client.create({
                 data: {
                   email:clientData.email,
@@ -83,8 +85,21 @@ export default async function handler(
                   phone: clientData.phone,
                 }
               });
+
               if(newClient){
-                const newScheduleTime = await prisma.scheduleTime.create({
+                              
+                const scheduleTime = await prisma.scheduleTime.findFirst({
+                  where: {
+                    contribuitorId: contribuitor.id,
+                    companyId: companyId,
+                    date: new Date(scheduleTimeData.date),
+                    time: scheduleTimeData.time,
+                  }
+                });
+                if(scheduleTime){
+                  res.status(400).json({error: "Horário indisponível, atualize a página."});
+                }else{ 
+                  const newScheduleTime = await prisma.scheduleTime.create({
                   data: {
                     companyId: company.id,
                     date: new Date(scheduleTimeData.date),
@@ -94,10 +109,11 @@ export default async function handler(
                     contribuitorId: contribuitor.id,
                   }
                 });
-                if(newScheduleTime){
-                  res.status(200).json({newScheduleTime});
-                }else{
-                  res.status(400).json({error: "Não foi possível agendar horário"});
+                  if(newScheduleTime){
+                    res.status(200).json({newScheduleTime});
+                  }else{
+                    res.status(400).json({error: "Não foi possível agendar horário"});
+                  }
                 }
               }else{
                 res.status(400).json({error: "Não foi possível cadastrar cliente"})
