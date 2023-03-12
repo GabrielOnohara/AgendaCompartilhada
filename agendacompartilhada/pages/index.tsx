@@ -21,9 +21,11 @@ const Home: NextPage = () => {
 
   const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
+  const [searchErrorMessage, setSearchErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
   const [searchClientEmail, setSearchClientEmail] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
+  const [searchScheduleTimes, setSearchScheduleTimes] = React.useState<any[]>([]);
 
   async function handleSearchCompany(event:any){
     event.preventDefault();
@@ -50,10 +52,58 @@ const Home: NextPage = () => {
 
   async function handleSearchScheduleTime(event:any){
     event.preventDefault();
-    try {
-      
-    } catch (error) {
-      console.log(error);
+
+    const data = {
+      clientEmail: searchClientEmail,
+      date: date.format("YYYY-MM-DD"),
+    }
+
+    const validateEmail = (email:string) => {
+      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      return regexEmail.test(email)
+    };
+
+    const validations = {
+      emailIsValid:false,
+    }
+
+    if(!validateEmail(searchClientEmail)){
+      validations.emailIsValid = false;
+      setSearchErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Email inválido");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Email inválido"]);
+      })
+    }else{
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Email inválido");
+      if(index >= 0)
+      setSearchErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+    if(validations.emailIsValid){
+      try {
+        const url = "api/companies/scheduleTimes/search";
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data)
+        });
+        const json = await response.json();
+        if(response.status == 200){    
+          setSearchScheduleTimes(json.scheduleTimes);
+        }else{
+          setSearchErrorMessage(json.error)
+          console.log(json.error);       
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
