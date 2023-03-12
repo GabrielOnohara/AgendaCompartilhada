@@ -24,9 +24,13 @@ export default async function handler(
               date: new Date(jsonData.date),
             }
           })
-
+          const company = await prisma.company.findUnique({
+            where: {
+              id: scheduleTimes.at(0)?.companyId,
+            }
+          })
           if(scheduleTimes.length>0){
-            res.status(200).json({scheduleTimes})
+            res.status(200).json({scheduleTimes, company})
           }else{
             res.status(400).json({error: 'Nenhum horário encontrado'})
           }
