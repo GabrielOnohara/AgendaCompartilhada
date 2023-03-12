@@ -14,14 +14,14 @@ export default async function handler(
       try{
         const client = await prisma.client.findUnique({
           where: {
-            email: jsonData.email,
+            email: jsonData.clientEmail,
           }
         })
         if(client){
           const scheduleTimes = await prisma.scheduleTime.findMany({
             where:{
               clientId: client.id,
-              date: jsonData.date,
+              date: new Date(jsonData.date),
             }
           })
 
