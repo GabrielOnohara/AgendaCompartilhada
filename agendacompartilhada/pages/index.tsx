@@ -22,6 +22,7 @@ const Home: NextPage = () => {
   const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
+  const [searchClientEmail, setSearchClientEmail] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
 
   async function handleSearchCompany(event:any){
@@ -44,6 +45,15 @@ const Home: NextPage = () => {
       }
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  async function handleSearchScheduleTime(event:any){
+    event.preventDefault();
+    try {
+      
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -138,11 +148,8 @@ const Home: NextPage = () => {
                 <Form.Group className="mb-3">
                   <Form.Label className="darkBlueText"><b>Digite seu email</b></Form.Label>
                   <Row  xs={12} md={12} sm={12}>
-                    <Col xs={12} md={9} sm={12} >
-                      <Form.Control type="text" placeholder="Digite seu email" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
-                    </Col>
-                    <Col xs={12} md={12} sm={12} >
-
+                    <Col xs={8} md={8} sm={8} >
+                      <Form.Control type="text" placeholder="Digite seu email" value={searchClientEmail} onChange={({ target }) => setSearchClientEmail(target.value)}/>
                     </Col>
                   </Row>
                 </Form.Group>
@@ -160,7 +167,7 @@ const Home: NextPage = () => {
                     />
                   </LocalizationProvider>
                 </Form.Group>
-                <Button variant="success mt-2"  >Confirmar</Button>
+                <Button variant="success mt-2" onClick={() => handleSearchScheduleTime}>Confirmar</Button>
               </Form>
             </Col>
             <Col md={6}>
@@ -170,8 +177,9 @@ const Home: NextPage = () => {
                     <Card.Body>
                       <Row xs={12} md={12}>
                         <Col  xs={12} sm={8} md={10}>
-                          <Card.Title className="darkBlueText  mt-2 mb-3">Horário 1</Card.Title>
+                          <Card.Title className="darkBlueText  mt-2 mb-3">Horário</Card.Title>
                           <Card.Text style={{float: "left",}}>
+                            <p className="mb-2"><span className={`darkBlueText`}>Empresa:</span> Empresa</p>
                             <p className="mb-2"><span className={`darkBlueText`}>Data:</span> 11/03/2023</p>
                             <p className="mb-2"><span className={`darkBlueText`}>Horário:</span> 8:00 </p>
                             <p><span className={`darkBlueText`}>Endereço</span> Rua das amélias 999, Guarulhos-SP </p>
