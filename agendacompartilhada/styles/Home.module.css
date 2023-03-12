@@ -39,3 +39,7 @@
 .searchForm:focus {
   border: 0px solid transparent;
 }
+
+.datePicker div{
+  background-color: #fff;
+}
