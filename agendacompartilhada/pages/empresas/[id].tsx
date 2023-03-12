@@ -235,8 +235,8 @@ const Company: NextPage = () => {
 
     function updateIntervals(calendar:any, scheduleTimes:any[]){
     
-    const [startHour, startMinute] = calendar?.startTime?.split(":");
-    const [finishHour, finishtMinute] = calendar?.finishTime?.split(":");
+    const [startHour, startMinute] = calendar?.startTime.split(":");
+    const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
     const intervalTime = calendar.intervalTime;
     let hour  = parseInt(finishHour) - parseInt(startHour);
     let minute = parseInt(finishtMinute) - parseInt(startMinute);;
@@ -317,7 +317,7 @@ const Company: NextPage = () => {
       const initialDateFormatted = date.subtract(1,'day').format('YYYY-MM-DD');
       const endDateFormatted = date.add(5,'day').format('YYYY-MM-DD');
       getScheduleTimeNextFiveDaysByDate(initialDateFormatted, endDateFormatted, parseInt(id)).then((scheduleTimesList)=>{
-        if(!intervalsAreUpdated){
+        if(!intervalsAreUpdated && calendar.hasOwnProperty('startTime')){
           updateIntervals(calendar,scheduleTimesList);
         }  
     })
