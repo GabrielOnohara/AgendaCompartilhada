@@ -25,7 +25,7 @@ export default async function handler(
             }
           })
 
-          if(scheduleTimes){
+          if(scheduleTimes.length>0){
             res.status(200).json({scheduleTimes})
           }else{
             res.status(400).json({error: 'Nenhum horário encontrado'})
