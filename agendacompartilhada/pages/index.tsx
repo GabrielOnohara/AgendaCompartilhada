@@ -12,12 +12,17 @@ import { Card,Row,Col, } from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { useRouter } from "next/router";
-
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import TextField from '@mui/material/TextField';
+import dayjs, { Dayjs } from 'dayjs';
 const Home: NextPage = () => {
 
   const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchValue, setSearchValue] = React.useState<string>("");
+  const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
 
   async function handleSearchCompany(event:any){
     event.preventDefault();
@@ -91,7 +96,7 @@ const Home: NextPage = () => {
               <Form.Label className="darkBlueText mb-3"><h2>Pesquisar empresa</h2></Form.Label>
               <Row  xs={12} md={12} sm={12}>
                 <Col xs={8} md={10} sm={9} >
-                  <Form.Control type="text" placeholder="Digite o nome" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
+                  <Form.Control type="text" placeholder="Digite o nome da empresa" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
                 </Col>
                 <Col xs={4} md={2} sm={3} >
                   <Button style={{float:"right",}} variant="primary" className="ms-auto" onClick={handleSearchCompany}>Buscar</Button>
@@ -126,6 +131,35 @@ const Home: NextPage = () => {
           ))}
           </Row>
           <hr />
+          <h2 className="darkBlueText my-3">Consulte seus horários</h2>
+          <Form >
+            <Form.Group className="mb-3">
+              <Form.Label className="darkBlueText"><b>Digite seu email</b></Form.Label>
+              <Row  xs={12} md={12} sm={12}>
+                <Col xs={12} md={6} sm={12} >
+                  <Form.Control type="text" placeholder="Digite seu email" value={searchValue} onChange={({ target }) => setSearchValue(target.value)}/>
+                </Col>
+                <Col xs={12} md={12} sm={12} >
+
+                </Col>
+              </Row>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="darkBlueText" style={{display:"block"}}><b>Selecione a data</b> </Form.Label>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={date}
+                  onChange={(newValue) => {    
+                    setDate(dayjs(newValue));
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                  inputFormat="DD/MM/YYYY"
+                  className={styles.datePicker}
+                />
+              </LocalizationProvider>
+            </Form.Group>
+            <Button variant="success"  >Confirmar</Button>
+          </Form>
           {/* <h2 className="darkBlueText mt-4 mb-3">Empresas recentes</h2>
           <Card style={{border: "1px solid #034078"}}>
             <Card.Body>
