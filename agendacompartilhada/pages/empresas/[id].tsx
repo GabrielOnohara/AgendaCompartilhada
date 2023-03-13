@@ -235,8 +235,8 @@ const Company: NextPage = () => {
 
     function updateIntervals(calendar:any, scheduleTimes:any[]){
     
-    const [startHour, startMinute] = calendar?.startTime?.split(":");
-    const [finishHour, finishtMinute] = calendar?.finishTime?.split(":");
+    const [startHour, startMinute] = calendar?.startTime.split(":");
+    const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
     const intervalTime = calendar.intervalTime;
     let hour  = parseInt(finishHour) - parseInt(startHour);
     let minute = parseInt(finishtMinute) - parseInt(startMinute);;
@@ -317,51 +317,14 @@ const Company: NextPage = () => {
       const initialDateFormatted = date.subtract(1,'day').format('YYYY-MM-DD');
       const endDateFormatted = date.add(5,'day').format('YYYY-MM-DD');
       getScheduleTimeNextFiveDaysByDate(initialDateFormatted, endDateFormatted, parseInt(id)).then((scheduleTimesList)=>{
-        if(!intervalsAreUpdated){
+        if(!intervalsAreUpdated && calendar.hasOwnProperty('startTime')){
           updateIntervals(calendar,scheduleTimesList);
         }  
     })
     }
 
   },[id,path,date,calendar,intervalsAreUpdated]);
-     // if(searchedScheduleTimes){
-        //   let sheduleDaysGroupByData:any = {};
-        //   for (let index = 0; index < 5; index++) {
-        //     sheduleDaysGroupByData[date.add(index,'day').format("DD-MM-YYYY")] = calculateIntervals(calendar);
-        //   }
-        //   scheduleTimes.forEach(scheduleTime => {
-        //     const key = dayjs(scheduleTime.date).format('DD-MM-YYYY');
-        //     if(sheduleDaysGroupByData[key].includes(scheduleTime.time)){
-        //       const timeIndex = sheduleDaysGroupByData[key].indexOf(scheduleTime.time);
-        //       sheduleDaysGroupByData[key].splice(timeIndex,1);
-        //     }
-        //   });
-      
-        //   setSchedulesGroupByDay(sheduleDaysGroupByData);    
-        // }
-    // function updatingScheduleIntervals(){
-    //   let sheduleDaysGroupByData:any = {};
-    //   for (let index = 0; index < 5; index++) {
-    //     sheduleDaysGroupByData[date.add(index,'day').format("DD-MM-YYYY")] = intervalTimes;
-    //   }
-    //   scheduleTimes.forEach(scheduleTime => {
-    //     const key = dayjs(scheduleTime.date).format('DD-MM-YYYY');
-    //     if(sheduleDaysGroupByData[key].includes(scheduleTime.time)){
-    //       const timeIndex = sheduleDaysGroupByData[key].indexOf(scheduleTime.time);
-    //       sheduleDaysGroupByData[key].splice(timeIndex,1);
-    //     }
-    //   });
-      
-    //   setSchedulesGroupByDay(sheduleDaysGroupByData); 
-         
-    // } 
   
-  React.useEffect(()=>{
-    
-    if(searchedScheduleTimes){
-
-    }
-  },[searchedScheduleTimes,date,])
   return (
     <div>
       <Head>
