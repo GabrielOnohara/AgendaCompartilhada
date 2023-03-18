@@ -32,7 +32,7 @@ const Home: NextPage = () => {
   const [showMessageModal, setShowMessageModal] = React.useState(false);
   const [messageContent, setMessageContent] = React.useState<string>("");
   const [messageIdSelected, setMessageIdSelected] = React.useState<Number>(0);
-  const [messageSent, setMessageSent] = React.useState<any>({});
+  const [messageSent, setMessageSent] = React.useState({});
 
   const handleCloseModal =() => {
     setShowMessageModal(false);
@@ -45,7 +45,11 @@ const Home: NextPage = () => {
   }
 
   const handleCloseModaAfterCreated = () => {
-
+    setShowMessageModal(false);
+    setMessageSent({})
+    setAdviseErrorMessage([]);
+    setMessageIdSelected(0);
+    setMessageContent("")
   }
     
   async function handleSearchCompany(event:any){
@@ -158,7 +162,7 @@ const Home: NextPage = () => {
 
     if(messageContent.length <= 0){
       validations.message = false;
-      setSearchErrorMessage((oldValue) => {
+      setAdviseErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Mensagem Inválida");
         if(index >= 0){
           oldValue.splice(index, 1);
@@ -169,15 +173,14 @@ const Home: NextPage = () => {
       validations.message = true;
       const index = errorMessage.indexOf("Mensagem Inválida");
       if(index >= 0)
-      setSearchErrorMessage((oldValue) => {
+      setAdviseErrorMessage((oldValue) => {
         return oldValue.splice(index, 1);
       })
     }
 
-
     if(validations.message){
       try {
-        const url = "api/scheduleTimes/message/create";
+        const url = "api/companies/scheduleTimes/message/create";
         const response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -188,10 +191,10 @@ const Home: NextPage = () => {
         const json = await response.json();
         if(response.status == 200){
           setMessageSent(json.message);
-          setErrorMessage((value) => [])
+          setAdviseErrorMessage([])
         }else {
-          setCompanies([]);
-          setErrorMessage([json.error])
+          setMessageSent({});
+          setAdviseErrorMessage([json.error])
         }
       } catch (error) {
         console.log(error)
@@ -250,15 +253,22 @@ const Home: NextPage = () => {
             <Form>
               <Row>
                 <Col>
-                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
-                    <Form.Label>Mensagem</Form.Label>
-                    <Form.Control
-                      className="bg-white"
-                      value={messageContent}
-                      onChange={({ target }) => setMessageContent(target.value)}
-                      as="textarea" rows={3} 
-                    />
-                  </Form.Group>
+                {
+                messageSent.hasOwnProperty("id")?
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                  <Form.Label className="text-success mt-2"><b>Mensagem enviada com sucesso</b></Form.Label>
+                </Form.Group>
+                :
+                <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                  <Form.Label>Mensagem</Form.Label>
+                  <Form.Control
+                    className="bg-white"
+                    value={messageContent}
+                    onChange={({ target }) => setMessageContent(target.value)}
+                    as="textarea" rows={3} 
+                  />
+                </Form.Group>
+                }
                 </Col>
               </Row>
             </Form>

@@ -21,7 +21,7 @@ export default async function handler(
         });
         if (message) {
           res.statusMessage = "Mensagem enviada com sucesso";
-          res.status(200).json(message)
+          res.status(200).json({message})
         } else {
           res.statusMessage = "Erro ao mandar mensagem";
           res.status(400).json({error: "Erro ao mandar mensagem"});
