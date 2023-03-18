@@ -24,6 +24,7 @@ const Home: NextPage = () => {
   const [companies, setCompanies] = React.useState<any[]>([])
   const [errorMessage, setErrorMessage] = React.useState<string[]>(["Pesquise o nome da empresa"]);
   const [searchErrorMessage, setSearchErrorMessage] = React.useState<string[]>(["Consulte seu horário"]);
+  const [adviseErrorMessage, setAdviseErrorMessage] = React.useState<string[]>([]);
   const [searchValue, setSearchValue] = React.useState<string>("");
   const [searchClientEmail, setSearchClientEmail] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
@@ -151,8 +152,51 @@ const Home: NextPage = () => {
       scheduleTimeId: messageIdSelected
     }
 
-    console.log(data);
-    
+    const validations = {
+      message:false,
+    }
+
+    if(messageContent.length <= 0){
+      validations.message = false;
+      setSearchErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Mensagem Inválida");
+        if(index >= 0){
+          oldValue.splice(index, 1);
+        }
+        return ([...oldValue, "Mensagem Inválida"]);
+      })
+    }else{
+      validations.message = true;
+      const index = errorMessage.indexOf("Mensagem Inválida");
+      if(index >= 0)
+      setSearchErrorMessage((oldValue) => {
+        return oldValue.splice(index, 1);
+      })
+    }
+
+
+    if(validations.message){
+      try {
+        const url = "api/scheduleTimes/message/create";
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        const json = await response.json();
+        if(response.status == 200){
+          setMessageSent(json.message);
+          setErrorMessage((value) => [])
+        }else {
+          setCompanies([]);
+          setErrorMessage([json.error])
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
 
   const router = useRouter();
