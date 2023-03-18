@@ -246,8 +246,11 @@ const Home: NextPage = () => {
                       <Card key={index}>
                         <Card.Body>
                           <Row xs={12} md={12}>
-                            <Col  xs={12} sm={8} md={10}>
-                              <Card.Title className="darkBlueText  mt-2 mb-3">Horário {index+1}</Card.Title>
+                            <Col  xs={12} sm={12} md={12}>
+                              <div className="apply-space-between">
+                                <Card.Title className="darkBlueText  mt-2 mb-3">Horário {index+1}</Card.Title>
+                                <Button variant="primary mt-2" onClick={handleSearchScheduleTime}>Avisar</Button>
+                              </div>
                               <Card.Text className="mb-2">
                                 <span className={`darkBlueText`}>Empresa:</span> {scheduleTime.company.name}
                               </Card.Text>
