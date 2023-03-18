@@ -26,8 +26,6 @@ const Home: NextPage = () => {
   const [searchClientEmail, setSearchClientEmail] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [searchScheduleTimes, setSearchScheduleTimes] = React.useState<any[]>([]); 
-  const [searchCompany, setSearchCompany] = React.useState<any[]>([]); 
-  const [searchCompanyIds, setSearchCompanyIds] = React.useState<any[]>([]); 
 
   async function handleSearchCompany(event:any){
     event.preventDefault();
