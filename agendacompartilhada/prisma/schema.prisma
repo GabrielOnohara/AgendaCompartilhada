@@ -79,6 +79,7 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   content  String
+  readed Boolean @default(false)
   scheduleTimeId Int
   scheduleTime ScheduleTime @relation(fields: [scheduleTimeId], references: [id])
 }
