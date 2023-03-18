@@ -17,6 +17,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from '@mui/material/TextField';
 import dayjs, { Dayjs } from 'dayjs';
+import Modal from 'react-bootstrap/Modal';
+
 const Home: NextPage = () => {
 
   const [companies, setCompanies] = React.useState<any[]>([])
@@ -26,7 +28,25 @@ const Home: NextPage = () => {
   const [searchClientEmail, setSearchClientEmail] = React.useState<string>("");
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
   const [searchScheduleTimes, setSearchScheduleTimes] = React.useState<any[]>([]); 
+  const [showMessageModal, setShowMessageModal] = React.useState(false);
+  const [messageContent, setMessageContent] = React.useState<string>("");
+  const [messageIdSelected, setMessageIdSelected] = React.useState<Number>(0);
+  const [messageSent, setMessageSent] = React.useState<any>({});
 
+  const handleCloseModal =() => {
+    setShowMessageModal(false);
+    setMessageContent("");
+  }
+
+  const handleModalConfirm = (id:Number) => {
+    setShowMessageModal(true);
+    setMessageIdSelected(id);
+  }
+
+  const handleCloseModaAfterCreated = () => {
+
+  }
+    
   async function handleSearchCompany(event:any){
     event.preventDefault();
 
@@ -123,6 +143,18 @@ const Home: NextPage = () => {
     }
   }
 
+  async function handleConfirmMessage(event:any){
+    event.preventDefault();
+
+    const data ={
+      message: messageContent,
+      scheduleTimeId: messageIdSelected
+    }
+
+    console.log(data);
+    
+  }
+
   const router = useRouter();
   function redirectToCompanyPage(id:Number){
     router.push(`/empresas/${id}`);
@@ -166,6 +198,48 @@ const Home: NextPage = () => {
         </Container>
       </Navbar>
       <main className={styles.mainContainer}>
+      <Modal show={showMessageModal} onHide={handleCloseModal} style={{color: "#034078", fontWeight: "bold"}}>
+          <Modal.Header closeButton >
+            <Modal.Title>Adicione uma observação</Modal.Title>
+          </Modal.Header>
+          <Modal.Body >
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                    <Form.Label>Mensagem</Form.Label>
+                    <Form.Control
+                      className="bg-white"
+                      value={messageContent}
+                      onChange={({ target }) => setMessageContent(target.value)}
+                      as="textarea" rows={3} 
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer >
+          {
+            messageSent.hasOwnProperty("id")
+            ?
+            <div>
+              <Button variant="danger" onClick={handleCloseModaAfterCreated}>
+                Fechar
+              </Button>
+            </div>
+            :
+            <div>
+              <Button variant="danger" onClick={handleCloseModal}>
+                Cancelar
+              </Button>
+              <Button variant="success" onClick={handleConfirmMessage}>
+                Confirmar
+              </Button>
+            </div>
+          }
+          </Modal.Footer>
+        </Modal>
         <Container>
           <Form onSubmit={handleSearchCompany}>
             <Form.Group className="mb-3">
@@ -247,7 +321,7 @@ const Home: NextPage = () => {
                             <Col  xs={12} sm={12} md={12}>
                               <div className="apply-space-between">
                                 <Card.Title className="darkBlueText  mt-2 mb-3">Horário {index+1}</Card.Title>
-                                <Button variant="primary mt-2" onClick={handleSearchScheduleTime}>Avisar</Button>
+                                <Button variant="primary mt-2" onClick={() => handleModalConfirm(scheduleTime.id)}>Avisar</Button>
                               </div>
                               <Card.Text className="mb-2">
                                 <span className={`darkBlueText`}>Empresa:</span> {scheduleTime.company.name}
