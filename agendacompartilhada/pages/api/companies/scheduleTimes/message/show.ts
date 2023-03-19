@@ -1,7 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next'
-const jwt = require('jsonwebtoken');
 
 export default async function handler(
   req: NextApiRequest,
@@ -27,12 +26,12 @@ export default async function handler(
           });
           if(scheduleTimes.length > 0){
             let scheduleTimeIds = scheduleTimes.map(scheduleTime => scheduleTime.id)
-            let messages = await prisma.message.findMany(({
+            let messages = await prisma.message.findMany({
               where:{
                 scheduleTimeId: {in: scheduleTimeIds},
                 readed: false,
               }
-            }));
+            });
             if(messages.length > 0){
               res.status(200).json({messages});
             }else{

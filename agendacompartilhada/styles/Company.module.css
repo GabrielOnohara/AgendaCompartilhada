@@ -19,7 +19,7 @@
 }
 
 .mainContainer {
-  width: calc(100vw - 15px);
+  width: calc(100vw);
   min-height: 100vh;
   padding: 150px 100px;
   background-color: #E3E5F7;
