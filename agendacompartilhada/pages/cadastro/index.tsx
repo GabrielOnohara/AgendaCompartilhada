@@ -7,38 +7,38 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
-var bcrypt = require('bcryptjs');
+var bcrypt = require("bcryptjs");
 
 const RegisterPage: NextPage = () => {
-  
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] = React.useState(false);
-  const {token, setToken} = React.useContext(TokenContext)
-  const {company, setCompany} = React.useContext(CompanyContext)
+  const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] =
+    React.useState(false);
+  const { token, setToken } = React.useContext(TokenContext);
+  const { company, setCompany } = React.useContext(CompanyContext);
   const router = useRouter();
 
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
   }
 
-  async function onSubmitHandler(e:any){
+  async function onSubmitHandler(e: any) {
     e.preventDefault();
 
     const validations = {
       emailIsValid: false,
       passwordLengthIsValid: false,
       passwordsMatches: false,
-      privacyPoliticIsAccepted: false
-    }
+      privacyPoliticIsAccepted: false,
+    };
 
-    const validateEmail = (email:string) => {
+    const validateEmail = (email: string) => {
       var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email)
+      return regexEmail.test(email);
     };
 
     let data = {
@@ -46,81 +46,97 @@ const RegisterPage: NextPage = () => {
       password: password,
       name: name,
       phone: telefone,
-    }
+    };
 
-    if(password != passwordConfirmation){
-      validations.passwordsMatches= false;
+    if (password != passwordConfirmation) {
+      validations.passwordsMatches = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Senhas não se correspondem");
-        if(index >= 0){
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "Senhas não se correspondem"]);
-      })
-    }else{
-      validations.passwordsMatches= true;
+        return [...oldValue, "Senhas não se correspondem"];
+      });
+    } else {
+      validations.passwordsMatches = true;
       const index = errorMessage.indexOf("Senhas não se correspondem");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
 
-    if(password.length <= 5){
+    if (password.length <= 5) {
       validations.passwordLengthIsValid = false;
       setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Senhas devem ter pelo menos seis dígitos");
-        if(index >= 0){
+        const index = oldValue.indexOf(
+          "Senhas devem ter pelo menos seis dígitos"
+        );
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "Senhas devem ter pelo menos seis dígitos"]);
-      })
-    }else{
+        return [...oldValue, "Senhas devem ter pelo menos seis dígitos"];
+      });
+    } else {
       validations.passwordLengthIsValid = true;
-      const index = errorMessage.indexOf("Senhas devem ter pelo menos seis dígitos");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      const index = errorMessage.indexOf(
+        "Senhas devem ter pelo menos seis dígitos"
+      );
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
 
-    if(!validateEmail(email)){
+    if (!validateEmail(email)) {
       validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Email inválido");
-        if(index >= 0){
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "Email inválido"]);
-      })
-    }else{
+        return [...oldValue, "Email inválido"];
+      });
+    } else {
       validations.emailIsValid = true;
       const index = errorMessage.indexOf("Email inválido");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
 
-    if(!acceptPrivacyPolitics){
+    if (!acceptPrivacyPolitics) {
       validations.privacyPoliticIsAccepted = false;
       setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("É necessário aceitar a nossa política de privacidade");
-        if(index >= 0){
+        const index = oldValue.indexOf(
+          "É necessário aceitar a nossa política de privacidade"
+        );
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "É necessário aceitar a nossa política de privacidade"])
-      })
-    }else{
+        return [
+          ...oldValue,
+          "É necessário aceitar a nossa política de privacidade",
+        ];
+      });
+    } else {
       validations.privacyPoliticIsAccepted = true;
-      const index = errorMessage.indexOf("É necessário aceitar a nossa política de privacidade");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      const index = errorMessage.indexOf(
+        "É necessário aceitar a nossa política de privacidade"
+      );
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
-    
-    if(validations.emailIsValid && validations.passwordsMatches && validations.passwordLengthIsValid && validations.privacyPoliticIsAccepted){
+
+    if (
+      validations.emailIsValid &&
+      validations.passwordsMatches &&
+      validations.passwordLengthIsValid &&
+      validations.privacyPoliticIsAccepted
+    ) {
       var salt = bcrypt.genSaltSync(10);
       var hash = bcrypt.hashSync(data.password, salt);
       data.password = hash;
@@ -129,28 +145,24 @@ const RegisterPage: NextPage = () => {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(data),
         });
-          if(response.ok){
-            const json = await response.json();
-          
-          window.localStorage.setItem(
-            "token",
-            json.token,
-          );
-          setToken(json.token)
-          setCompany(json.newCompany)
-          router.push("/empresa")
-        }else{
-          setErrorMessage([response.statusText])
+        if (response.ok) {
+          const json = await response.json();
+
+          window.localStorage.setItem("token", json.token);
+          setToken(json.token);
+          setCompany(json.newCompany);
+          router.push("/empresa");
+        } else {
+          setErrorMessage([response.statusText]);
         }
       } catch (error) {
-        throw error
+        throw error;
       }
     }
-    
   }
 
   return (
@@ -265,8 +277,13 @@ const RegisterPage: NextPage = () => {
               />
               <p>Aceita a nossa política de privacidade</p>
             </div>
-            {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
-            <div className="centerHorizontal">   
+            {errorMessage &&
+              errorMessage.map((errorMessage, index) => (
+                <p key={index} className={styles.errorMessage}>
+                  {errorMessage}
+                </p>
+              ))}
+            <div className="centerHorizontal">
               <button
                 className="btnDarkBlue"
                 type="submit"
