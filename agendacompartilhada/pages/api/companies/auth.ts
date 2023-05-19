@@ -1,65 +1,69 @@
-import { PrismaClient } from '@prisma/client';
-import type { NextApiRequest, NextApiResponse } from 'next'
-var bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import { PrismaClient } from "@prisma/client";
+import type { NextApiRequest, NextApiResponse } from "next";
+var bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const data =  req.body;
+  const data = req.body;
   const prisma = new PrismaClient();
-  await prisma.$connect()
-  switch(req.method){
+  await prisma.$connect();
+  switch (req.method) {
     case "POST":
       try {
         const company = await prisma.company.findFirst({
           where: {
             email: data.email,
-          }
+          },
         });
-        if(company){
-          var passwordsMatch = bcrypt.compareSync(data.password, company.password); 
-          if(passwordsMatch){
-            const token = jwt.sign({company}, process.env.JWT_KEY, {expiresIn: 60*60});
+        if (company) {
+          var passwordsMatch = bcrypt.compareSync(
+            data.password,
+            company.password
+          );
+          if (passwordsMatch) {
+            const token = jwt.sign({ company }, process.env.JWT_KEY, {
+              expiresIn: 60 * 60,
+            });
             res.statusMessage = "Login efetuado com sucesso";
-            res.status(200).json({token, company });
-          }else{
+            res.status(200).json({ token, company });
+          } else {
             res.statusMessage = "Senha inválida";
             res.status(400);
           }
-        }else{
+        } else {
           res.statusMessage = "Email inválido";
           res.status(400);
         }
       } catch (error) {
         res.statusMessage = "Não foi possível efetuar login";
-        res.status(400).json({ error: error});
+        res.status(400).json({ error: error });
       } finally {
         res.end();
-        await prisma.$disconnect()
+        await prisma.$disconnect();
       }
       break;
     default:
       try {
         const company = await prisma.company.findFirst({
           where: {
-            email: data.email
-          }
+            email: data.email,
+          },
         });
-        if(company){
+        if (company) {
           res.status(200).json({ company });
-        }else{
+        } else {
           res.statusMessage = "Usuário não encontrado";
           res.status(400);
         }
-      }catch(error){
-        res.status(400).json({ error:error });
-      }finally{
+      } catch (error) {
+        res.status(400).json({ error: error });
+      } finally {
         res.end();
-        await prisma.$disconnect()
+        await prisma.$disconnect();
       }
       break;
   }
-
 }

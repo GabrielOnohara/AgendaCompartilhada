@@ -6,14 +6,14 @@ interface CurrentUserContextType {
 
 export const UserContext = React.createContext<any>(undefined);
 
-const UserStorage = (props:any) => {
+const UserStorage = (props: any) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
 
   return (
-    <UserContext.Provider value={{loggedIn, setLoggedIn}}>
+    <UserContext.Provider value={{ loggedIn, setLoggedIn }}>
       {props.children}
     </UserContext.Provider>
   );
-}
+};
 
 export default UserStorage;

@@ -6,23 +6,21 @@ import logo from "../../public/calendario.png";
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {TokenContext} from "../../src/context/TokenContext";
-import {CompanyContext} from "../../src/context/CompanyContext";
+import { TokenContext } from "../../src/context/TokenContext";
+import { CompanyContext } from "../../src/context/CompanyContext";
 
-const Home: NextPage = () => {  
-
+const Home: NextPage = () => {
   const [remindeMe, setRemindeMe] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  const {token, setToken} = React.useContext(TokenContext)
-  const {company, setCompany} = React.useContext(CompanyContext)
+  const { token, setToken } = React.useContext(TokenContext);
+  const { company, setCompany } = React.useContext(CompanyContext);
   const router = useRouter();
   const [autoLogin, setAutologin] = React.useState(false);
 
   React.useEffect(() => {
-    const lastMaintainChecked =
-    window.localStorage.getItem("remindeMe");
+    const lastMaintainChecked = window.localStorage.getItem("remindeMe");
     if (lastMaintainChecked === "true") {
       const lastEmail = window.localStorage.getItem("email");
       setEmail(lastEmail ?? "");
@@ -30,104 +28,98 @@ const Home: NextPage = () => {
     }
   }, []);
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     if (token) {
       setAutologin(true);
-      try{
-        setTimeout(()=>{
+      try {
+        setTimeout(() => {
           router.push("/empresa");
         }, 3000);
-      }finally{
+      } finally {
         setAutologin(false);
       }
     } else {
       setAutologin(false);
     }
-  },[router,token])
+  }, [router, token]);
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
   }
 
-  async function onSubmitHandler(e:any){
+  async function onSubmitHandler(e: any) {
     e.preventDefault();
-    
+
     const validations = {
       emailIsValid: false,
       passwordIsValid: false,
-    }
+    };
 
     let data = {
       email: email,
       password: password,
-    }
-    
-    if(email.trim().length == 0) {
+    };
+
+    if (email.trim().length == 0) {
       validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Insira um email");
-        if(index >= 0){
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "Insira um email"]);
-      })
-    }else{
+        return [...oldValue, "Insira um email"];
+      });
+    } else {
       validations.emailIsValid = true;
       const index = errorMessage.indexOf("Insira um email");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
-    
-    if(password.trim().length == 0) {
+
+    if (password.trim().length == 0) {
       validations.passwordIsValid = false;
       setErrorMessage((oldValue) => {
         const index = oldValue.indexOf("Insira uma senha");
-        if(index >= 0){
+        if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return ([...oldValue, "Insira uma senha"]);
-      })
-    }else{
+        return [...oldValue, "Insira uma senha"];
+      });
+    } else {
       validations.passwordIsValid = true;
       const index = errorMessage.indexOf("Insira uma senha");
-      if(index >= 0)
-      setErrorMessage((oldValue) => {
-        return oldValue.splice(index, 1);
-      })
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
     }
-    
-    if(validations.emailIsValid && validations.passwordIsValid){
+
+    if (validations.emailIsValid && validations.passwordIsValid) {
       const url = "api/companies/auth";
       try {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "Content-type": "application/json; charset=UTF-8"
+            "Content-type": "application/json; charset=UTF-8",
           },
           body: JSON.stringify(data),
         });
-        if(response.status == 200){
-          const {token, company} = await response.json();
-          window.localStorage.setItem(
-            "token",
-            token,
-          );
-          setToken(token)
-          setCompany(company)
-          router.push("/empresa")
-        }else {
-          setErrorMessage([response.statusText])
+        if (response.status == 200) {
+          const { token, company } = await response.json();
+          window.localStorage.setItem("token", token);
+          setToken(token);
+          setCompany(company);
+          router.push("/empresa");
+        } else {
+          setErrorMessage([response.statusText]);
         }
       } catch (error) {
         console.log(error);
       }
     }
-    window.localStorage.setItem(
-      "remindeMe",
-      remindeMe.toString()
-    );
+    window.localStorage.setItem("remindeMe", remindeMe.toString());
     window.localStorage.setItem("email", email);
   }
 
@@ -209,33 +201,33 @@ const Home: NextPage = () => {
               />
               <p>Lembrar de mim</p>
             </div>
-            {errorMessage && errorMessage.map((errorMessage, index) => <p key={index} className={styles.errorMessage}>{errorMessage}</p>)}
+            {errorMessage &&
+              errorMessage.map((errorMessage, index) => (
+                <p key={index} className={styles.errorMessage}>
+                  {errorMessage}
+                </p>
+              ))}
             <div className="centerHorizontal">
-              {autoLogin?
-                (
-                  <button
-                    className="btnDarkBlue"
-                    type="submit"
-                    disabled
-                  >
-                    Carregando...
-                  </button>
-                )
-               :(
-                  <button
-                    className="btnDarkBlue"
-                    type="submit"
-                    onClick={() => onSubmitHandler}
-                  >
-                    Confirmar
-                  </button>
-                )
-               }
-              
+              {autoLogin ? (
+                <button className="btnDarkBlue" type="submit" disabled>
+                  Carregando...
+                </button>
+              ) : (
+                <button
+                  className="btnDarkBlue"
+                  type="submit"
+                  onClick={() => onSubmitHandler}
+                >
+                  Confirmar
+                </button>
+              )}
             </div>
             <div className={styles.registerContainer}>
               <p>Não possui conta ainda?</p>
-              <Link href={{pathname: "/cadastro"}} className={`darkBlueText apply-no-underline`}>
+              <Link
+                href={{ pathname: "/cadastro" }}
+                className={`darkBlueText apply-no-underline`}
+              >
                 Criar Conta
               </Link>
             </div>
