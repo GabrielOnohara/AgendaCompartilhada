@@ -5,8 +5,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { nameSlug } = req.query;
-  const name = nameSlug?.at(0);
+  const { name } = req.query;
+  if (typeof name !== "string") {
+    return res.status(400).json("invalid name");
+  }
+
   const prisma = new PrismaClient();
   await prisma.$connect();
   switch (req.method) {
