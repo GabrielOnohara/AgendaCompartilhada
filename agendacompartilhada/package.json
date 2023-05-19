@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fmt": "npx prettier --write \"**/*.{ts,tsx,js,json}\" --ignore-path .gitignore"
   },
   "dependencies": {
     "@date-io/dayjs": "^2.16.0",
