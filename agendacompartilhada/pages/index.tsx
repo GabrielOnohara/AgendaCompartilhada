@@ -37,6 +37,11 @@ const Home: NextPage = () => {
   async function handleSearchCompany(event: any) {
     event.preventDefault();
 
+    if (searchValue == "") {
+      setErrorMessage(["Digite o nome da empresa no campo acima"]);
+      return;
+    }
+
     try {
       const url = "api/companies/searchByName/" + searchValue;
       const response = await fetch(url, {
