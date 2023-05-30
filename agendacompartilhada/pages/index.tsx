@@ -323,7 +323,7 @@ const Home: NextPage = () => {
                     <Col  xs={12} sm={8} md={10}>
                       <Card.Title className="darkBlueText  mt-2 mb-3">{company.name}</Card.Title>
                       <Card.Text style={{float: "left",}}>
-                        <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span> Rua das amélias 999, Guarulhos-SP {company.address}</p>
+                        <p className="mb-2"><span className={`darkBlueText`}>Endereço:</span>{company.address}</p>
                         <p className=""><span className={`darkBlueText`}>Telefone:</span> {company.phone}</p>
                       </Card.Text>
                       <Button style={{float:"right",}} variant="primary" className="ms-auto mt-3" onClick={() => redirectToCompanyPage(company.id)}>Acessar</Button>
