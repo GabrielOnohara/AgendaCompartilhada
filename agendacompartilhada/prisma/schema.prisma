@@ -70,4 +70,16 @@ model ScheduleTime {
   contribuitor Contribuitor @relation(fields: [contribuitorId], references: [id])
   companyId Int
   company Company @relation(fields:[companyId],references: [id])
+  messageId Int @default(0)
+  messages Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content  String
+  readed Boolean @default(false)
+  scheduleTimeId Int
+  scheduleTime ScheduleTime @relation(fields: [scheduleTimeId], references: [id])
 }

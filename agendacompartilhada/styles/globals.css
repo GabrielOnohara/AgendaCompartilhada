@@ -133,3 +133,8 @@ img {
 .darkBlueBg {
   background-color: #034078;
 }
+
+.apply-space-between{
+  display: flex;
+  justify-content: space-between;
+}

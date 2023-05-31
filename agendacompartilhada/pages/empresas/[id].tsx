@@ -189,7 +189,13 @@ const Company: NextPage = () => {
         if(response.status == 200){
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
-          setIntervalsAreUpdated(false);
+          let thereAreFreeTimes = await thereAreTimesAvaliable(scheduleTime);
+          if(thereAreFreeTimes){
+            setIntervalsAreUpdated(true);
+          }else{
+            setIntervalsAreUpdated(false);
+          }
+          
         }else {
           const json = await response.json();
           setErrorMessage([json.error]);
@@ -201,7 +207,40 @@ const Company: NextPage = () => {
       
   }
     
-  
+  const thereAreTimesAvaliable = async (scheduleTime:any) => {
+    let thereAreAvaliableTimes = false;
+    const data = {
+      companyId: company.id,
+      scheduleTime: {
+        date: dayjs(selectedScheduleDay).format('YYYY-MM-DD'),
+        time: selectedScheduleTime,
+      },
+    }
+    
+    try {
+      const url = path + "/api/companies/scheduleTimes/verifyIsFree";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(data),
+      });
+      if(response.status == 200){
+        const json = await response.json();
+        thereAreAvaliableTimes = json?.free
+      }else {
+        const json = await response.json();
+        setErrorMessage([json.error]);
+      }
+    } catch (error) {
+      console.log(error);
+      
+    } finally {
+      return thereAreAvaliableTimes
+    }
+    
+  }
 
   React.useEffect(()=>{
     async function getCompanyAndCalendarByID(id:Number){
@@ -235,54 +274,55 @@ const Company: NextPage = () => {
 
     function updateIntervals(calendar:any, scheduleTimes:any[]){
     
-    const [startHour, startMinute] = calendar?.startTime.split(":");
-    const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
-    const intervalTime = calendar.intervalTime;
-    let hour  = parseInt(finishHour) - parseInt(startHour);
-    let minute = parseInt(finishtMinute) - parseInt(startMinute);;
-    let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
-    let intervalTimesList:any[] = [];
-    for (let index = 0; index < totalMinutesDifference; index++) {
-      let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
-      let minuteAsNumber =  (index*intervalTime)%60;
-      let hourString;
-      let minuteString;
+      const [startHour, startMinute] = calendar?.startTime.split(":");
+      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
+      const intervalTime = calendar.intervalTime;
+      let hour  = parseInt(finishHour) - parseInt(startHour);
+      let minute = parseInt(finishtMinute) - parseInt(startMinute);;
+      let totalMinutesDifference = Math.floor(((hour*60) + minute)/(intervalTime));
+      let intervalTimesList:any[] = [];
+      for (let index = 0; index < totalMinutesDifference; index++) {
+        let hourAsNumber = parseInt(startHour) + Math.floor(index*intervalTime/60);
+        let minuteAsNumber =  (index*intervalTime)%60;
+        let hourString;
+        let minuteString;
 
-      if(hourAsNumber <= 9){
-        hourString = '0' + hourAsNumber.toString();
-      }else{
-        hourString = hourAsNumber.toString();
+        if(hourAsNumber <= 9){
+          hourString = '0' + hourAsNumber.toString();
+        }else{
+          hourString = hourAsNumber.toString();
+        }
+
+        if(minuteAsNumber <= 9){
+          minuteString = '0' + minuteAsNumber.toString();
+        }else{
+          minuteString = minuteAsNumber.toString();
+        }
+
+        let lastString = hourString + ':' + minuteString;
+        intervalTimesList[index] = lastString; 
       }
 
-      if(minuteAsNumber <= 9){
-        minuteString = '0' + minuteAsNumber.toString();
-      }else{
-        minuteString = minuteAsNumber.toString();
-      }
-
-      let lastString = hourString + ':' + minuteString;
-      intervalTimesList[index] = lastString; 
-    }
-
-    let weekIntervalTimesList:any = {};
-    
-    for (let index = 0; index < 5; index++) {
-      weekIntervalTimesList[date.add(index, 'day').format('DD-MM-YYYY')] = intervalTimesList;
-    }
-
-    scheduleTimes.map(scheduleTime => {
-      const dateAsKey = dayjs(new Date(scheduleTime.date)).add(1, 'day').format('DD-MM-YYYY'); //necessario adicionar 1 dia
+      let weekIntervalTimesList:any = {};
       
-      if(weekIntervalTimesList[dateAsKey].includes(scheduleTime.time) ){
-        weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[dateAsKey].filter(function(item:any){
-          return item != scheduleTime.time;
-        });
+      for (let index = 0; index < 5; index++) {
+        weekIntervalTimesList[date.add(index, 'day').format('DD-MM-YYYY')] = intervalTimesList;
       }
-    });
-    
-    setSchedulesGroupByDay(weekIntervalTimesList);
-    setIntervalsAreUpdated(true);
-  }
+
+      scheduleTimes.map(scheduleTime => {
+        const dateAsKey = dayjs(new Date(scheduleTime.date)).add(1, 'day').format('DD-MM-YYYY'); //necessario adicionar 1 dia
+        
+        if(weekIntervalTimesList[dateAsKey].includes(scheduleTime.time) ){
+          weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[dateAsKey].filter(function(item:any){
+            //preciso verificar se existe prestador disponível
+            return item != scheduleTime.time;
+          });
+        }
+      });
+      
+      setSchedulesGroupByDay(weekIntervalTimesList);
+      setIntervalsAreUpdated(true);
+    }
     
     async function getScheduleTimeNextFiveDaysByDate(initialDate:String, endDate:String, id:Number){
 

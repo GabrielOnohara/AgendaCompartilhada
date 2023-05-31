@@ -13,7 +13,6 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import styles from "../../styles/Company.module.css";
 var bcrypt = require('bcryptjs');
-import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -21,7 +20,7 @@ import TextField from '@mui/material/TextField';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
-
+import dayjs, { Dayjs } from 'dayjs';
 const Empresa: NextPage = () => {
 
   const router = useRouter();
@@ -420,6 +419,33 @@ const Empresa: NextPage = () => {
     }
   }
 
+  async function  refreshMessages(companyID:any) {
+    const data = {
+      date: dayjs(new Date()).format("YYYY-MM-DD"),
+      companyId: companyID,
+    }
+    try {
+      const url = "api/companies/scheduleTimes/message/show";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(data),
+      });
+      const json = await response.json();
+      if(response.status == 200){
+        console.log(json.messages);
+        setMessages((oldValue) => [json.messages, ...oldValue]);
+        setAdviseErrorMessage([])
+      }else {
+        setAdviseErrorMessage([json.error])
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   async function onSubmitCalendarModalConfirm(e:any) {
     e.preventDefault();
     switch (modalCalendarTitle) {
@@ -593,13 +619,15 @@ const Empresa: NextPage = () => {
   React.useEffect(()=>{
     switch (menuItemSelected) {
       case "resumo": 
-
+        if(company.id > 0){
+          refreshMessages(company.id)
+        }
         break;
       case "agenda":  
-        refreshCalendar(company.id).then(()=> setShowModalCalendar(false)) 
+        refreshCalendar(company.id).then(()=> setShowModalCalendar(false));
         break;
       case "equipe":  
-        refreshTeam(company.id).then(()=>setShowModal(false)) 
+        refreshTeam(company.id).then(()=>setShowModal(false)); 
         break;
       default:
         break;
@@ -610,6 +638,9 @@ const Empresa: NextPage = () => {
     refreshCalendar(company.id).then(()=> setShowModalCalendar(false))   
     refreshTeam(company.id).then(()=>setShowModal(false)) 
   },[company.id])
+
+  const [messages, setMessages] = React.useState<any[]>([]);
+  const [adviseErrorMessage, setAdviseErrorMessage] = React.useState<string[]>(['Sem avisos']);
 
   if(!token){
     return (
@@ -650,52 +681,6 @@ const Empresa: NextPage = () => {
           />
           <link rel="icon" href="/calendario.ico" />
         </Head>
-        {/* <nav className={`navbar navbar-dark navbar-exwpand-lg bg-body-tertiary ${styles.navbar}`} >
-          <div className={`container-fluid ${styles.applySpaceBetween}`}>
-            {company && <Link className={`navbar-brand ${styles.companyName} yellowText`} href="/empresa">{company.name}</Link>}
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHome" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarHome">
-              <ul className="navbar-nav mx-auto mb-2 mb-lg-2 mt-lg-2">
-                <li className="nav-item">
-                  <button
-                    className={`nav-link mx-2 ${menuItemSelected == "resumo" ?'active':''} ${styles.menuButton}`}
-                    type="button"
-                    onClick={companyMenuClick}
-                  >
-                    Resumo
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link mx-2  ${menuItemSelected == "agenda" ?'active':''} ${styles.menuButton}`}
-                    type="button"
-                    onClick={scheduleMenuClick}
-                  >
-                    Agenda
-                  </button>
-                </li>
-                <li className="nav-item">
-                  <button
-                    className={`nav-link mx-2  ${menuItemSelected == "equipe" ?'active':''} ${styles.menuButton}`}
-                    type="button"
-                    onClick={teamMenuClick}
-                  >
-                    Equipe
-                  </button>
-                </li>
-              </ul>
-              <button
-                className={`navbar-link ${styles.logoutButton} yellowText`}
-                type="button"
-                onClick={onSubmitLogoutHandler}
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </nav> */}
         <Navbar fixed="top" style={{backgroundColor: "#034078"}}  expand="lg" variant="dark">
           <Container fluid>
             <Navbar.Brand href="/empresa" style={{color: "#FACE54"}}>
@@ -798,10 +783,8 @@ const Empresa: NextPage = () => {
                         <Card >
                           <Card.Body>
                             <Card.Text>
-                              <div style={{display:"flex", justifyContent:"space-between"}}>
-                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Contribuidor:</span> Teste Completo</p>
-                                <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Data:</span> 01/01/2001</p>
-                              </div>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Contribuidor:</span> Teste Completo</p>
+                              <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Data:</span> 01/01/2001</p>
                               <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Cliente:</span> Adam</p>
                               <p className="mb-1"><span className="darkBlueText" style={{fontWeight:"bold"}} >Mensagem:</span><br /> Vou me atrasar 5 min, se tiver horario mais cedo por favor me avise</p>
                               <Button  variant="primary" className="mt-3 btn-sm" style={{float:"right"}} onClick={searchScheduleTimes} >Marcar como lida</Button>  
