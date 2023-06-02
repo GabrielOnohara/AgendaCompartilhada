@@ -20,15 +20,18 @@ import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
+import { Calendar, Company, Contribuitor, ScheduleTime } from "@prisma/client";
 
 const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
-  const [company, setCompany] = React.useState<any>({});
-  const [calendar, setCalendar] = React.useState<any>({});
-  const [scheduleTime, setScheduleTime] = React.useState<any>({});
-  const [contributors, setContributors] = React.useState<any[]>([]);
+  const [company, setCompany] = React.useState<Company | null>(null);
+  const [calendar, setCalendar] = React.useState<Calendar | null>(null);
+  const [scheduleTime, setScheduleTime] = React.useState<ScheduleTime | null>(
+    null
+  );
+  const [contributors, setContributors] = React.useState<Contribuitor[]>([]);
   const [searchedScheduleTimes, setSearchedScheduleTimes] =
     React.useState<boolean>(false);
   const [intervalsAreUpdated, setIntervalsAreUpdated] =
@@ -53,7 +56,7 @@ const CompanyPage: NextPage = () => {
 
   const handleCloseModal = () => {
     setShowModalScheduleTime(false);
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
@@ -65,7 +68,7 @@ const CompanyPage: NextPage = () => {
     setClientEmail("");
     setClientPhone("");
     setClientName("");
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
@@ -92,6 +95,16 @@ const CompanyPage: NextPage = () => {
         setErrorMessage((oldValue) => {
           return oldValue.splice(index, 1);
         });
+    }
+
+    if (company === null) {
+      showError("Erro Interno: compania não existe");
+      return;
+    }
+
+    if (calendar === null) {
+      showError("Erro Interno: calendário não existe");
+      return;
     }
 
     const validations = {
@@ -175,7 +188,7 @@ const CompanyPage: NextPage = () => {
         if (response.status == 200) {
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
-          let thereAreFreeTimes = await thereAreTimesAvaliable(scheduleTime);
+          let thereAreFreeTimes = await thereAreTimesAvaliable(company);
           if (thereAreFreeTimes) {
             setIntervalsAreUpdated(true);
           } else {
@@ -191,7 +204,7 @@ const CompanyPage: NextPage = () => {
     }
   };
 
-  const thereAreTimesAvaliable = async (scheduleTime: any) => {
+  const thereAreTimesAvaliable = async (company: Company) => {
     let thereAreAvaliableTimes = false;
     const data = {
       companyId: company.id,
@@ -239,7 +252,7 @@ const CompanyPage: NextPage = () => {
           setCalendar(calendar);
           setContributors(contributors);
         } else {
-          setCompany({});
+          setCompany(null);
         }
       } catch (error) {
         throw error;
@@ -300,7 +313,7 @@ const CompanyPage: NextPage = () => {
         if (weekIntervalTimesList[dateAsKey].includes(scheduleTime.time)) {
           weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[
             dateAsKey
-          ].filter(function (item: any) {
+          ].filter(function(item: any) {
             //preciso verificar se existe prestador disponível
             return item != scheduleTime.time;
           });
@@ -351,7 +364,7 @@ const CompanyPage: NextPage = () => {
         endDateFormatted,
         parseInt(id)
       ).then((scheduleTimesList) => {
-        if (!intervalsAreUpdated && calendar.hasOwnProperty("startTime")) {
+        if (!intervalsAreUpdated && calendar != null) {
           updateIntervals(calendar, scheduleTimesList);
         }
       });
@@ -403,7 +416,7 @@ const CompanyPage: NextPage = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      {company.hasOwnProperty("name") ? (
+      {company != null ? (
         <main className={styles.mainContainer}>
           <Modal
             show={showModalScheduleTime}
@@ -444,7 +457,7 @@ const CompanyPage: NextPage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-                {scheduleTime.hasOwnProperty("id") ? (
+                {scheduleTime != null ? (
                   <div>
                     <Form.Group
                       className="mb-3"
@@ -525,7 +538,7 @@ const CompanyPage: NextPage = () => {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              {scheduleTime.hasOwnProperty("id") ? (
+              {scheduleTime != null ? (
                 <div>
                   <Button
                     variant="danger"
