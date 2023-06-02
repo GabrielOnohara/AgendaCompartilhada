@@ -313,7 +313,7 @@ const CompanyPage: NextPage = () => {
         if (weekIntervalTimesList[dateAsKey].includes(scheduleTime.time)) {
           weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[
             dateAsKey
-          ].filter(function(item: any) {
+          ].filter(function (item: any) {
             //preciso verificar se existe prestador disponível
             return item != scheduleTime.time;
           });
@@ -356,20 +356,20 @@ const CompanyPage: NextPage = () => {
       }
     }
 
-    if (parseInt(id) > 0) {
+    if (company != null) {
       const initialDateFormatted = date.subtract(1, "day").format("YYYY-MM-DD");
       const endDateFormatted = date.add(5, "day").format("YYYY-MM-DD");
       getScheduleTimeNextFiveDaysByDate(
         initialDateFormatted,
         endDateFormatted,
-        parseInt(id)
+        company.id
       ).then((scheduleTimesList) => {
         if (!intervalsAreUpdated && calendar != null) {
           updateIntervals(calendar, scheduleTimesList);
         }
       });
     }
-  }, [id, path, date, calendar, intervalsAreUpdated]);
+  }, [path, company, date, calendar, intervalsAreUpdated]);
 
   return (
     <div>
