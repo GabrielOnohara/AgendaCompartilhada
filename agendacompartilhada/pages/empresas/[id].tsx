@@ -39,8 +39,7 @@ const CompanyPage: NextPage = () => {
 
   const router = useRouter();
   const path = router.basePath;
-  const queryId = router.query.id ?? "0";
-  const id = queryId as string;
+  const id = router.query.id as string | undefined;
   const [showModalScheduleTime, setShowModalScheduleTime] =
     React.useState(false);
   const [selectedScheduleTime, setSelectedScheduleTime] =
@@ -238,30 +237,31 @@ const CompanyPage: NextPage = () => {
   };
 
   React.useEffect(() => {
-    async function getCompanyAndCalendarByID(id: Number) {
+    async function getCompanyAndCalendarByID(id: string) {
+      var company = null;
       try {
-        const url = path + "/api/companies/searchById/" + id;
-        const response = await fetch(url, {
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        });
-        if (response.status == 200) {
-          const { newCompany, calendar, contributors } = await response.json();
-          setCompany(newCompany);
-          setCalendar(calendar);
-          setContributors(contributors);
-        } else {
-          setCompany(null);
+        if (parseInt(id) > 0) {
+          const url = path + "/api/companies/searchById/" + id;
+          const response = await fetch(url, {
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+          if (response.status == 200) {
+            const { newCompany, calendar, contributors } =
+              await response.json();
+            company = newCompany;
+            setCalendar(calendar);
+            setContributors(contributors);
+          }
         }
-      } catch (error) {
-        throw error;
+      } finally {
+        setCompany(company);
+        setViewIsReady(true);
       }
     }
 
-    if (parseInt(id) > 0) {
-      getCompanyAndCalendarByID(parseInt(id));
-    }
+    if (id) getCompanyAndCalendarByID(id);
   }, [id, path]);
 
   React.useEffect(() => {
