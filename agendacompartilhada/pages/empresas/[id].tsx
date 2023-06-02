@@ -20,15 +20,18 @@ import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
+import { Calendar, Company, Contribuitor, ScheduleTime } from "@prisma/client";
 
-const Company: NextPage = () => {
+const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
-  const [company, setCompany] = React.useState<any>({});
-  const [calendar, setCalendar] = React.useState<any>({});
-  const [scheduleTime, setScheduleTime] = React.useState<any>({});
-  const [contributors, setContributors] = React.useState<any[]>([]);
+  const [company, setCompany] = React.useState<Company | null>(null);
+  const [calendar, setCalendar] = React.useState<Calendar | null>(null);
+  const [scheduleTime, setScheduleTime] = React.useState<ScheduleTime | null>(
+    null
+  );
+  const [contributors, setContributors] = React.useState<Contribuitor[]>([]);
   const [searchedScheduleTimes, setSearchedScheduleTimes] =
     React.useState<boolean>(false);
   const [intervalsAreUpdated, setIntervalsAreUpdated] =
@@ -36,8 +39,7 @@ const Company: NextPage = () => {
 
   const router = useRouter();
   const path = router.basePath;
-  const queryId = router.query.id ?? "0";
-  const id = queryId as string;
+  const id = router.query.id as string | undefined;
   const [showModalScheduleTime, setShowModalScheduleTime] =
     React.useState(false);
   const [selectedScheduleTime, setSelectedScheduleTime] =
@@ -53,7 +55,7 @@ const Company: NextPage = () => {
 
   const handleCloseModal = () => {
     setShowModalScheduleTime(false);
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
@@ -65,7 +67,7 @@ const Company: NextPage = () => {
     setClientEmail("");
     setClientPhone("");
     setClientName("");
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
@@ -76,6 +78,34 @@ const Company: NextPage = () => {
   };
 
   const handleModalConfirm = async () => {
+    function showError(message: string) {
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf(message);
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, message];
+      });
+    }
+
+    function hideError(message: string) {
+      const index = errorMessage.indexOf(message);
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
+    if (company === null) {
+      showError("Erro Interno: compania não existe");
+      return;
+    }
+
+    if (calendar === null) {
+      showError("Erro Interno: calendário não existe");
+      return;
+    }
+
     const validations = {
       emailIsValid: false,
       nameIsValid: false,
@@ -90,71 +120,31 @@ const Company: NextPage = () => {
 
     if (!validateEmail(clientEmail)) {
       validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Email inválido"];
-      });
+      showError("Email inválido");
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Email inválido");
     }
 
     if (!(clientPhone.length >= 10)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Telefone inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Telefone inválido"];
-      });
+      showError("Telefone inválido");
     } else {
       validations.phoneIsValid = true;
-      const index = errorMessage.indexOf("Telefone inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Telefone inválido");
     }
 
     if (!(clientName.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Nome inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Nome inválido"];
-      });
+      showError("Nome inválido");
     } else {
       validations.nameIsValid = true;
-      const index = errorMessage.indexOf("Nome inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Nome inválido");
     }
 
     if (!(selectedContributor.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Contribuidor inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Contribuidor inválido"];
-      });
+      showError("Contribuidor inválido");
     } else {
       validations.contributorIsValid = true;
-      const index = errorMessage.indexOf("Contribuidor inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Contribuidor inválido");
     }
 
     if (
@@ -197,7 +187,7 @@ const Company: NextPage = () => {
         if (response.status == 200) {
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
-          let thereAreFreeTimes = await thereAreTimesAvaliable(scheduleTime);
+          let thereAreFreeTimes = await thereAreTimesAvaliable(company);
           if (thereAreFreeTimes) {
             setIntervalsAreUpdated(true);
           } else {
@@ -213,7 +203,7 @@ const Company: NextPage = () => {
     }
   };
 
-  const thereAreTimesAvaliable = async (scheduleTime: any) => {
+  const thereAreTimesAvaliable = async (company: Company) => {
     let thereAreAvaliableTimes = false;
     const data = {
       companyId: company.id,
@@ -247,64 +237,67 @@ const Company: NextPage = () => {
   };
 
   React.useEffect(() => {
-    async function getCompanyAndCalendarByID(id: Number) {
+    async function getCompanyAndCalendarByID(id: string) {
+      var company = null;
       try {
-        const url = path + "/api/companies/searchById/" + id;
-        const response = await fetch(url, {
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        });
-        if (response.status == 200) {
-          const { newCompany, calendar, contributors } = await response.json();
-          setCompany(newCompany);
-          setCalendar(calendar);
-          setContributors(contributors);
-        } else {
-          setCompany({});
+        if (parseInt(id) > 0) {
+          const url = path + "/api/companies/searchById/" + id;
+          const response = await fetch(url, {
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+          if (response.status == 200) {
+            const { newCompany, calendar, contributors } =
+              await response.json();
+            company = newCompany;
+            setCalendar(calendar);
+            setContributors(contributors);
+          }
         }
-      } catch (error) {
-        throw error;
+      } finally {
+        setCompany(company);
+        setViewIsReady(true);
       }
     }
 
-    if (parseInt(id) > 0) {
-      getCompanyAndCalendarByID(parseInt(id));
-    }
+    if (id) getCompanyAndCalendarByID(id);
   }, [id, path]);
 
   React.useEffect(() => {
-    function updateIntervals(calendar: any, scheduleTimes: any[]) {
-      const [startHour, startMinute] = calendar?.startTime.split(":");
-      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
-      const intervalTime = calendar.intervalTime;
-      let hour = parseInt(finishHour) - parseInt(startHour);
-      let minute = parseInt(finishtMinute) - parseInt(startMinute);
-      let totalMinutesDifference = Math.floor(
-        (hour * 60 + minute) / intervalTime
-      );
-      let intervalTimesList: any[] = [];
-      for (let index = 0; index < totalMinutesDifference; index++) {
-        let hourAsNumber =
-          parseInt(startHour) + Math.floor((index * intervalTime) / 60);
-        let minuteAsNumber = (index * intervalTime) % 60;
-        let hourString;
-        let minuteString;
+    function updateIntervals(calendar: Calendar | null, scheduleTimes: any[]) {
+      let intervalTimesList: string[] = [];
+      if (calendar) {
+        const [startHour, startMinute] = calendar.startTime.split(":");
+        const [finishHour, finishtMinute] = calendar.finishTime.split(":");
+        const intervalTime = calendar.intervalTime;
+        let hour = parseInt(finishHour) - parseInt(startHour);
+        let minute = parseInt(finishtMinute) - parseInt(startMinute);
+        let totalMinutesDifference = Math.floor(
+          (hour * 60 + minute) / intervalTime
+        );
+        for (let index = 0; index < totalMinutesDifference; index++) {
+          let hourAsNumber =
+            parseInt(startHour) + Math.floor((index * intervalTime) / 60);
+          let minuteAsNumber = (index * intervalTime) % 60;
+          let hourString;
+          let minuteString;
 
-        if (hourAsNumber <= 9) {
-          hourString = "0" + hourAsNumber.toString();
-        } else {
-          hourString = hourAsNumber.toString();
+          if (hourAsNumber <= 9) {
+            hourString = "0" + hourAsNumber.toString();
+          } else {
+            hourString = hourAsNumber.toString();
+          }
+
+          if (minuteAsNumber <= 9) {
+            minuteString = "0" + minuteAsNumber.toString();
+          } else {
+            minuteString = minuteAsNumber.toString();
+          }
+
+          let lastString = hourString + ":" + minuteString;
+          intervalTimesList[index] = lastString;
         }
-
-        if (minuteAsNumber <= 9) {
-          minuteString = "0" + minuteAsNumber.toString();
-        } else {
-          minuteString = minuteAsNumber.toString();
-        }
-
-        let lastString = hourString + ":" + minuteString;
-        intervalTimesList[index] = lastString;
       }
 
       let weekIntervalTimesList: any = {};
@@ -365,20 +358,20 @@ const Company: NextPage = () => {
       }
     }
 
-    if (parseInt(id) > 0) {
+    if (company != null) {
       const initialDateFormatted = date.subtract(1, "day").format("YYYY-MM-DD");
       const endDateFormatted = date.add(5, "day").format("YYYY-MM-DD");
       getScheduleTimeNextFiveDaysByDate(
         initialDateFormatted,
         endDateFormatted,
-        parseInt(id)
+        company.id
       ).then((scheduleTimesList) => {
-        if (!intervalsAreUpdated && calendar.hasOwnProperty("startTime")) {
+        if (!intervalsAreUpdated) {
           updateIntervals(calendar, scheduleTimesList);
         }
       });
     }
-  }, [id, path, date, calendar, intervalsAreUpdated]);
+  }, [path, company, date, calendar, intervalsAreUpdated]);
 
   return (
     <div>
@@ -425,7 +418,7 @@ const Company: NextPage = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      {company.hasOwnProperty("name") ? (
+      {company != null ? (
         <main className={styles.mainContainer}>
           <Modal
             show={showModalScheduleTime}
@@ -466,7 +459,7 @@ const Company: NextPage = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-                {scheduleTime.hasOwnProperty("id") ? (
+                {scheduleTime != null ? (
                   <div>
                     <Form.Group
                       className="mb-3"
@@ -547,7 +540,7 @@ const Company: NextPage = () => {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              {scheduleTime.hasOwnProperty("id") ? (
+              {scheduleTime != null ? (
                 <div>
                   <Button
                     variant="danger"
@@ -609,26 +602,36 @@ const Company: NextPage = () => {
                         {intervalsAreUpdated ? (
                           schedulesGroupByDay[
                             date.add(num, "day").format("DD-MM-YYYY")
-                          ].map((timeString: string, index: any) => (
-                            <Card.Text key={index} className="my-3">
-                              <Button
-                                variant="outline-success"
-                                className="text-center"
-                                onClick={() => {
-                                  handleShowModalScheduleTime(
-                                    timeString,
-                                    date.add(num, "day").format("YYYY-MM-DD")
-                                  );
-                                }}
-                              >
-                                {timeString}
-                              </Button>
+                          ].length == 0 ? (
+                            <Card.Text className="d-flex my-3">
+                              <span className={`darkBlueText py-2`}>
+                                Não há horários disponíveis
+                              </span>
                             </Card.Text>
-                          ))
+                          ) : (
+                            schedulesGroupByDay[
+                              date.add(num, "day").format("DD-MM-YYYY")
+                            ].map((timeString: string, index: any) => (
+                              <Card.Text key={index} className="my-3">
+                                <Button
+                                  variant="outline-success"
+                                  className="text-center"
+                                  onClick={() => {
+                                    handleShowModalScheduleTime(
+                                      timeString,
+                                      date.add(num, "day").format("YYYY-MM-DD")
+                                    );
+                                  }}
+                                >
+                                  {timeString}
+                                </Button>
+                              </Card.Text>
+                            ))
+                          )
                         ) : (
                           <Card.Text className="d-flex my-3">
                             <span className={`darkBlueText py-2`}>
-                              Verificando horarios
+                              Verificando horários
                             </span>
                           </Card.Text>
                         )}
@@ -660,4 +663,4 @@ const Company: NextPage = () => {
   );
 };
 
-export default Company;
+export default CompanyPage;
