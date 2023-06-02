@@ -265,37 +265,39 @@ const CompanyPage: NextPage = () => {
   }, [id, path]);
 
   React.useEffect(() => {
-    function updateIntervals(calendar: any, scheduleTimes: any[]) {
-      const [startHour, startMinute] = calendar?.startTime.split(":");
-      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
-      const intervalTime = calendar.intervalTime;
-      let hour = parseInt(finishHour) - parseInt(startHour);
-      let minute = parseInt(finishtMinute) - parseInt(startMinute);
-      let totalMinutesDifference = Math.floor(
-        (hour * 60 + minute) / intervalTime
-      );
-      let intervalTimesList: any[] = [];
-      for (let index = 0; index < totalMinutesDifference; index++) {
-        let hourAsNumber =
-          parseInt(startHour) + Math.floor((index * intervalTime) / 60);
-        let minuteAsNumber = (index * intervalTime) % 60;
-        let hourString;
-        let minuteString;
+    function updateIntervals(calendar: Calendar | null, scheduleTimes: any[]) {
+      let intervalTimesList: string[] = [];
+      if (calendar) {
+        const [startHour, startMinute] = calendar.startTime.split(":");
+        const [finishHour, finishtMinute] = calendar.finishTime.split(":");
+        const intervalTime = calendar.intervalTime;
+        let hour = parseInt(finishHour) - parseInt(startHour);
+        let minute = parseInt(finishtMinute) - parseInt(startMinute);
+        let totalMinutesDifference = Math.floor(
+          (hour * 60 + minute) / intervalTime
+        );
+        for (let index = 0; index < totalMinutesDifference; index++) {
+          let hourAsNumber =
+            parseInt(startHour) + Math.floor((index * intervalTime) / 60);
+          let minuteAsNumber = (index * intervalTime) % 60;
+          let hourString;
+          let minuteString;
 
-        if (hourAsNumber <= 9) {
-          hourString = "0" + hourAsNumber.toString();
-        } else {
-          hourString = hourAsNumber.toString();
+          if (hourAsNumber <= 9) {
+            hourString = "0" + hourAsNumber.toString();
+          } else {
+            hourString = hourAsNumber.toString();
+          }
+
+          if (minuteAsNumber <= 9) {
+            minuteString = "0" + minuteAsNumber.toString();
+          } else {
+            minuteString = minuteAsNumber.toString();
+          }
+
+          let lastString = hourString + ":" + minuteString;
+          intervalTimesList[index] = lastString;
         }
-
-        if (minuteAsNumber <= 9) {
-          minuteString = "0" + minuteAsNumber.toString();
-        } else {
-          minuteString = minuteAsNumber.toString();
-        }
-
-        let lastString = hourString + ":" + minuteString;
-        intervalTimesList[index] = lastString;
       }
 
       let weekIntervalTimesList: any = {};
@@ -364,7 +366,7 @@ const CompanyPage: NextPage = () => {
         endDateFormatted,
         company.id
       ).then((scheduleTimesList) => {
-        if (!intervalsAreUpdated && calendar != null) {
+        if (!intervalsAreUpdated) {
           updateIntervals(calendar, scheduleTimesList);
         }
       });
@@ -600,26 +602,36 @@ const CompanyPage: NextPage = () => {
                         {intervalsAreUpdated ? (
                           schedulesGroupByDay[
                             date.add(num, "day").format("DD-MM-YYYY")
-                          ].map((timeString: string, index: any) => (
-                            <Card.Text key={index} className="my-3">
-                              <Button
-                                variant="outline-success"
-                                className="text-center"
-                                onClick={() => {
-                                  handleShowModalScheduleTime(
-                                    timeString,
-                                    date.add(num, "day").format("YYYY-MM-DD")
-                                  );
-                                }}
-                              >
-                                {timeString}
-                              </Button>
+                          ].length == 0 ? (
+                            <Card.Text className="d-flex my-3">
+                              <span className={`darkBlueText py-2`}>
+                                Não há horários disponíveis
+                              </span>
                             </Card.Text>
-                          ))
+                          ) : (
+                            schedulesGroupByDay[
+                              date.add(num, "day").format("DD-MM-YYYY")
+                            ].map((timeString: string, index: any) => (
+                              <Card.Text key={index} className="my-3">
+                                <Button
+                                  variant="outline-success"
+                                  className="text-center"
+                                  onClick={() => {
+                                    handleShowModalScheduleTime(
+                                      timeString,
+                                      date.add(num, "day").format("YYYY-MM-DD")
+                                    );
+                                  }}
+                                >
+                                  {timeString}
+                                </Button>
+                              </Card.Text>
+                            ))
+                          )
                         ) : (
                           <Card.Text className="d-flex my-3">
                             <span className={`darkBlueText py-2`}>
-                              Verificando horarios
+                              Verificando horários
                             </span>
                           </Card.Text>
                         )}
