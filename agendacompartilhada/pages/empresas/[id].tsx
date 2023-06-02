@@ -21,7 +21,7 @@ import { useRouter } from "next/router";
 require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
 
-const Company: NextPage = () => {
+const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
@@ -660,4 +660,4 @@ const Company: NextPage = () => {
   );
 };
 
-export default Company;
+export default CompanyPage;
