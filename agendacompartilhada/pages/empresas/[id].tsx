@@ -76,6 +76,24 @@ const CompanyPage: NextPage = () => {
   };
 
   const handleModalConfirm = async () => {
+    function showError(message: string) {
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf(message);
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, message];
+      });
+    }
+
+    function hideError(message: string) {
+      const index = errorMessage.indexOf(message);
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
     const validations = {
       emailIsValid: false,
       nameIsValid: false,
@@ -90,71 +108,31 @@ const CompanyPage: NextPage = () => {
 
     if (!validateEmail(clientEmail)) {
       validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Email inválido"];
-      });
+      showError("Email inválido");
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Email inválido");
     }
 
     if (!(clientPhone.length >= 10)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Telefone inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Telefone inválido"];
-      });
+      showError("Telefone inválido");
     } else {
       validations.phoneIsValid = true;
-      const index = errorMessage.indexOf("Telefone inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Telefone inválido");
     }
 
     if (!(clientName.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Nome inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Nome inválido"];
-      });
+      showError("Nome inválido");
     } else {
       validations.nameIsValid = true;
-      const index = errorMessage.indexOf("Nome inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Nome inválido");
     }
 
     if (!(selectedContributor.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Contribuidor inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Contribuidor inválido"];
-      });
+      showError("Contribuidor inválido");
     } else {
       validations.contributorIsValid = true;
-      const index = errorMessage.indexOf("Contribuidor inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Contribuidor inválido");
     }
 
     if (
