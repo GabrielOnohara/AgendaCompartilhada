@@ -22,6 +22,15 @@ require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
 import { Calendar, Company, Contribuitor, ScheduleTime } from "@prisma/client";
 
+interface DateToIntervals {
+  [date: string]: Interval[];
+}
+
+interface Interval {
+  time: string;
+  freeContribuitors: Contribuitor[];
+}
+
 const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
@@ -43,7 +52,7 @@ const CompanyPage: NextPage = () => {
   const [showModalScheduleTime, setShowModalScheduleTime] =
     React.useState(false);
   const [selectedScheduleTime, setSelectedScheduleTime] =
-    React.useState<string>("");
+    React.useState<Interval | null>(null);
   const [selectedScheduleDay, setSelectedScheduleDay] =
     React.useState<string>("");
   const [selectedContributor, setSelectedContributor] =
@@ -51,7 +60,8 @@ const CompanyPage: NextPage = () => {
   const [clientEmail, setClientEmail] = React.useState<string>("");
   const [clientPhone, setClientPhone] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
-  const [schedulesGroupByDay, setSchedulesGroupByDay] = React.useState<any>({});
+  const [schedulesGroupByDay, setSchedulesGroupByDay] =
+    React.useState<DateToIntervals>({});
 
   const handleCloseModal = () => {
     setShowModalScheduleTime(false);
@@ -61,7 +71,7 @@ const CompanyPage: NextPage = () => {
 
   const handleCloseModaAfterCreated = () => {
     setShowModalScheduleTime(false);
-    setSelectedScheduleTime("");
+    setSelectedScheduleTime(null);
     setSelectedScheduleDay("");
     setSelectedContributor("");
     setClientEmail("");
@@ -71,7 +81,7 @@ const CompanyPage: NextPage = () => {
     setErrorMessage([""]);
   };
 
-  const handleShowModalScheduleTime = (sheduleTime: string, day: string) => {
+  const handleShowModalScheduleTime = (sheduleTime: Interval, day: string) => {
     setShowModalScheduleTime(true);
     setSelectedScheduleTime(sheduleTime);
     setSelectedScheduleDay(day);
@@ -103,6 +113,11 @@ const CompanyPage: NextPage = () => {
 
     if (calendar === null) {
       showError("Erro Interno: calendário não existe");
+      return;
+    }
+
+    if (selectedScheduleTime === null) {
+      showError("Erro Interno: selectedScheduleTime não existe");
       return;
     }
 
@@ -170,7 +185,7 @@ const CompanyPage: NextPage = () => {
         contributorId: contributorId,
         scheduleTime: {
           date: dayjs(selectedScheduleDay).format("YYYY-MM-DD"),
-          time: selectedScheduleTime,
+          time: selectedScheduleTime.time,
           duration: calendar.intervalTime,
         },
       };
@@ -199,6 +214,7 @@ const CompanyPage: NextPage = () => {
         }
       } catch (error) {
         console.log(error);
+        showError(`Erro Interno: ${error}`);
       }
     }
   };
@@ -265,7 +281,10 @@ const CompanyPage: NextPage = () => {
   }, [id, path]);
 
   React.useEffect(() => {
-    function updateIntervals(calendar: Calendar | null, scheduleTimes: any[]) {
+    function updateIntervals(
+      calendar: Calendar | null,
+      scheduleTimes: ScheduleTime[]
+    ) {
       let intervalTimesList: string[] = [];
       if (calendar) {
         const [startHour, startMinute] = calendar.startTime.split(":");
@@ -300,25 +319,30 @@ const CompanyPage: NextPage = () => {
         }
       }
 
-      let weekIntervalTimesList: any = {};
+      let weekIntervalTimesList: DateToIntervals = {};
 
       for (let index = 0; index < 5; index++) {
         weekIntervalTimesList[date.add(index, "day").format("DD-MM-YYYY")] =
-          intervalTimesList;
+          intervalTimesList.map((x) => {
+            return { time: x, freeContribuitors: [...contributors] };
+          });
       }
 
+      // remove os contribuidores ocupados da lista freeContribuitors.
       scheduleTimes.map((scheduleTime) => {
         const dateAsKey = dayjs(new Date(scheduleTime.date))
           .add(1, "day")
           .format("DD-MM-YYYY"); //necessario adicionar 1 dia
 
-        if (weekIntervalTimesList[dateAsKey].includes(scheduleTime.time)) {
-          weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[
-            dateAsKey
-          ].filter(function (item: any) {
-            //preciso verificar se existe prestador disponível
-            return item != scheduleTime.time;
-          });
+        const interval = weekIntervalTimesList[dateAsKey].find(
+          (x) => x.time == scheduleTime.time
+        );
+
+        if (interval) {
+          const index = interval.freeContribuitors.findIndex(
+            (x) => x.id == scheduleTime.contribuitorId
+          );
+          if (index >= 0) interval.freeContribuitors.splice(index, 1);
         }
       });
 
@@ -330,8 +354,8 @@ const CompanyPage: NextPage = () => {
       initialDate: String,
       endDate: String,
       id: Number
-    ) {
-      let scheduleTimesList = [];
+    ): Promise<ScheduleTime[]> {
+      let scheduleTimesList: ScheduleTime[] = [];
       try {
         const data = {
           companyId: id,
@@ -347,12 +371,11 @@ const CompanyPage: NextPage = () => {
           body: JSON.stringify(data),
         });
         if (response.status == 200) {
-          const { scheduleTimes } = await response.json();
+          const scheduleTimes: ScheduleTime[] = (await response.json())
+            .scheduleTimes;
           setSearchedScheduleTimes(true);
           scheduleTimesList = scheduleTimes;
         }
-      } catch (error) {
-        throw error;
       } finally {
         return scheduleTimesList;
       }
@@ -371,7 +394,7 @@ const CompanyPage: NextPage = () => {
         }
       });
     }
-  }, [path, company, date, calendar, intervalsAreUpdated]);
+  }, [path, company, contributors, date, calendar, intervalsAreUpdated]);
 
   return (
     <div>
@@ -453,7 +476,7 @@ const CompanyPage: NextPage = () => {
                       <Form.Control
                         autoFocus
                         className="bg-white"
-                        value={selectedScheduleTime}
+                        value={selectedScheduleTime?.time ?? ""}
                         disabled
                       />
                     </Form.Group>
@@ -483,11 +506,13 @@ const CompanyPage: NextPage = () => {
                         }}
                       >
                         <option></option>
-                        {contributors.map((contribuitor, index) => (
-                          <option className={styles.option} key={index}>
-                            {contribuitor.name}
-                          </option>
-                        ))}
+                        {selectedScheduleTime?.freeContribuitors.map(
+                          (contribuitor, index) => (
+                            <option className={styles.option} key={index}>
+                              {contribuitor.name}
+                            </option>
+                          )
+                        )}
                       </Form.Select>
                     </Form.Group>
                     <Form.Group
@@ -611,19 +636,22 @@ const CompanyPage: NextPage = () => {
                           ) : (
                             schedulesGroupByDay[
                               date.add(num, "day").format("DD-MM-YYYY")
-                            ].map((timeString: string, index: any) => (
+                            ].map((interval: Interval, index: any) => (
                               <Card.Text key={index} className="my-3">
                                 <Button
                                   variant="outline-success"
                                   className="text-center"
+                                  disabled={
+                                    interval.freeContribuitors.length == 0
+                                  }
                                   onClick={() => {
                                     handleShowModalScheduleTime(
-                                      timeString,
+                                      interval,
                                       date.add(num, "day").format("YYYY-MM-DD")
                                     );
                                   }}
                                 >
-                                  {timeString}
+                                  {`${interval.time} +${interval.freeContribuitors.length}`}
                                 </Button>
                               </Card.Text>
                             ))
