@@ -22,6 +22,10 @@ require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
 import { Calendar, Company, Contribuitor, ScheduleTime } from "@prisma/client";
 
+interface DateToTimeList {
+  [date: string]: string[];
+}
+
 const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
@@ -51,7 +55,8 @@ const CompanyPage: NextPage = () => {
   const [clientEmail, setClientEmail] = React.useState<string>("");
   const [clientPhone, setClientPhone] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
-  const [schedulesGroupByDay, setSchedulesGroupByDay] = React.useState<any>({});
+  const [schedulesGroupByDay, setSchedulesGroupByDay] =
+    React.useState<DateToTimeList>({});
 
   const handleCloseModal = () => {
     setShowModalScheduleTime(false);
@@ -265,7 +270,10 @@ const CompanyPage: NextPage = () => {
   }, [id, path]);
 
   React.useEffect(() => {
-    function updateIntervals(calendar: Calendar | null, scheduleTimes: any[]) {
+    function updateIntervals(
+      calendar: Calendar | null,
+      scheduleTimes: ScheduleTime[]
+    ) {
       let intervalTimesList: string[] = [];
       if (calendar) {
         const [startHour, startMinute] = calendar.startTime.split(":");
@@ -300,7 +308,7 @@ const CompanyPage: NextPage = () => {
         }
       }
 
-      let weekIntervalTimesList: any = {};
+      let weekIntervalTimesList: DateToTimeList = {};
 
       for (let index = 0; index < 5; index++) {
         weekIntervalTimesList[date.add(index, "day").format("DD-MM-YYYY")] =
@@ -315,7 +323,7 @@ const CompanyPage: NextPage = () => {
         if (weekIntervalTimesList[dateAsKey].includes(scheduleTime.time)) {
           weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[
             dateAsKey
-          ].filter(function (item: any) {
+          ].filter(function (item: string) {
             //preciso verificar se existe prestador disponível
             return item != scheduleTime.time;
           });
@@ -330,8 +338,8 @@ const CompanyPage: NextPage = () => {
       initialDate: String,
       endDate: String,
       id: Number
-    ) {
-      let scheduleTimesList = [];
+    ): Promise<ScheduleTime[]> {
+      let scheduleTimesList: ScheduleTime[] = [];
       try {
         const data = {
           companyId: id,
@@ -347,12 +355,11 @@ const CompanyPage: NextPage = () => {
           body: JSON.stringify(data),
         });
         if (response.status == 200) {
-          const { scheduleTimes } = await response.json();
+          const scheduleTimes: ScheduleTime[] = (await response.json())
+            .scheduleTimes;
           setSearchedScheduleTimes(true);
           scheduleTimesList = scheduleTimes;
         }
-      } catch (error) {
-        throw error;
       } finally {
         return scheduleTimesList;
       }
