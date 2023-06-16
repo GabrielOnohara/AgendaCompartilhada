@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
+import jwt from "jsonwebtoken";
+
 var bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,7 +25,7 @@ export default async function handler(
             company.password
           );
           if (passwordsMatch) {
-            const token = jwt.sign({ company }, process.env.JWT_KEY, {
+            const token = jwt.sign({ company }, process.env.JWT_KEY ?? "", {
               expiresIn: 60 * 60,
             });
             res.statusMessage = "Login efetuado com sucesso";

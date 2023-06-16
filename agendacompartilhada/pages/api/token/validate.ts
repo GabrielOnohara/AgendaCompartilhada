@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 export default async function handler(
@@ -16,7 +16,7 @@ export default async function handler(
             .status(401)
             .json({ auth: false, message: "No token provided." });
 
-        jwt.verify(token, process.env.JWT_KEY, function (err: any) {
+        jwt.verify(token, process.env.JWT_KEY ?? "", function (err: any) {
           if (err)
             return res
               .status(500)
