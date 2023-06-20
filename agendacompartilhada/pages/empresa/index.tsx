@@ -439,7 +439,7 @@ const Empresa: NextPage = () => {
       const json = await response.json();
       if (response.status == 200) {
         console.log(json.messages);
-        setMessages((oldValue) => [json.messages, ...oldValue]);
+        setMessages(json.messages);
         setAdviseErrorMessage([]);
       } else {
         setAdviseErrorMessage([json.error]);
@@ -811,7 +811,9 @@ const Empresa: NextPage = () => {
                   </Card>
                 </Col>
                 <Col>
-                  <Card>
+                {
+                  messages.map((m)=> (
+                    <Card key={m.id}>
                     <Card.Body>
                       <Card.Title
                         style={{ marginBottom: "20px", textAlign: "center" }}
@@ -838,7 +840,7 @@ const Empresa: NextPage = () => {
                               >
                                 Data:
                               </span>{" "}
-                              01/01/2001
+                              {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
                             </p>
                             <p className="mb-1">
                               <span
@@ -856,10 +858,11 @@ const Empresa: NextPage = () => {
                               >
                                 Mensagem:
                               </span>
-                              <br /> Vou me atrasar 5 min, se tiver horario mais
-                              cedo por favor me avise
+                              <br /> {m.content}
                             </p>
-                            <Button
+                            {!m.readed 
+                             ?(
+                              <Button
                               variant="primary"
                               className="mt-3 btn-sm"
                               style={{ float: "right" }}
@@ -867,11 +870,25 @@ const Empresa: NextPage = () => {
                             >
                               Marcar como lida
                             </Button>
+                             )
+                             :(
+                              <Button
+                              variant="success"
+                              className="mt-3 btn-sm"
+                              style={{ float: "right" }}
+                              disabled
+                            >
+                              Lida
+                            </Button>
+                             )
+                             }
                           </Card.Text>
                         </Card.Body>
                       </Card>
                     </Card.Body>
                   </Card>
+                  ))
+                }
                 </Col>
               </Row>
             </div>
