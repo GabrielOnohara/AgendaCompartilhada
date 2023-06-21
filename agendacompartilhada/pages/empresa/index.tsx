@@ -549,10 +549,24 @@ const Empresa: NextPage = () => {
   const [scheduleTimeContributor, setScheduleTimeContributor] =
     React.useState("");
 
-  async function searchScheduleTimes(e: any) {
-    e.preventDefault();
+  async function setMessageAsReaded(id:Number) {
+    const data = {
+      id: id,
+      readed: true
+    };
+    const url = "api/companies/scheduleTimes/message/";
+        const response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
   }
 
+  async function searchScheduleTimes(e:any) {
+    e.preventDefault()
+  }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -888,7 +902,7 @@ const Empresa: NextPage = () => {
                               variant="primary"
                               className="mt-3 btn-sm"
                               style={{ float: "right" }}
-                              onClick={searchScheduleTimes}
+                              onClick={() => setMessageAsReaded(m.id)}
                             >
                               Marcar como lida
                             </Button>
