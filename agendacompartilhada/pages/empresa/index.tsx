@@ -422,47 +422,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function refreshMessages(companyID: any) {
-    const data = {
-      date: dayjs(new Date()).format("YYYY-MM-DD"),
-      companyId: companyID,
-    };
-    try {
-      const url = "api/companies/scheduleTimes/message/show";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await response.json();
-      if (response.status == 200) {
-        let messages = json.messages.map((message:any) =>{
-          let scheduleTimesList =  json.scheduleTimes;
-          scheduleTimesList.forEach((time:any) => {
-            if(time.id == message.scheduleTimeId){
-              message.scheduleTime = time;
-            }
-          })
-          let clientList =  json.clients;
-          clientList.forEach((client:any)=>{
-            if(client.id = message.scheduleTime.clientId){
-              message.client = client;
-            }
-          })
-          return message
-        })
-        console.log(messages);
-        setMessages(messages);
-        setAdviseErrorMessage([]);
-      } else {
-        setAdviseErrorMessage([json.error]);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  
 
   async function onSubmitCalendarModalConfirm(e: any) {
     e.preventDefault();
@@ -633,6 +593,53 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
+    async function refreshMessages(companyID: any) {
+      const data = {
+        date: dayjs(new Date()).format("YYYY-MM-DD"),
+        companyId: companyID,
+      };
+      try {
+        const url = "api/companies/scheduleTimes/message/show";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        const json = await response.json();
+        if (response.status == 200) {
+          let messages = json.messages.map((message:any) =>{
+            let scheduleTimesList =  json.scheduleTimes;
+            scheduleTimesList.forEach((time:any) => {
+              if(time.id == message.scheduleTimeId){
+                message.scheduleTime = time;
+                contribuitors.forEach((contribuitor:any)=>{
+                  if(contribuitor.id == message.scheduleTime.contribuitorId){
+                    message.contribuitor = contribuitor
+                  }
+                })
+                let clientList =  json.clients;
+                clientList.forEach((client:any)=>{
+                  if(client.id == message.scheduleTime.clientId){
+                    message.client = client;
+                  }
+                })
+              }   
+            })
+   
+            return message
+          })
+          console.log(messages);
+          setMessages(messages);
+          setAdviseErrorMessage([]);
+        } else {
+          setAdviseErrorMessage([json.error]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
@@ -648,7 +655,7 @@ const Empresa: NextPage = () => {
       default:
         break;
     }
-  }, [menuItemSelected, company.id]);
+  }, [menuItemSelected, company.id, contribuitors]);
 
   React.useEffect(() => {
     refreshCalendar(company.id).then(() => setShowModalCalendar(false));
@@ -826,9 +833,7 @@ const Empresa: NextPage = () => {
                   </Card>
                 </Col>
                 <Col>
-                {
-                  messages.map((m)=> (
-                    <Card key={m.id}>
+                  <Card>
                     <Card.Body>
                       <Card.Title
                         style={{ marginBottom: "20px", textAlign: "center" }}
@@ -836,8 +841,10 @@ const Empresa: NextPage = () => {
                         Últimos avisos
                       </Card.Title>
                       <Card.Text></Card.Text>
-                      <Card>
-                        <Card.Body>
+                      {
+                        messages.map((m)=> (
+                      <Card key={m.id}>
+                        <Card.Body >
                           <Card.Text>
                             <p className="mb-1">
                               <span
@@ -846,7 +853,7 @@ const Empresa: NextPage = () => {
                               >
                                 Contribuidor:
                               </span>{" "}
-                              {m.scheduleTime.contribuitorId}
+                              {m.contribuitor.name}
                             </p>
                             <p className="mb-1">
                               <span
@@ -900,10 +907,10 @@ const Empresa: NextPage = () => {
                           </Card.Text>
                         </Card.Body>
                       </Card>
+                          ))
+                      }
                     </Card.Body>
                   </Card>
-                  ))
-                }
                 </Col>
               </Row>
             </div>
