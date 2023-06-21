@@ -438,8 +438,17 @@ const Empresa: NextPage = () => {
       });
       const json = await response.json();
       if (response.status == 200) {
-        console.log(json.messages);
-        setMessages(json.messages);
+        let messages = json.messages.map((message:any) =>{
+          let scheduleTimesList =  json.scheduleTimes;
+          scheduleTimesList.forEach((time:any) => {
+            if(time.id == message.scheduleTimeId){
+              message.scheduleTime = time;
+            }
+          })
+          return message
+        })
+        console.log(messages);
+        setMessages(messages);
         setAdviseErrorMessage([]);
       } else {
         setAdviseErrorMessage([json.error]);
@@ -831,7 +840,7 @@ const Empresa: NextPage = () => {
                               >
                                 Contribuidor:
                               </span>{" "}
-                              Teste Completo
+                              {m.scheduleTime.contribuitorId}
                             </p>
                             <p className="mb-1">
                               <span
@@ -849,7 +858,7 @@ const Empresa: NextPage = () => {
                               >
                                 Cliente:
                               </span>{" "}
-                              Adam
+                              {m.scheduleTime.clientId}
                             </p>
                             <p className="mb-1">
                               <span
