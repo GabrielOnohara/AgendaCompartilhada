@@ -549,12 +549,12 @@ const Empresa: NextPage = () => {
   const [scheduleTimeContributor, setScheduleTimeContributor] =
     React.useState("");
 
-  async function setMessageAsReaded(id:Number) {
+  async function setMessageAsReaded(message:any) {
     const data = {
-      id: id,
+      id: message.id,
       readed: true
     };
-    const url = "api/companies/scheduleTimes/message/";
+    const url = "api/companies/scheduleTimes/message/update";
         const response = await fetch(url, {
           method: "PATCH",
           headers: {
@@ -562,6 +562,16 @@ const Empresa: NextPage = () => {
           },
           body: JSON.stringify(data),
         });
+        if(response.ok){
+          setMessages((oldValue) => {
+            return oldValue.map(m => {
+              if(message == m){
+                m.readed = true;
+              }
+              return m
+            })
+          })
+        }
   }
 
   async function searchScheduleTimes(e:any) {
@@ -856,7 +866,24 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                        messages.map((m)=> (
+                       messages.length <= 0 
+                       ? (
+                        <Card>
+                          <Card.Body >
+                            <Card.Text>
+                              <p className="mb-1" style={{ textAlign: "center" }}>
+                                <span
+                                  className="darkBlueText"
+                                  style={{ fontWeight: "bold" }}
+                                >
+                                  Não foram encontrados novos avisos.
+                                </span>{" "}
+                              </p>
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                       )
+                      :  messages.map((m)=> (
                       <Card key={m.id}>
                         <Card.Body >
                           <Card.Text>
@@ -902,7 +929,7 @@ const Empresa: NextPage = () => {
                               variant="primary"
                               className="mt-3 btn-sm"
                               style={{ float: "right" }}
-                              onClick={() => setMessageAsReaded(m.id)}
+                              onClick={() => setMessageAsReaded(m)}
                             >
                               Marcar como lida
                             </Button>
