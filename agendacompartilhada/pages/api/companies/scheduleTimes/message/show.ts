@@ -35,7 +35,7 @@ export default async function handler(
               },
             });
             if (messages.length > 0) {
-              res.status(200).json({ messages });
+              res.status(200).json({ messages: messages, scheduleTimes });
             } else {
               res.statusMessage = "Sem avisos";
               res.status(400).json({ error: "Sem avisos" });
