@@ -24,10 +24,19 @@ export default async function handler(
               date: { gte: new Date(jsonData.date) },
             },
           });
+
           if (scheduleTimes.length > 0) {
             let scheduleTimeIds = scheduleTimes.map(
               (scheduleTime) => scheduleTime.id
             );
+            let clientIds = scheduleTimes.map(
+              (scheduleTime) => scheduleTime.clientId
+            );
+            let clients = await prisma.client.findMany({
+              where: {
+                id: { in: clientIds },
+              },
+            });
             let messages = await prisma.message.findMany({
               where: {
                 scheduleTimeId: { in: scheduleTimeIds },
@@ -35,7 +44,7 @@ export default async function handler(
               },
             });
             if (messages.length > 0) {
-              res.status(200).json({ messages });
+              res.status(200).json({ messages: messages, scheduleTimes, clients });
             } else {
               res.statusMessage = "Sem avisos";
               res.status(400).json({ error: "Sem avisos" });
@@ -48,22 +57,11 @@ export default async function handler(
           res.statusMessage = "Não encontrou empresa";
           res.status(400).json({ error: "Não encontrou empresa" });
         }
-        const message = await prisma.message.create({
-          data: {
-            content: jsonData.message,
-            scheduleTimeId: jsonData.scheduleTimeId,
-          },
-        });
-        if (message) {
-          res.statusMessage = "Mensagem enviada com sucesso";
-          res.status(200).json({ message });
-        } else {
-          res.statusMessage = "Erro ao mandar mensagem";
-          res.status(400).json({ error: "Erro ao mandar mensagem" });
-        }
+
       } catch (error) {
-        res.statusMessage = "Erro ao mandar mensagem";
+        res.statusMessage = "Erro: " + error;
         res.status(400).json({ error: error });
+        throw error
       } finally {
         res.end();
         await prisma.$disconnect();

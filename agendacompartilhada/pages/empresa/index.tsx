@@ -422,32 +422,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function refreshMessages(companyID: any) {
-    const data = {
-      date: dayjs(new Date()).format("YYYY-MM-DD"),
-      companyId: companyID,
-    };
-    try {
-      const url = "api/companies/scheduleTimes/message/show";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await response.json();
-      if (response.status == 200) {
-        console.log(json.messages);
-        setMessages((oldValue) => [json.messages, ...oldValue]);
-        setAdviseErrorMessage([]);
-      } else {
-        setAdviseErrorMessage([json.error]);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  
 
   async function onSubmitCalendarModalConfirm(e: any) {
     e.preventDefault();
@@ -574,10 +549,34 @@ const Empresa: NextPage = () => {
   const [scheduleTimeContributor, setScheduleTimeContributor] =
     React.useState("");
 
-  async function searchScheduleTimes(e: any) {
-    e.preventDefault();
+  async function setMessageAsReaded(message:any) {
+    const data = {
+      id: message.id,
+      readed: true
+    };
+    const url = "api/companies/scheduleTimes/message/update";
+        const response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        if(response.ok){
+          setMessages((oldValue) => {
+            return oldValue.map(m => {
+              if(message == m){
+                m.readed = true;
+              }
+              return m
+            })
+          })
+        }
   }
 
+  async function searchScheduleTimes(e:any) {
+    e.preventDefault()
+  }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -618,6 +617,53 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
+    async function refreshMessages(companyID: any) {
+      const data = {
+        date: dayjs(new Date()).format("YYYY-MM-DD"),
+        companyId: companyID,
+      };
+      try {
+        const url = "api/companies/scheduleTimes/message/show";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        const json = await response.json();
+        if (response.status == 200) {
+          let messages = json.messages.map((message:any) =>{
+            let scheduleTimesList =  json.scheduleTimes;
+            scheduleTimesList.forEach((time:any) => {
+              if(time.id == message.scheduleTimeId){
+                message.scheduleTime = time;
+                contribuitors.forEach((contribuitor:any)=>{
+                  if(contribuitor.id == message.scheduleTime.contribuitorId){
+                    message.contribuitor = contribuitor
+                  }
+                })
+                let clientList =  json.clients;
+                clientList.forEach((client:any)=>{
+                  if(client.id == message.scheduleTime.clientId){
+                    message.client = client;
+                  }
+                })
+              }   
+            })
+   
+            return message
+          })
+          console.log(messages);
+          setMessages(messages);
+          setAdviseErrorMessage([]);
+        } else {
+          setAdviseErrorMessage([json.error]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
@@ -633,7 +679,7 @@ const Empresa: NextPage = () => {
       default:
         break;
     }
-  }, [menuItemSelected, company.id]);
+  }, [menuItemSelected, company.id, contribuitors]);
 
   React.useEffect(() => {
     refreshCalendar(company.id).then(() => setShowModalCalendar(false));
@@ -819,8 +865,27 @@ const Empresa: NextPage = () => {
                         Últimos avisos
                       </Card.Title>
                       <Card.Text></Card.Text>
-                      <Card>
-                        <Card.Body>
+                      {
+                       messages.length <= 0 
+                       ? (
+                        <Card>
+                          <Card.Body >
+                            <Card.Text>
+                              <p className="mb-1" style={{ textAlign: "center" }}>
+                                <span
+                                  className="darkBlueText"
+                                  style={{ fontWeight: "bold" }}
+                                >
+                                  Não foram encontrados novos avisos.
+                                </span>{" "}
+                              </p>
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                       )
+                      :  messages.map((m)=> (
+                      <Card key={m.id}>
+                        <Card.Body >
                           <Card.Text>
                             <p className="mb-1">
                               <span
@@ -829,7 +894,7 @@ const Empresa: NextPage = () => {
                               >
                                 Contribuidor:
                               </span>{" "}
-                              Teste Completo
+                              {m.contribuitor.name}
                             </p>
                             <p className="mb-1">
                               <span
@@ -838,7 +903,7 @@ const Empresa: NextPage = () => {
                               >
                                 Data:
                               </span>{" "}
-                              01/01/2001
+                              {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
                             </p>
                             <p className="mb-1">
                               <span
@@ -847,7 +912,7 @@ const Empresa: NextPage = () => {
                               >
                                 Cliente:
                               </span>{" "}
-                              Adam
+                              {m.client.name}
                             </p>
                             <p className="mb-1">
                               <span
@@ -856,20 +921,35 @@ const Empresa: NextPage = () => {
                               >
                                 Mensagem:
                               </span>
-                              <br /> Vou me atrasar 5 min, se tiver horario mais
-                              cedo por favor me avise
+                              <br /> {m.content}
                             </p>
-                            <Button
+                            {!m.readed 
+                             ?(
+                              <Button
                               variant="primary"
                               className="mt-3 btn-sm"
                               style={{ float: "right" }}
-                              onClick={searchScheduleTimes}
+                              onClick={() => setMessageAsReaded(m)}
                             >
                               Marcar como lida
                             </Button>
+                             )
+                             :(
+                              <Button
+                              variant="success"
+                              className="mt-3 btn-sm"
+                              style={{ float: "right" }}
+                              disabled
+                            >
+                              Lida
+                            </Button>
+                             )
+                             }
                           </Card.Text>
                         </Card.Body>
                       </Card>
+                          ))
+                      }
                     </Card.Body>
                   </Card>
                 </Col>
