@@ -48,6 +48,24 @@ const Home: NextPage = () => {
   }
 
   async function onSubmitHandler(e: any) {
+    function showError(message: string) {
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf(message);
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, message];
+      });
+    }
+
+    function hideError(message: string) {
+      const index = errorMessage.indexOf(message);
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
     e.preventDefault();
 
     const validations = {
@@ -62,38 +80,18 @@ const Home: NextPage = () => {
 
     if (email.trim().length == 0) {
       validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira um email");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Insira um email"];
-      });
+      showError("Insira um email");
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Insira um email");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira um email");
     }
 
     if (password.trim().length == 0) {
       validations.passwordIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira uma senha");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Insira uma senha"];
-      });
+      showError("Insira uma senha");
     } else {
       validations.passwordIsValid = true;
-      const index = errorMessage.indexOf("Insira uma senha");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira uma senha");
     }
 
     if (validations.emailIsValid && validations.passwordIsValid) {
