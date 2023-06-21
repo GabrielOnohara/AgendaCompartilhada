@@ -445,6 +445,12 @@ const Empresa: NextPage = () => {
               message.scheduleTime = time;
             }
           })
+          let clientList =  json.clients;
+          clientList.forEach((client:any)=>{
+            if(client.id = message.scheduleTime.clientId){
+              message.client = client;
+            }
+          })
           return message
         })
         console.log(messages);
@@ -858,7 +864,7 @@ const Empresa: NextPage = () => {
                               >
                                 Cliente:
                               </span>{" "}
-                              {m.scheduleTime.clientId}
+                              {m.client.name}
                             </p>
                             <p className="mb-1">
                               <span
