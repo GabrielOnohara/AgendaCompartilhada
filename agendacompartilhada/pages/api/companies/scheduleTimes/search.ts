@@ -40,7 +40,7 @@ export default async function handler(
             res.status(400).json({ error: "Nenhum horário encontrado" });
           }
         } else {
-          res.status(400).json({ error: "Email inválido" });
+          res.status(400).json({ error: "Email não encontrado" });
         }
       } catch (error) {
         throw error;
