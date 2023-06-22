@@ -8,14 +8,16 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
+import { ContribuitorContext } from "../../src/context/ContribuitorContext";
 
 const Home: NextPage = () => {
   const [remindeMe, setRemindeMe] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  const { token, setToken } = React.useContext(TokenContext);
-  const { company, setCompany } = React.useContext(CompanyContext);
+  const { setToken } = React.useContext(TokenContext);
+  const { setCompany } = React.useContext(CompanyContext);
+  const { setContribuitor } = React.useContext(ContribuitorContext);
   const router = useRouter();
   const [autoLogin, setAutologin] = React.useState(false);
 
@@ -28,20 +30,20 @@ const Home: NextPage = () => {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (token) {
-      setAutologin(true);
-      try {
-        setTimeout(() => {
-          router.push("/empresa");
-        }, 3000);
-      } finally {
-        setAutologin(false);
-      }
-    } else {
-      setAutologin(false);
-    }
-  }, [router, token]);
+  // React.useEffect(() => {
+  //   if (token) {
+  //     setAutologin(true);
+  //     try {
+  //       setTimeout(() => {
+  //         router.push("/empresa");
+  //       }, 3000);
+  //     } finally {
+  //       setAutologin(false);
+  //     }
+  //   } else {
+  //     setAutologin(false);
+  //   }
+  // }, [router, token]);
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
@@ -95,8 +97,9 @@ const Home: NextPage = () => {
     }
 
     if (validations.emailIsValid && validations.passwordIsValid) {
-      const url = "api/companies/auth";
+      const url = "api/auth";
       try {
+        console.log(data);
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -105,11 +108,26 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if (response.status == 200) {
-          const { token, company } = await response.json();
+          const { token, company, contribuitor } = await response.json();
+          console.log(company);
+          console.log(contribuitor);
           window.localStorage.setItem("token", token);
           setToken(token);
-          setCompany(company);
-          router.push("/empresa");
+          if (company) {
+            console.log("set company");
+            setCompany(company);
+            setContribuitor({});
+            router.push("/empresa");
+          } else if (contribuitor) {
+            console.log("set contribuitor");
+            setCompany({});
+            setContribuitor(contribuitor);
+            router.push("/contribuidor");
+          } else {
+            setErrorMessage([
+              "Erro interno: usuário não é empresa nem contribuidor",
+            ]);
+          }
         } else {
           setErrorMessage([response.statusText]);
         }
