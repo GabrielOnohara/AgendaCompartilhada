@@ -120,15 +120,16 @@
 }
 
 .registerContainer a {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: bold;
+  color: #c2910b;
 }
 
 .registerContainer a:hover,
 .registerContainer a:focus {
   outline: none;
   text-decoration: underline;
-  color: #034078;
+  color: #956d00;
 }
 
 .errorMessage {

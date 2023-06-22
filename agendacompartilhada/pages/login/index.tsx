@@ -123,6 +123,20 @@ const Home: NextPage = () => {
     window.localStorage.setItem("email", email);
   }
 
+  function handleEmail(value: string) {
+    setEmail(value)
+    if(value) {
+      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+    }
+  }
+
+  function handlePassword(value: string) {
+    setPassword(value)
+    if(value) {
+      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha"))
+    }
+  }
+
   return (
     <div>
       <Head>
@@ -178,7 +192,7 @@ const Home: NextPage = () => {
               name="email"
               id="email"
               value={email}
-              onChange={({ target }) => setEmail(target.value)}
+              onChange={({ target }) => handleEmail(target.value)}
             />
             <label htmlFor="password" className="title3">
               Senha
@@ -189,7 +203,7 @@ const Home: NextPage = () => {
               name="password"
               id="password"
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
+              onChange={({ target }) => handlePassword(target.value)}
             />
             <div className={styles.checkboxContainer}>
               <input
@@ -228,7 +242,7 @@ const Home: NextPage = () => {
                 href={{ pathname: "/cadastro" }}
                 className={`darkBlueText apply-no-underline`}
               >
-                Criar Conta
+                Criar conta
               </Link>
             </div>
           </form>
