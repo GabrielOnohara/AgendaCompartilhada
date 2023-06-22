@@ -21,6 +21,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import dayjs, { Dayjs } from "dayjs";
+import { log } from "console";
 const Empresa: NextPage = () => {
   const router = useRouter();
   const { token, setToken } = React.useContext(TokenContext);
@@ -88,7 +89,7 @@ const Empresa: NextPage = () => {
   const [modalCalendarTitle, setModalCalendarTitle] =
     React.useState("Adicionar");
   const [calendar, setCalendar] = React.useState<any>({});
-  const [date, setDate] = React.useState<Date | null>(new Date());
+  const [date, setDate] = React.useState<Dayjs>(dayjs(new Date));
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
     setInitialTime("");
@@ -555,27 +556,47 @@ const Empresa: NextPage = () => {
       readed: true
     };
     const url = "api/companies/scheduleTimes/message/update";
-        const response = await fetch(url, {
-          method: "PATCH",
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-          body: JSON.stringify(data),
-        });
-        if(response.ok){
-          setMessages((oldValue) => {
-            return oldValue.map(m => {
-              if(message == m){
-                m.readed = true;
-              }
-              return m
-            })
-          })
-        }
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify(data),
+    });
+    if(response.ok){
+      setMessages((oldValue) => {
+        return oldValue.map(m => {
+          if(message == m){
+            m.readed = true;
+          }
+          return m
+        })
+      })
+    }
   }
 
   async function searchScheduleTimes(e:any) {
     e.preventDefault()
+    const data = {
+      companyId: company.id,
+      contributor: scheduleTimeContributor,
+      date: date.subtract(1,'hour').format("YYYY-MM-DD")
+    }
+
+    const url = "api/contribuitors/scheduleTimes/show";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if(response.ok){
+        const json = await response.json()
+        setScheduleTimes(json.scheduleTimes)
+      }else{
+      }
   }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
@@ -687,6 +708,7 @@ const Empresa: NextPage = () => {
   }, [company.id]);
 
   const [messages, setMessages] = React.useState<any[]>([]);
+  const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([]);
   const [adviseErrorMessage, setAdviseErrorMessage] = React.useState<string[]>([
     "Sem avisos",
   ]);
@@ -839,7 +861,7 @@ const Empresa: NextPage = () => {
                                 label=""
                                 value={date}
                                 onChange={(newValue) => {
-                                  setDate(newValue);
+                                  setDate(dayjs(newValue));
                                 }}
                                 renderInput={(params) => (
                                   <TextField {...params} />
