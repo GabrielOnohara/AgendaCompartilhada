@@ -15,6 +15,7 @@ const RegisterPage: NextPage = () => {
   const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
+  const [address, setAddress] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] =
     React.useState(false);
@@ -46,6 +47,7 @@ const RegisterPage: NextPage = () => {
       password: password,
       name: name,
       phone: telefone,
+      address: address
     };
 
     if (password != passwordConfirmation) {
@@ -233,6 +235,17 @@ const RegisterPage: NextPage = () => {
               id="email"
               value={email}
               onChange={({ target }) => setEmail(target.value)}
+            />
+            <label htmlFor="address" className="title3">
+              Endereço
+            </label>
+            <input
+              className={styles.input}
+              type="address"
+              name="address"
+              id="address"
+              value={address}
+              onChange={({target}) => setAddress(target.value)}
             />
             <label htmlFor="telefone" className="title3">
               Telefone
