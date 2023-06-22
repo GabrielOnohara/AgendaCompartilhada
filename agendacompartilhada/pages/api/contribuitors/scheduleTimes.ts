@@ -6,7 +6,6 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const jsonData = req.body;
-  console.log(jsonData);
   const contribuitorId = parseInt(jsonData.contribuitorId);
   const prisma = new PrismaClient();
   await prisma.$connect();
@@ -57,8 +56,21 @@ export default async function handler(
         await prisma.$disconnect();
       }
       break;
+    case "DELETE":
+      try {
+        await prisma.scheduleTime.delete({
+          where: {
+            id: parseInt(jsonData.id),
+          },
+        });
+        res.status(200);
+      } catch (error) {
+        res.status(404).json({ error: error });
+      }
+      break;
+
     default:
-      res.status(200).json({ name: "John Doe" });
+      res.status(403);
       break;
   }
 }

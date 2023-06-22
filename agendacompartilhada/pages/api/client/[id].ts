@@ -5,23 +5,21 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const email = req.query["email"] as string;
+  const id = parseInt(req.query["id"] as string);
   const prisma = new PrismaClient();
   await prisma.$connect();
   switch (req.method) {
-    case "POST":
-      break;
-    default:
+    case "GET":
       try {
-        const contribuitor = await prisma.contribuitor.findFirst({
+        const client = await prisma.client.findFirst({
           where: {
-            email: email,
+            id: id,
           },
         });
-        if (contribuitor) {
-          res.status(200).json({ contribuitor });
+        if (client) {
+          res.status(200).json({ client: client });
         } else {
-          res.status(400).json({ error: "Usuário não encontrado" });
+          res.status(400).json({ error: "Cliente não encontrado" });
         }
       } catch (error) {
         res.status(400).json({ error: error });
@@ -29,6 +27,9 @@ export default async function handler(
         res.end();
         await prisma.$disconnect();
       }
+      break;
+    default:
+      res.status(405);
       break;
   }
 }

@@ -19,7 +19,9 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import dayjs, { Dayjs } from "dayjs";
-import { Calendar, Contribuitor, ScheduleTime } from "@prisma/client";
+import Modal from "react-bootstrap/Modal";
+import { Calendar, Client, Contribuitor, ScheduleTime } from "@prisma/client";
+import internal from "stream";
 require("dayjs/locale/pt");
 
 interface DateToIntervals {
@@ -28,7 +30,7 @@ interface DateToIntervals {
 
 interface Interval {
   time: string;
-  isScheduled: boolean;
+  scheduleTime: ScheduleTime | null;
 }
 
 const Contribuidor: NextPage = () => {
@@ -36,9 +38,11 @@ const Contribuidor: NextPage = () => {
   const path = router.basePath;
 
   const { token, setToken } = React.useContext(TokenContext);
-  const { contribuitor, setContribuitor } =
+  const {
+    contribuitor,
+    setContribuitor,
+  }: { contribuitor: Contribuitor | null; setContribuitor: any } =
     React.useContext(ContribuitorContext);
-  const [calendar, setCalendar] = React.useState<Calendar | null>(null);
 
   const [menuItemSelected, setMenuItemSelected] =
     React.useState<string>("horarios");
@@ -51,6 +55,73 @@ const Contribuidor: NextPage = () => {
   const [schedulesGroupByDay, setSchedulesGroupByDay] =
     React.useState<DateToIntervals>({});
 
+  const [showModalScheduleTime, setShowModalScheduleTime] =
+    React.useState(false);
+  const [selectedScheduleTime, setSelectedScheduleTime] =
+    React.useState<ScheduleTime | null>(null);
+  const [selectedClient, setSelectedClient] = React.useState<Client | null>(
+    null
+  );
+
+  async function getClient(clientId: number) {
+    try {
+      const url = "api/client/" + clientId;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      if (response.status == 200) {
+        const { client } = await response.json();
+        setSelectedClient(client);
+      } else {
+        setSelectedClient(null);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function deleteScheduleTime() {
+    try {
+      const url = path + "/api/scheduleTimes/" + selectedScheduleTime?.id;
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      });
+      if (response.status != 200) {
+        console.log(`error deleting scheduleTimes: reponse ${response.status}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleShowModalScheduleTime = (interval: Interval, day: string) => {
+    if (interval.scheduleTime != null) {
+      setShowModalScheduleTime(true);
+      setSelectedScheduleTime(interval.scheduleTime);
+      getClient(interval.scheduleTime.clientId);
+    }
+  };
+
+  const handleModalDelete = async () => {
+    if (selectedScheduleTime != null) {
+      await deleteScheduleTime();
+      setIntervalsAreUpdated(false);
+    }
+    handleModalClose();
+  };
+
+  const handleModalClose = () => {
+    setShowModalScheduleTime(false);
+    setSelectedScheduleTime(null);
+    setSelectedClient(null);
+  };
+
   function contribuitorMenuClick(e: any) {
     e.preventDefault();
     setMenuItemSelected("horarios");
@@ -60,7 +131,7 @@ const Contribuidor: NextPage = () => {
     try {
       window.localStorage.setItem("token", "");
       router.push("/login");
-      setTimeout(setContribuitor({ name: "" }), 2000);
+      setTimeout(setContribuitor(null), 2000);
       setTimeout(setToken(""), 2000);
     } catch (error) {
       throw error;
@@ -113,7 +184,7 @@ const Contribuidor: NextPage = () => {
       for (let index = 0; index < 5; index++) {
         weekIntervalTimesList[date.add(index, "day").format("DD-MM-YYYY")] =
           intervalTimesList.map((x) => {
-            return { time: x, isScheduled: false };
+            return { time: x, scheduleTime: null };
           });
       }
 
@@ -127,7 +198,7 @@ const Contribuidor: NextPage = () => {
         );
 
         if (interval) {
-          interval.isScheduled = true;
+          interval.scheduleTime = scheduleTime;
         }
       });
 
@@ -193,7 +264,7 @@ const Contribuidor: NextPage = () => {
           const { contribuitor } = await response.json();
           setContribuitor(contribuitor);
         } else {
-          setContribuitor({ name: "" });
+          setContribuitor(null);
         }
       } catch (error) {
         console.log(error);
@@ -208,7 +279,7 @@ const Contribuidor: NextPage = () => {
             setViewIsReady(true);
           });
         } else {
-          setContribuitor({});
+          setContribuitor(null);
         }
       }
     } catch (error) {
@@ -297,6 +368,108 @@ const Contribuidor: NextPage = () => {
           </Container>
         </Navbar>
         <main className={styles.mainContainer}>
+          <Modal
+            show={showModalScheduleTime}
+            onHide={handleModalClose}
+            style={{ color: "#034078", fontWeight: "bold" }}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Horário Agendado</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                {selectedScheduleTime == null || selectedClient == null ? (
+                  <div>
+                    <Form.Group
+                      className="mb-3"
+                      controlId="exampleForm.ControlInput1"
+                    >
+                      <Form.Label className="mt-2">
+                        <b>Carregando...</b>
+                      </Form.Label>
+                    </Form.Group>
+                  </div>
+                ) : (
+                  <Row>
+                    <Col>
+                      <Form.Group
+                        className="mb-3"
+                        controlId="exampleForm.ControlInput2"
+                      >
+                        <Form.Label>Data</Form.Label>
+                        <Form.Control
+                          className="bg-white"
+                          value={dayjs(selectedScheduleTime.date).format(
+                            "YYYY-MM-DD"
+                          )}
+                          disabled
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group
+                        className="mb-3"
+                        controlId="exampleForm.ControlInput1"
+                      >
+                        <Form.Label>Horário</Form.Label>
+                        <Form.Control
+                          autoFocus
+                          className="bg-white"
+                          value={selectedScheduleTime?.time ?? ""}
+                          disabled
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Form.Group
+                      className="mb-3"
+                      controlId="exampleForm.ControlInput3"
+                    >
+                      <Form.Label>Nome</Form.Label>
+                      <Form.Control
+                        className="bg-white"
+                        value={selectedClient.name}
+                        type="text"
+                        disabled
+                      />
+                    </Form.Group>
+                    <Form.Group
+                      className="mb-3"
+                      controlId="exampleForm.ControlInput3"
+                    >
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        className="bg-white"
+                        value={selectedClient?.email}
+                        type="email"
+                        disabled
+                      />
+                    </Form.Group>
+                    <Form.Group
+                      className="mb-3"
+                      controlId="exampleForm.ControlInput3"
+                    >
+                      <Form.Label>Telefone</Form.Label>
+                      <Form.Control
+                        className="bg-white"
+                        value={selectedClient?.phone}
+                        type="tel"
+                        disabled
+                      />
+                    </Form.Group>
+                  </Row>
+                )}
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <div>
+                {contribuitor.isAdmin && (
+                  <Button variant="danger" onClick={handleModalDelete}>
+                    Deletar Horário
+                  </Button>
+                )}
+              </div>
+            </Modal.Footer>
+          </Modal>
           {menuItemSelected == "horarios" ? (
             <Container>
               <div className="d-flex justify-content-between">
@@ -350,14 +523,14 @@ const Contribuidor: NextPage = () => {
                                   <Button
                                     variant="outline-success"
                                     className="text-center"
-                                    disabled={!interval.isScheduled}
+                                    disabled={interval.scheduleTime == null}
                                     onClick={() => {
-                                      // handleShowModalScheduleTime(
-                                      //   interval,
-                                      //   date
-                                      //     .add(num, "day")
-                                      //     .format("YYYY-MM-DD")
-                                      // );
+                                      handleShowModalScheduleTime(
+                                        interval,
+                                        date
+                                          .add(num, "day")
+                                          .format("YYYY-MM-DD")
+                                      );
                                     }}
                                   >
                                     {`${interval.time}`}
