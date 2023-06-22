@@ -125,15 +125,17 @@ const Home: NextPage = () => {
 
   function handleEmail(value: string) {
     setEmail(value)
-    if(value) {
+    if (value) {
       setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email"))
     }
   }
 
   function handlePassword(value: string) {
     setPassword(value)
-    if(value) {
+    if (value) {
       setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha"))
+    } else {
+      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senha inválida"))
     }
   }
 

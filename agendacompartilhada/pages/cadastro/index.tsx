@@ -24,6 +24,7 @@ const RegisterPage: NextPage = () => {
 
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
+    setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "É necessário aceitar a nossa política de privacidade"))
   }
 
   async function onSubmitHandler(e: any) {
@@ -91,15 +92,15 @@ const RegisterPage: NextPage = () => {
     if (!validateEmail(email)) {
       validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
+        const index = oldValue.indexOf("Insira um email");
         if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return [...oldValue, "Email inválido"];
+        return [...oldValue, "Insira um email"];
       });
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
+      const index = errorMessage.indexOf("Insira um email");
       if (index >= 0)
         setErrorMessage((oldValue) => {
           return oldValue.splice(index, 1);
@@ -162,6 +163,18 @@ const RegisterPage: NextPage = () => {
       } catch (error) {
         throw error;
       }
+    }
+  }
+
+  function handleInput(value: string, type: string) {
+    if (type === 'email') {
+      setEmail(value)
+      if (value)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+    } else if (type === 'password') {
+      setPassword(value)
+      if (value.length > 6)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
     }
   }
 
@@ -232,7 +245,7 @@ const RegisterPage: NextPage = () => {
               name="email"
               id="email"
               value={email}
-              onChange={({ target }) => setEmail(target.value)}
+              onChange={({ target }) => handleInput(target.value, "email")}
             />
             <label htmlFor="telefone" className="title3">
               Telefone
@@ -254,7 +267,7 @@ const RegisterPage: NextPage = () => {
               name="password"
               id="password"
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
+              onChange={({ target }) => handleInput(target.value, "password")}
             />
             <label htmlFor="password" className="title3">
               Confirmar Senha
