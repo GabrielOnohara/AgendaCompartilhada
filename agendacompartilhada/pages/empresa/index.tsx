@@ -877,6 +877,52 @@ const Empresa: NextPage = () => {
                       </Button>
                     </Card.Body>
                   </Card>
+                  <Card>
+                    <Card.Body>
+                      <Card.Title
+                        style={{ marginBottom: "20px", textAlign: "center" }}
+                      >
+                        Agendamentos
+                      </Card.Title>
+                      <Card.Text></Card.Text>
+                      {
+                       scheduleTimes.length <= 0 
+                       ? (
+                        <Card>
+                          <Card.Body >
+                            <Card.Text>
+                              <p className="mb-1" style={{ textAlign: "center" }}>
+                                <span
+                                  className="error"
+                                  style={{ fontWeight: "bold" }}
+                                >
+                                  Nenhum horário encontrado.
+                                </span>{" "}
+                              </p>
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                       )
+                      :  scheduleTimes.map((s)=> (
+                      <Card key={s.id}>
+                        <Card.Body >
+                          <Card.Text>
+                            <p className="mb-1">
+                              <span
+                                className="darkBlueText"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                Horário:
+                              </span>{" "}
+                              {s.time}
+                            </p>
+                          </Card.Text>
+                        </Card.Body>
+                      </Card>
+                          ))
+                      }
+                    </Card.Body>
+                  </Card>
                 </Col>
                 <Col>
                   <Card>
