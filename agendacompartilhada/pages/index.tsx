@@ -387,7 +387,7 @@ const Home: NextPage = () => {
                         </Card.Title>
                         <Card.Text style={{ float: "left" }}>
                           <p className="mb-2">
-                            <span className={`darkBlueText`}>Endereço:</span>
+                            <span className={`darkBlueText`}>Endereço:</span>{" "}
                             {company.address}
                           </p>
                           <p className="">
