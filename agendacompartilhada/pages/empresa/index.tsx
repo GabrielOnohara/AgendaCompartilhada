@@ -661,7 +661,7 @@ const Empresa: NextPage = () => {
                 message.scheduleTime = time;
                 contribuitors.forEach((contribuitor:any)=>{
                   if(contribuitor.id == message.scheduleTime.contribuitorId){
-                    message.contribuitor = contribuitor
+                    message.contributor = contribuitor
                   }
                 })
                 let clientList =  json.clients;
@@ -675,7 +675,6 @@ const Empresa: NextPage = () => {
    
             return message
           })
-          console.log(messages);
           setMessages(messages);
           setAdviseErrorMessage([]);
         } else {
@@ -688,8 +687,10 @@ const Empresa: NextPage = () => {
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshTeam(company.id).then(() => refreshMessages(company.id));
-
+          refreshTeam(company.id)
+          if(contribuitors.length>0){
+            refreshMessages(company.id)
+          }
         }
         break;
       case "agenda":
@@ -935,7 +936,7 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                       messages.length <= 0 
+                       messages.length && contribuitors.length <= 0 
                        ? (
                         <Card>
                           <Card.Body >
@@ -963,7 +964,7 @@ const Empresa: NextPage = () => {
                               >
                                 Contribuidor:
                               </span>{" "}
-                              {m.contribuitor.name}
+                              {m.contributor.name}
                             </p>
                             <p className="mb-1">
                               <span
