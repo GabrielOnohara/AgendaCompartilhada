@@ -34,7 +34,7 @@ export default async function handler(
             res.status(400);
           }
         } else {
-          res.statusMessage = "Email inválido";
+          res.statusMessage = "Email não encontrado";
           res.status(400);
         }
       } catch (error) {
