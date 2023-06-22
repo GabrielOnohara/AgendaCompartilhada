@@ -339,7 +339,7 @@ const Contribuidor: NextPage = () => {
           variant="dark"
         >
           <Container fluid>
-            <Navbar.Brand href="/empresa" style={{ color: "#FACE54" }}>
+            <Navbar.Brand href="/contribuidor" style={{ color: "#FACE54" }}>
               {contribuitor.name}
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
