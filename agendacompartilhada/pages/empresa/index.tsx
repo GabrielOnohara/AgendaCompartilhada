@@ -322,7 +322,6 @@ const Empresa: NextPage = () => {
               const { contributorEdited } = await response.json();
               if (contributorEdited) {
                 refreshTeam(dataEDIT.companyId);
-                setShowModal(false);
                 setModalTitle("");
                 handleCloseModal();
               }
@@ -387,6 +386,7 @@ const Empresa: NextPage = () => {
         const { contribuitors } = await response.json();
         if (contribuitors) {
           setContribuitors(contribuitors);
+          return contribuitors
         }
       } else {
         setErrorMessage([response.statusText]);
@@ -638,7 +638,7 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
-    async function refreshMessages(companyID: any) {
+    async function refreshMessages(companyID: any, contributors:any) {
       const data = {
         date: dayjs(new Date()).format("YYYY-MM-DD"),
         companyId: companyID,
@@ -659,7 +659,7 @@ const Empresa: NextPage = () => {
             scheduleTimesList.forEach((time:any) => {
               if(time.id == message.scheduleTimeId){
                 message.scheduleTime = time;
-                contribuitors.forEach((contribuitor:any)=>{
+                contributors.forEach((contribuitor:any)=>{
                   if(contribuitor.id == message.scheduleTime.contribuitorId){
                     message.contributor = contribuitor
                   }
@@ -687,10 +687,7 @@ const Empresa: NextPage = () => {
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshTeam(company.id)
-          if(contribuitors.length>0){
-            refreshMessages(company.id)
-          }
+          refreshTeam(company.id).then((contributors)=> refreshMessages(company.id, contributors))
         }
         break;
       case "agenda":
@@ -702,7 +699,7 @@ const Empresa: NextPage = () => {
       default:
         break;
     }
-  }, [menuItemSelected, company.id, contribuitors]);
+  }, [menuItemSelected, company.id]);
 
   React.useEffect(() => {
     refreshCalendar(company.id).then(() => setShowModalCalendar(false));
