@@ -423,7 +423,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  
+
 
   async function onSubmitCalendarModalConfirm(e: any) {
     e.preventDefault();
@@ -547,10 +547,15 @@ const Empresa: NextPage = () => {
     }
   }
 
+  function handleInput() {
+    if (initialTime == "" || finishTime == "" || intervalTime == "")
+      setErrorMessageCalendar(errorMessageCalendar.filter((mensagem) => mensagem !== "Preencha todos os campos"))
+  }
+
   const [scheduleTimeContributor, setScheduleTimeContributor] =
     React.useState("");
 
-  async function setMessageAsReaded(message:any) {
+  async function setMessageAsReaded(message: any) {
     const data = {
       id: message.id,
       readed: true
@@ -563,10 +568,10 @@ const Empresa: NextPage = () => {
       },
       body: JSON.stringify(data),
     });
-    if(response.ok){
+    if (response.ok) {
       setMessages((oldValue) => {
         return oldValue.map(m => {
-          if(message == m){
+          if (message == m) {
             m.readed = true;
           }
           return m
@@ -575,28 +580,28 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function searchScheduleTimes(e:any) {
+  async function searchScheduleTimes(e: any) {
     e.preventDefault()
     const data = {
       companyId: company.id,
       contributor: scheduleTimeContributor,
-      date: date.subtract(1,'hour').format("YYYY-MM-DD")
+      date: date.subtract(1, 'hour').format("YYYY-MM-DD")
     }
 
     const url = "api/contribuitors/scheduleTimes/show";
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify(data),
-      });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify(data),
+    });
 
-      if(response.ok){
-        const json = await response.json()
-        setScheduleTimes(json.scheduleTimes)
-      }else{
-      }
+    if (response.ok) {
+      const json = await response.json()
+      setScheduleTimes(json.scheduleTimes)
+    } else {
+    }
   }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
@@ -654,25 +659,25 @@ const Empresa: NextPage = () => {
         });
         const json = await response.json();
         if (response.status == 200) {
-          let messages = json.messages.map((message:any) =>{
-            let scheduleTimesList =  json.scheduleTimes;
-            scheduleTimesList.forEach((time:any) => {
-              if(time.id == message.scheduleTimeId){
+          let messages = json.messages.map((message: any) => {
+            let scheduleTimesList = json.scheduleTimes;
+            scheduleTimesList.forEach((time: any) => {
+              if (time.id == message.scheduleTimeId) {
                 message.scheduleTime = time;
-                contribuitors.forEach((contribuitor:any)=>{
-                  if(contribuitor.id == message.scheduleTime.contribuitorId){
+                contribuitors.forEach((contribuitor: any) => {
+                  if (contribuitor.id == message.scheduleTime.contribuitorId) {
                     message.contribuitor = contribuitor
                   }
                 })
-                let clientList =  json.clients;
-                clientList.forEach((client:any)=>{
-                  if(client.id == message.scheduleTime.clientId){
+                let clientList = json.clients;
+                clientList.forEach((client: any) => {
+                  if (client.id == message.scheduleTime.clientId) {
                     message.client = client;
                   }
                 })
-              }   
+              }
             })
-   
+
             return message
           })
           console.log(messages);
@@ -773,9 +778,8 @@ const Empresa: NextPage = () => {
               <Nav className="mx-auto">
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2 ${
-                      menuItemSelected == "resumo" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2 ${menuItemSelected == "resumo" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={companyMenuClick}
                   >
@@ -784,9 +788,8 @@ const Empresa: NextPage = () => {
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2  ${
-                      menuItemSelected == "agenda" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2  ${menuItemSelected == "agenda" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={scheduleMenuClick}
                   >
@@ -795,9 +798,8 @@ const Empresa: NextPage = () => {
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2  ${
-                      menuItemSelected == "equipe" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2  ${menuItemSelected == "equipe" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={teamMenuClick}
                   >
@@ -887,39 +889,39 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                       scheduleTimes.length <= 0 
-                       ? (
-                        <Card>
-                          <Card.Body >
-                            <Card.Text>
-                              <p className="mb-1" style={{ textAlign: "center" }}>
-                                <span
-                                  className="error"
-                                  style={{ fontWeight: "bold" }}
-                                >
-                                  Nenhum horário encontrado.
-                                </span>{" "}
-                              </p>
-                            </Card.Text>
-                          </Card.Body>
-                        </Card>
-                       )
-                      :  scheduleTimes.map((s)=> (
-                      <Card key={s.id}>
-                        <Card.Body >
-                          <Card.Text>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Horário:
-                              </span>{" "}
-                              {s.time}
-                            </p>
-                          </Card.Text>
-                        </Card.Body>
-                      </Card>
+                        scheduleTimes.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="error"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Nenhum horário encontrado.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : scheduleTimes.map((s) => (
+                            <Card key={s.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Horário:
+                                    </span>{" "}
+                                    {s.time}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
                           ))
                       }
                     </Card.Body>
@@ -935,88 +937,88 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                       messages.length <= 0 
-                       ? (
-                        <Card>
-                          <Card.Body >
-                            <Card.Text>
-                              <p className="mb-1" style={{ textAlign: "center" }}>
-                                <span
-                                  className="darkBlueText"
-                                  style={{ fontWeight: "bold" }}
-                                >
-                                  Não foram encontrados novos avisos.
-                                </span>{" "}
-                              </p>
-                            </Card.Text>
-                          </Card.Body>
-                        </Card>
-                       )
-                      :  messages.map((m)=> (
-                      <Card key={m.id}>
-                        <Card.Body >
-                          <Card.Text>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Contribuidor:
-                              </span>{" "}
-                              {m.contribuitor.name}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Data:
-                              </span>{" "}
-                              {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Cliente:
-                              </span>{" "}
-                              {m.client.name}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Mensagem:
-                              </span>
-                              <br /> {m.content}
-                            </p>
-                            {!m.readed 
-                             ?(
-                              <Button
-                              variant="primary"
-                              className="mt-3 btn-sm"
-                              style={{ float: "right" }}
-                              onClick={() => setMessageAsReaded(m)}
-                            >
-                              Marcar como lida
-                            </Button>
-                             )
-                             :(
-                              <Button
-                              variant="success"
-                              className="mt-3 btn-sm"
-                              style={{ float: "right" }}
-                              disabled
-                            >
-                              Lida
-                            </Button>
-                             )
-                             }
-                          </Card.Text>
-                        </Card.Body>
-                      </Card>
+                        messages.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Não foram encontrados novos avisos.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : messages.map((m) => (
+                            <Card key={m.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Contribuidor:
+                                    </span>{" "}
+                                    {m.contribuitor.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Data:
+                                    </span>{" "}
+                                    {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Cliente:
+                                    </span>{" "}
+                                    {m.client.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Mensagem:
+                                    </span>
+                                    <br /> {m.content}
+                                  </p>
+                                  {!m.readed
+                                    ? (
+                                      <Button
+                                        variant="primary"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        onClick={() => setMessageAsReaded(m)}
+                                      >
+                                        Marcar como lida
+                                      </Button>
+                                    )
+                                    : (
+                                      <Button
+                                        variant="success"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        disabled
+                                      >
+                                        Lida
+                                      </Button>
+                                    )
+                                  }
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
                           ))
                       }
                     </Card.Body>
@@ -1059,8 +1061,10 @@ const Empresa: NextPage = () => {
                           color="034078"
                           type="time"
                           value={initialTime}
-                          onChange={({ target }) =>
+                          onChange={({ target }) => {
                             setInitialTime(target.value)
+                            handleInput()
+                          }
                           }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
@@ -1075,7 +1079,11 @@ const Empresa: NextPage = () => {
                           className="bg-white"
                           type="time"
                           value={finishTime}
-                          onChange={({ target }) => setFinishTime(target.value)}
+                          onChange={({ target }) => {
+                            setFinishTime(target.value)
+                            handleInput()
+                          }
+                          }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
                       </Form.Group>
@@ -1091,8 +1099,10 @@ const Empresa: NextPage = () => {
                           className="bg-white"
                           value={intervalTime}
                           type="number"
-                          onChange={({ target }) =>
+                          onChange={({ target }) => {
                             setIntervalTime(target.value)
+                            handleInput()
+                          }
                           }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
