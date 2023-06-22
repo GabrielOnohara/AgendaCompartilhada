@@ -322,7 +322,6 @@ const Empresa: NextPage = () => {
               const { contributorEdited } = await response.json();
               if (contributorEdited) {
                 refreshTeam(dataEDIT.companyId);
-                setShowModal(false);
                 setModalTitle("");
                 handleCloseModal();
               }
@@ -387,6 +386,7 @@ const Empresa: NextPage = () => {
         const { contribuitors } = await response.json();
         if (contribuitors) {
           setContribuitors(contribuitors);
+          return contribuitors
         }
       } else {
         setErrorMessage([response.statusText]);
@@ -643,7 +643,7 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
-    async function refreshMessages(companyID: any) {
+    async function refreshMessages(companyID: any, contributors:any) {
       const data = {
         date: dayjs(new Date()).format("YYYY-MM-DD"),
         companyId: companyID,
@@ -664,9 +664,9 @@ const Empresa: NextPage = () => {
             scheduleTimesList.forEach((time: any) => {
               if (time.id == message.scheduleTimeId) {
                 message.scheduleTime = time;
-                contribuitors.forEach((contribuitor: any) => {
-                  if (contribuitor.id == message.scheduleTime.contribuitorId) {
-                    message.contribuitor = contribuitor
+                contributors.forEach((contribuitor:any)=>{
+                  if(contribuitor.id == message.scheduleTime.contribuitorId){
+                    message.contributor = contribuitor
                   }
                 })
                 let clientList = json.clients;
@@ -680,7 +680,6 @@ const Empresa: NextPage = () => {
 
             return message
           })
-          console.log(messages);
           setMessages(messages);
           setAdviseErrorMessage([]);
         } else {
@@ -693,8 +692,7 @@ const Empresa: NextPage = () => {
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshTeam(company.id).then(() => refreshMessages(company.id));
-
+          refreshTeam(company.id).then((contributors)=> refreshMessages(company.id, contributors))
         }
         break;
       case "agenda":
@@ -706,7 +704,7 @@ const Empresa: NextPage = () => {
       default:
         break;
     }
-  }, [menuItemSelected, company.id, contribuitors]);
+  }, [menuItemSelected, company.id]);
 
   React.useEffect(() => {
     refreshCalendar(company.id).then(() => setShowModalCalendar(false));
@@ -937,88 +935,88 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                        messages.length <= 0
-                          ? (
-                            <Card>
-                              <Card.Body >
-                                <Card.Text>
-                                  <p className="mb-1" style={{ textAlign: "center" }}>
-                                    <span
-                                      className="darkBlueText"
-                                      style={{ fontWeight: "bold" }}
-                                    >
-                                      Não foram encontrados novos avisos.
-                                    </span>{" "}
-                                  </p>
-                                </Card.Text>
-                              </Card.Body>
-                            </Card>
-                          )
-                          : messages.map((m) => (
-                            <Card key={m.id}>
-                              <Card.Body >
-                                <Card.Text>
-                                  <p className="mb-1">
-                                    <span
-                                      className="darkBlueText"
-                                      style={{ fontWeight: "bold" }}
-                                    >
-                                      Contribuidor:
-                                    </span>{" "}
-                                    {m.contribuitor.name}
-                                  </p>
-                                  <p className="mb-1">
-                                    <span
-                                      className="darkBlueText"
-                                      style={{ fontWeight: "bold" }}
-                                    >
-                                      Data:
-                                    </span>{" "}
-                                    {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
-                                  </p>
-                                  <p className="mb-1">
-                                    <span
-                                      className="darkBlueText"
-                                      style={{ fontWeight: "bold" }}
-                                    >
-                                      Cliente:
-                                    </span>{" "}
-                                    {m.client.name}
-                                  </p>
-                                  <p className="mb-1">
-                                    <span
-                                      className="darkBlueText"
-                                      style={{ fontWeight: "bold" }}
-                                    >
-                                      Mensagem:
-                                    </span>
-                                    <br /> {m.content}
-                                  </p>
-                                  {!m.readed
-                                    ? (
-                                      <Button
-                                        variant="primary"
-                                        className="mt-3 btn-sm"
-                                        style={{ float: "right" }}
-                                        onClick={() => setMessageAsReaded(m)}
-                                      >
-                                        Marcar como lida
-                                      </Button>
-                                    )
-                                    : (
-                                      <Button
-                                        variant="success"
-                                        className="mt-3 btn-sm"
-                                        style={{ float: "right" }}
-                                        disabled
-                                      >
-                                        Lida
-                                      </Button>
-                                    )
-                                  }
-                                </Card.Text>
-                              </Card.Body>
-                            </Card>
+                       messages.length && contribuitors.length <= 0 
+                       ? (
+                        <Card>
+                          <Card.Body >
+                            <Card.Text>
+                              <p className="mb-1" style={{ textAlign: "center" }}>
+                                <span
+                                  className="darkBlueText"
+                                  style={{ fontWeight: "bold" }}
+                                >
+                                  Não foram encontrados novos avisos.
+                                </span>{" "}
+                              </p>
+                            </Card.Text>
+                          </Card.Body>
+                        </Card>
+                       )
+                      :  messages.map((m)=> (
+                      <Card key={m.id}>
+                        <Card.Body >
+                          <Card.Text>
+                            <p className="mb-1">
+                              <span
+                                className="darkBlueText"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                Contribuidor:
+                              </span>{" "}
+                              {m.contributor.name}
+                            </p>
+                            <p className="mb-1">
+                              <span
+                                className="darkBlueText"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                Data:
+                              </span>{" "}
+                              {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
+                            </p>
+                            <p className="mb-1">
+                              <span
+                                className="darkBlueText"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                Cliente:
+                              </span>{" "}
+                              {m.client.name}
+                            </p>
+                            <p className="mb-1">
+                              <span
+                                className="darkBlueText"
+                                style={{ fontWeight: "bold" }}
+                              >
+                                Mensagem:
+                              </span>
+                              <br /> {m.content}
+                            </p>
+                            {!m.readed 
+                             ?(
+                              <Button
+                              variant="primary"
+                              className="mt-3 btn-sm"
+                              style={{ float: "right" }}
+                              onClick={() => setMessageAsReaded(m)}
+                            >
+                              Marcar como lida
+                            </Button>
+                             )
+                             :(
+                              <Button
+                              variant="success"
+                              className="mt-3 btn-sm"
+                              style={{ float: "right" }}
+                              disabled
+                            >
+                              Lida
+                            </Button>
+                             )
+                             }
+                          </Card.Text>
+                        </Card.Body>
+                      </Card>
                           ))
                       }
                     </Card.Body>
