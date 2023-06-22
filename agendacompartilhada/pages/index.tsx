@@ -107,15 +107,15 @@ const Home: NextPage = () => {
     if (!validateEmail(searchClientEmail)) {
       validations.emailIsValid = false;
       setSearchErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
+        const index = oldValue.indexOf("Insira um email");
         if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return [...oldValue, "Email inválido"];
+        return [...oldValue, "Insira um email"];
       });
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
+      const index = errorMessage.indexOf("Insira um email");
       if (index >= 0)
         setSearchErrorMessage((oldValue) => {
           return oldValue.splice(index, 1);
@@ -222,6 +222,14 @@ const Home: NextPage = () => {
   const router = useRouter();
   function redirectToCompanyPage(id: Number) {
     router.push(`/empresas/${id}`);
+  }
+
+  function handleEmailInput(value: string) {
+    setSearchClientEmail(value)
+    console.log(adviseErrorMessage)
+    if(value) {
+      setSearchErrorMessage(searchErrorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+    }
   }
 
   return (
@@ -426,7 +434,7 @@ const Home: NextPage = () => {
                         placeholder="Digite seu email"
                         value={searchClientEmail}
                         onChange={({ target }) =>
-                          setSearchClientEmail(target.value)
+                          handleEmailInput(target.value)
                         }
                       />
                     </Col>
@@ -464,61 +472,61 @@ const Home: NextPage = () => {
                 <Card.Body>
                   {searchScheduleTimes.length > 0
                     ? searchScheduleTimes.map((scheduleTime, index) => (
-                        <Card key={index}>
-                          <Card.Body>
-                            <Row xs={12} md={12}>
-                              <Col xs={12} sm={12} md={12}>
-                                <div className="apply-space-between">
-                                  <Card.Title className="darkBlueText  mt-2 mb-3">
-                                    Horário {index + 1}
-                                  </Card.Title>
-                                  <Button
-                                    variant="primary mt-2"
-                                    onClick={() =>
-                                      handleModalConfirm(scheduleTime.id)
-                                    }
-                                  >
-                                    Avisar
-                                  </Button>
-                                </div>
-                                <Card.Text className="mb-2">
-                                  <span className={`darkBlueText`}>
-                                    Empresa:
-                                  </span>{" "}
-                                  {scheduleTime.company.name}
-                                </Card.Text>
-                                <Card.Text className="mb-2">
-                                  <span className={`darkBlueText`}>Data:</span>{" "}
-                                  {dayjs(scheduleTime.date)
-                                    .add(1, "day")
-                                    .format("DD/MM/YYYY")}
-                                </Card.Text>
-                                <Card.Text className="mb-2">
-                                  <span className={`darkBlueText`}>
-                                    Horário:
-                                  </span>{" "}
-                                  {scheduleTime.time}
-                                </Card.Text>
-                                <Card.Text className="mb-2">
-                                  <span className={`darkBlueText`}>
-                                    Endereço
-                                  </span>{" "}
-                                  {scheduleTime.company.address}
-                                </Card.Text>
-                              </Col>
-                            </Row>
-                          </Card.Body>
-                        </Card>
-                      ))
+                      <Card key={index}>
+                        <Card.Body>
+                          <Row xs={12} md={12}>
+                            <Col xs={12} sm={12} md={12}>
+                              <div className="apply-space-between">
+                                <Card.Title className="darkBlueText  mt-2 mb-3">
+                                  Horário {index + 1}
+                                </Card.Title>
+                                <Button
+                                  variant="primary mt-2"
+                                  onClick={() =>
+                                    handleModalConfirm(scheduleTime.id)
+                                  }
+                                >
+                                  Avisar
+                                </Button>
+                              </div>
+                              <Card.Text className="mb-2">
+                                <span className={`darkBlueText`}>
+                                  Empresa:
+                                </span>{" "}
+                                {scheduleTime.company.name}
+                              </Card.Text>
+                              <Card.Text className="mb-2">
+                                <span className={`darkBlueText`}>Data:</span>{" "}
+                                {dayjs(scheduleTime.date)
+                                  .add(1, "day")
+                                  .format("DD/MM/YYYY")}
+                              </Card.Text>
+                              <Card.Text className="mb-2">
+                                <span className={`darkBlueText`}>
+                                  Horário:
+                                </span>{" "}
+                                {scheduleTime.time}
+                              </Card.Text>
+                              <Card.Text className="mb-2">
+                                <span className={`darkBlueText`}>
+                                  Endereço
+                                </span>{" "}
+                                {scheduleTime.company.address}
+                              </Card.Text>
+                            </Col>
+                          </Row>
+                        </Card.Body>
+                      </Card>
+                    ))
                     : searchErrorMessage.length > 0 &&
-                      searchErrorMessage.map((searchErrorMessage, index) => (
-                        <p
-                          key={index}
-                          className={`${styles.errorMessage} my-3`}
-                        >
-                          {searchErrorMessage}
-                        </p>
-                      ))}
+                    searchErrorMessage.map((searchErrorMessage, index) => (
+                      <p
+                        key={index}
+                        className={`${styles.errorMessage} my-3`}
+                      >
+                        {searchErrorMessage}
+                      </p>
+                    ))}
                 </Card.Body>
               </Card>
             </Col>
