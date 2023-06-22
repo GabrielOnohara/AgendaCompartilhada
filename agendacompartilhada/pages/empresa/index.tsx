@@ -688,7 +688,8 @@ const Empresa: NextPage = () => {
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshMessages(company.id);
+          refreshTeam(company.id).then(() => refreshMessages(company.id));
+
         }
         break;
       case "agenda":
