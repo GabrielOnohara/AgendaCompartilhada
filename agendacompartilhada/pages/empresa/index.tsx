@@ -37,6 +37,7 @@ const Empresa: NextPage = () => {
     setEmail("");
     setName("");
     setTelefone("");
+    setAddress("");
     setPassword("");
     setAdmin(false);
     setErrorMessageContribuitor([]);
@@ -47,6 +48,7 @@ const Empresa: NextPage = () => {
     setEmail("");
     setName("");
     setTelefone("");
+    setAddress("");
     setPassword("");
     setAdmin(false);
     setShowModal(true);
@@ -57,6 +59,7 @@ const Empresa: NextPage = () => {
     setEmail(contributor.email ?? "");
     setName(contributor.name ?? "");
     setTelefone(contributor.phone ?? "");
+    setAddress(contributor.address ?? "");
     setPassword(contributor.password ?? "");
     setAdmin(contributor.isAdmin ?? false);
     setModalTitle("Editar");
@@ -68,6 +71,7 @@ const Empresa: NextPage = () => {
     setEmail(contributor.email ?? "");
     setName(contributor.name ?? "");
     setTelefone(contributor.phone ?? "");
+    setAddress(contributor.address ?? "");
     setModalTitle("Deletar");
     setShowModal(true);
   };
@@ -77,6 +81,7 @@ const Empresa: NextPage = () => {
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
+  const [address, setAddress] = React.useState("");
   const [admin, setAdmin] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [errorMessageContribuitor, setErrorMessageContribuitor] =
@@ -864,7 +869,7 @@ const Empresa: NextPage = () => {
                                 onChange={(newValue) => {
                                   setDate(dayjs(newValue));
                                 }}
-                                renderInput={(params) => (
+                                renderInput={(params: any) => (
                                   <TextField {...params} />
                                 )}
                                 inputFormat="DD/MM/YYYY"
