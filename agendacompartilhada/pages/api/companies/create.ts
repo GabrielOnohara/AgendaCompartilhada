@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,7 +25,7 @@ export default async function handler(
           const newCompany = await prisma.company.create({
             data: jsonData,
           });
-          const token = jwt.sign({ newCompany }, process.env.JWT_KEY, {
+          const token = jwt.sign({ newCompany }, process.env.JWT_KEY ?? "", {
             expiresIn: 60 * 60,
           });
           res.statusMessage = "Usuário criado com sucesso";

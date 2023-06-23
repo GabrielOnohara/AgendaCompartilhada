@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
+import jwt from "jsonwebtoken";
+
 var bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,7 +25,7 @@ export default async function handler(
             company.password
           );
           if (passwordsMatch) {
-            const token = jwt.sign({ company }, process.env.JWT_KEY, {
+            const token = jwt.sign({ company }, process.env.JWT_KEY ?? "", {
               expiresIn: 60 * 60,
             });
             res.statusMessage = "Login efetuado com sucesso";
@@ -33,10 +34,38 @@ export default async function handler(
             res.statusMessage = "Senha inválida";
             res.status(400);
           }
-        } else {
-          res.statusMessage = "Email não encontrado";
-          res.status(400);
+          return;
         }
+
+        const contribuitor = await prisma.contribuitor.findFirst({
+          where: {
+            email: data.email,
+          },
+        });
+        if (contribuitor) {
+          var passwordsMatch = bcrypt.compareSync(
+            data.password,
+            contribuitor.password
+          );
+          if (passwordsMatch) {
+            const token = jwt.sign(
+              { contribuitor },
+              process.env.JWT_KEY ?? "",
+              {
+                expiresIn: 60 * 60,
+              }
+            );
+            res.statusMessage = "Login efetuado com sucesso";
+            res.status(200).json({ token, contribuitor });
+          } else {
+            res.statusMessage = "Senha inválida";
+            res.status(400);
+          }
+          return;
+        }
+
+        res.statusMessage = "Email não encontrado";
+        res.status(400);
       } catch (error) {
         res.statusMessage = "Não foi possível efetuar login";
         res.status(400).json({ error: error });

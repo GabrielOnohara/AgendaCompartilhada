@@ -263,16 +263,19 @@ const Home: NextPage = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <Nav.Link href="/login">Login</Nav.Link>
+              {/*
               <NavDropdown
                 align={{ lg: "end" }}
                 drop="down"
                 title="Login"
                 id="basic-nav-dropdown"
               >
-                {/* <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
-                <NavDropdown.Divider /> */}
+                <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
+                <NavDropdown.Divider />
                 <NavDropdown.Item href="/login">Sou empresa</NavDropdown.Item>
               </NavDropdown>
+              */}
             </Nav>
           </Navbar.Collapse>
         </Container>
