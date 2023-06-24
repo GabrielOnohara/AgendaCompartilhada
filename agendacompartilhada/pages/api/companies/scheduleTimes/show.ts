@@ -31,8 +31,8 @@ export default async function handler(
           });
         }
       } catch (error) {
-        throw error;
         res.status(400).json({ error: error });
+        throw error;
       } finally {
         res.end();
         await prisma.$disconnect();

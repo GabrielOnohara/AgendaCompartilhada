@@ -19,22 +19,25 @@ export default async function handler(
             id: parseInt(id ?? "0"),
           },
         });
-        if (company) {
-          const { password, ...newCompany } = company;
-          const calendar = await prisma.calendar.findUnique({
-            where: {
-              companyId: parseInt(id ?? "0"),
-            },
-          });
-          const contributors = await prisma.contribuitor.findMany({
-            where: {
-              companyId: parseInt(id ?? "0"),
-            },
-          });
-          res.status(200).json({ newCompany, calendar, contributors });
-        } else {
-          res.status(400).json({ error: "Empresa não encontrada" });
+
+        if (company == null) {
+          return res.status(400).json({ error: "Empresa não encontrada" });
         }
+
+        const { password, ...newCompany } = company;
+        const calendar = await prisma.calendar.findUnique({
+          where: {
+            companyId: parseInt(id ?? "0"),
+          },
+        });
+
+        const contributors = await prisma.contribuitor.findMany({
+          where: {
+            companyId: parseInt(id ?? "0"),
+          },
+        });
+
+        res.status(200).json({ newCompany, calendar, contributors });
       } catch (error) {
         res.status(400).json({ error: error });
       } finally {
