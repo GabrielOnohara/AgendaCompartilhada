@@ -5,8 +5,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { emailSlug } = req.query;
-  const email = emailSlug?.at(0);
+  const email = req.query["email"] as string;
   const prisma = new PrismaClient();
   await prisma.$connect();
   switch (req.method) {
