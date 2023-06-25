@@ -221,11 +221,12 @@ const CompanyPage: NextPage = () => {
 
   const thereAreTimesAvaliable = async (company: Company) => {
     let thereAreAvaliableTimes = false;
+    if (selectedScheduleTime == null) return false;
     const data = {
       companyId: company.id,
       scheduleTime: {
         date: dayjs(selectedScheduleDay).format("YYYY-MM-DD"),
-        time: selectedScheduleTime,
+        time: selectedScheduleTime.time,
       },
     };
 

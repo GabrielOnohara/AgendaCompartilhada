@@ -29,115 +29,82 @@ export default async function handler(
   switch (req.method) {
     case "POST":
       try {
-        const company = await prisma.company.findUnique({
-          where: {
-            id: companyId,
-          },
-        });
+        await prisma.$transaction(async (prisma) => {
+          const company = await prisma.company.findUnique({
+            where: {
+              id: companyId,
+            },
+          });
 
-        if (company) {
+          if (company == null) {
+            throw new Error("Empresa não encontrada");
+          }
+
           const contribuitor = await prisma.contribuitor.findUnique({
             where: {
               id: contribuitorId,
             },
           });
-          if (contribuitor) {
-            const client = await prisma.client.findUnique({
-              where: {
-                email: clientData.email,
-              },
-            });
-            if (client) {
-              const scheduleTime = await prisma.scheduleTime.findFirst({
-                where: {
-                  contribuitorId: contribuitor.id,
-                  companyId: companyId,
-                  date: new Date(scheduleTimeData.date),
-                  time: scheduleTimeData.time,
-                },
-              });
 
-              if (scheduleTime) {
-                res
-                  .status(400)
-                  .json({ error: "Horário indisponível, atualize a página." });
-              } else {
-                const newScheduleTime = await prisma.scheduleTime.create({
-                  data: {
-                    companyId: company.id,
-                    date: new Date(scheduleTimeData.date),
-                    time: scheduleTimeData.time,
-                    duration: scheduleTimeData.duration,
-                    clientId: client.id,
-                    contribuitorId: contribuitor.id,
-                  },
-                });
-                if (newScheduleTime) {
-                  res.status(200).json({ newScheduleTime });
-                } else {
-                  res
-                    .status(400)
-                    .json({ error: "Não foi possível agendar horário" });
-                }
-              }
-            } else {
-              const newClient = await prisma.client.create({
+          if (contribuitor == null) {
+            throw new Error("Profissional não encontrado");
+          }
+
+          let client = await prisma.client.findUnique({
+            where: {
+              email: clientData.email,
+            },
+          });
+
+          if (client == null) {
+            try {
+              client = await prisma.client.create({
                 data: {
                   email: clientData.email,
                   name: clientData.name,
                   phone: clientData.phone,
                 },
               });
-
-              if (newClient) {
-                const scheduleTime = await prisma.scheduleTime.findFirst({
-                  where: {
-                    contribuitorId: contribuitor.id,
-                    companyId: companyId,
-                    date: new Date(scheduleTimeData.date),
-                    time: scheduleTimeData.time,
-                  },
-                });
-                if (scheduleTime) {
-                  res
-                    .status(400)
-                    .json({
-                      error: "Horário indisponível, atualize a página.",
-                    });
-                } else {
-                  const newScheduleTime = await prisma.scheduleTime.create({
-                    data: {
-                      companyId: company.id,
-                      date: new Date(scheduleTimeData.date),
-                      time: scheduleTimeData.time,
-                      duration: scheduleTimeData.duration,
-                      clientId: newClient.id,
-                      contribuitorId: contribuitor.id,
-                    },
-                  });
-                  if (newScheduleTime) {
-                    res.status(200).json({ newScheduleTime });
-                  } else {
-                    res
-                      .status(400)
-                      .json({ error: "Não foi possível agendar horário" });
-                  }
-                }
-              } else {
-                res
-                  .status(400)
-                  .json({ error: "Não foi possível cadastrar cliente" });
-              }
+            } catch (error) {
+              throw new Error("Não foi possível cadastrar cliente");
             }
-          } else {
-            res.status(400).json({ error: "Profissional não encontrado" });
           }
-        } else {
-          res.status(400).json({ error: "Empresa não encontrada" });
-        }
+
+          const scheduleTime = await prisma.scheduleTime.findFirst({
+            where: {
+              contribuitorId: contribuitor.id,
+              companyId: companyId,
+              date: new Date(scheduleTimeData.date),
+              time: scheduleTimeData.time,
+            },
+          });
+
+          if (scheduleTime) {
+            throw new Error("Horário indisponível, atualize a página.");
+          }
+
+          try {
+            const newScheduleTime = await prisma.scheduleTime.create({
+              data: {
+                companyId: company.id,
+                date: new Date(scheduleTimeData.date),
+                time: scheduleTimeData.time,
+                duration: scheduleTimeData.duration,
+                clientId: client.id,
+                contribuitorId: contribuitor.id,
+              },
+            });
+            res.status(200).json({ newScheduleTime });
+          } catch (error) {
+            throw new Error("Não foi possível agendar horário");
+          }
+        });
       } catch (error) {
-        throw error;
+        if (error instanceof Error) {
+          error = error.message;
+        }
         res.status(400).json({ error: error });
+        throw error;
       } finally {
         res.end();
         await prisma.$disconnect();

@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { json } from "stream/consumers";
 
@@ -18,21 +18,22 @@ export default async function handler(
             id: jsonData.id,
           },
           data: {
-            readed: jsonData.readed
-          }
+            readed: jsonData.readed,
+          },
         });
-        if (message) {
-          res.statusMessage = "Mensagem atualizada com sucesso";
-          res.status(200);
-        } else {
-          res.statusMessage = "Não encontrou mensagem";
-          res.status(400).json({ error: "Não encontrou mensagem" });
-        }
-
+        res.statusMessage = "Mensagem atualizada com sucesso";
+        res.status(200);
       } catch (error) {
-        res.statusMessage = "Erro: " + error;
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025"
+        ) {
+          res.statusMessage = "Não encontrou mensagem";
+          return res.status(404).json({ error: "Não encontrou mensagem" });
+        }
+        res.statusMessage = "Erro ao atualizar mensagem";
         res.status(400).json({ error: error });
-        throw error
+        throw error;
       } finally {
         res.end();
         await prisma.$disconnect();

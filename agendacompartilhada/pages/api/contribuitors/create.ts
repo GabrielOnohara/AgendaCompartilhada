@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -12,22 +12,20 @@ export default async function handler(
       const prisma = new PrismaClient();
       await prisma.$connect();
       try {
-        const contribuitor = await prisma.contribuitor.findFirst({
-          where: {
-            email: jsonData.email,
-          },
+        const newContribuitor = await prisma.contribuitor.create({
+          data: jsonData,
         });
-        if (contribuitor) {
+        res.statusMessage = "Usuário criado com sucesso";
+        res.status(200).json({ newContribuitor });
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
           res.statusMessage = "Usuário com o email já existe.";
           res.status(400);
-        } else {
-          const newContribuitor = await prisma.contribuitor.create({
-            data: jsonData,
-          });
-          res.statusMessage = "Usuário criado com sucesso";
-          res.status(200).json({ newContribuitor });
         }
-      } catch (error) {
+
         res.statusMessage = "Não foi possível criar usuário.";
         res.status(400).json({ error: error });
       } finally {
