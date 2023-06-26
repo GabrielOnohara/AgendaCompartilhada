@@ -45,7 +45,7 @@ const CompanyPage: NextPage = () => {
     React.useState<boolean>(false);
   const [intervalsAreUpdated, setIntervalsAreUpdated] =
     React.useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter();
   const path = router.basePath;
   const id = router.query.id as string | undefined;
@@ -192,6 +192,7 @@ const CompanyPage: NextPage = () => {
 
       try {
         const url = path + "/api/companies/scheduleTimes/create";
+        setIsLoading(true)
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -203,11 +204,7 @@ const CompanyPage: NextPage = () => {
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
           let thereAreFreeTimes = await thereAreTimesAvaliable(company);
-          if (thereAreFreeTimes) {
-            setIntervalsAreUpdated(true);
-          } else {
-            setIntervalsAreUpdated(false);
-          }
+          setIntervalsAreUpdated(false);
         } else {
           const json = await response.json();
           setErrorMessage([json.error]);
@@ -215,6 +212,8 @@ const CompanyPage: NextPage = () => {
       } catch (error) {
         console.log(error);
         showError(`Erro Interno: ${error}`);
+      }finally{
+        setIsLoading(false)
       }
     }
   };
@@ -583,7 +582,7 @@ const CompanyPage: NextPage = () => {
                   <Button variant="danger" onClick={handleCloseModal}>
                     Cancelar
                   </Button>
-                  <Button variant="success" onClick={handleModalConfirm}>
+                  <Button variant="success" onClick={handleModalConfirm} disabled={isLoading}>
                     Confirmar
                   </Button>
                 </div>
