@@ -133,33 +133,33 @@ const CompanyPage: NextPage = () => {
       return regexEmail.test(email);
     };
 
-    if (!validateEmail(clientEmail)) {
-      validations.emailIsValid = false;
-      showError("Email inválido");
+    if (!(selectedContributor.length > 0)) {
+      showError("Selecione um contribuidor");
     } else {
-      validations.emailIsValid = true;
-      hideError("Email inválido");
+      validations.contributorIsValid = true;
+      hideError("Selecione um contribuidor");
     }
 
-    if (!(clientPhone.length >= 10)) {
-      showError("Telefone inválido");
+    if (!validateEmail(clientEmail)) {
+      validations.emailIsValid = false;
+      showError("Insira um email válido");
     } else {
-      validations.phoneIsValid = true;
-      hideError("Telefone inválido");
+      validations.emailIsValid = true;
+      hideError("Insira um email válido");
     }
 
     if (!(clientName.length > 0)) {
-      showError("Nome inválido");
+      showError("Insira um nome");
     } else {
       validations.nameIsValid = true;
-      hideError("Nome inválido");
+      hideError("Insira um nome");
     }
 
-    if (!(selectedContributor.length > 0)) {
-      showError("Contribuidor inválido");
+    if (!(clientPhone.length >= 10)) {
+      showError("Insira um telefone válido");
     } else {
-      validations.contributorIsValid = true;
-      hideError("Contribuidor inválido");
+      validations.phoneIsValid = true;
+      hideError("Insira um telefone válido");
     }
 
     if (
@@ -218,6 +218,26 @@ const CompanyPage: NextPage = () => {
       }
     }
   };
+
+  function handleInput(value: string, type: string) {
+    if (type === 'email') {
+      setClientEmail(value)
+      if (value)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+    } else if (type === 'name') {
+      setClientName(value)
+      if (value)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
+    } else if (type === 'phone') {
+      setClientPhone(value)
+      if (value.length >= 10)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um telefone válido"))
+    } else if (type === 'contribuitor') {
+      setSelectedContributor(value)
+      if (value)
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Selecione um contribuidor"))
+    }
+  }
 
   const thereAreTimesAvaliable = async (company: Company) => {
     let thereAreAvaliableTimes = false;
@@ -506,7 +526,7 @@ const CompanyPage: NextPage = () => {
                       <Form.Select
                         onChange={({ target }) => {
                           console.log(target.value);
-                          setSelectedContributor(target.value);
+                          handleInput(target.value, 'contribuitor');
                         }}
                       >
                         <option></option>
@@ -529,7 +549,7 @@ const CompanyPage: NextPage = () => {
                         className="bg-white"
                         value={clientEmail}
                         type="email"
-                        onChange={({ target }) => setClientEmail(target.value)}
+                        onChange={({ target }) => handleInput(target.value, 'email')}
                       />
                     </Form.Group>
                     <Form.Group
@@ -542,7 +562,7 @@ const CompanyPage: NextPage = () => {
                         className="bg-white"
                         value={clientName}
                         type="text"
-                        onChange={({ target }) => setClientName(target.value)}
+                        onChange={({ target }) => handleInput(target.value, "name")}
                       />
                     </Form.Group>
                     <Form.Group
@@ -555,7 +575,7 @@ const CompanyPage: NextPage = () => {
                         className="bg-white"
                         value={clientPhone}
                         type="tel"
-                        onChange={({ target }) => setClientPhone(target.value)}
+                        onChange={({ target }) => handleInput(target.value, "phone")}
                       />
                     </Form.Group>
                   </div>
@@ -579,7 +599,7 @@ const CompanyPage: NextPage = () => {
                   </Button>
                 </div>
               ) : (
-                <div>
+                <div className="d-flex gap-2">
                   <Button variant="danger" onClick={handleCloseModal}>
                     Cancelar
                   </Button>

@@ -218,15 +218,15 @@ const Empresa: NextPage = () => {
         if (!validateEmail(email)) {
           validations.emailIsValid = false;
           setErrorMessageContribuitor((oldValue) => {
-            const index = oldValue.indexOf("Email inválido");
+            const index = oldValue.indexOf("Insira um email válido");
             if (index >= 0) {
               oldValue.splice(index, 1);
             }
-            return [...oldValue, "Email inválido"];
+            return [...oldValue, "Insira um email válido"];
           });
         } else {
           validations.emailIsValid = true;
-          const index = errorMessage.indexOf("Email inválido");
+          const index = errorMessage.indexOf("Insira um email válido");
           if (index >= 0)
             setErrorMessageContribuitor((oldValue) => {
               return oldValue.splice(index, 1);
@@ -374,6 +374,18 @@ const Empresa: NextPage = () => {
         break;
       default:
         break;
+    }
+  }
+
+  function handleInputError(value: string, type: string) {
+    if (type === 'email') {
+      setEmail(value)
+      if (value)
+        setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um email válido"))
+    } else if (type === 'password') {
+      setPassword(value)
+      if (value.length >= 6)
+        setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
     }
   }
 
@@ -592,7 +604,7 @@ const Empresa: NextPage = () => {
       contributor: scheduleTimeContributor,
       date: date.subtract(1, 'hour').format("YYYY-MM-DD")
     }
-    
+
     try {
       setIsLoading(true)
       const url = "api/contribuitors/scheduleTimes/show";
@@ -604,17 +616,17 @@ const Empresa: NextPage = () => {
         body: JSON.stringify(data),
       });
 
-    if (response.ok) {
-      const json = await response.json()
-      setScheduleTimes(json.scheduleTimes)
-    } else {
-    }
+      if (response.ok) {
+        const json = await response.json()
+        setScheduleTimes(json.scheduleTimes)
+      } else {
+      }
     } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       setIsLoading(false)
     }
-    
+
 
   }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
@@ -657,7 +669,7 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
-    async function refreshMessages(companyID: any, contributors:any) {
+    async function refreshMessages(companyID: any, contributors: any) {
       const data = {
         date: dayjs(new Date()).format("YYYY-MM-DD"),
         companyId: companyID,
@@ -678,8 +690,8 @@ const Empresa: NextPage = () => {
             scheduleTimesList.forEach((time: any) => {
               if (time.id == message.scheduleTimeId) {
                 message.scheduleTime = time;
-                contributors.forEach((contribuitor:any)=>{
-                  if(contribuitor.id == message.scheduleTime.contribuitorId){
+                contributors.forEach((contribuitor: any) => {
+                  if (contribuitor.id == message.scheduleTime.contribuitorId) {
                     message.contributor = contribuitor
                   }
                 })
@@ -706,7 +718,7 @@ const Empresa: NextPage = () => {
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshTeam(company.id).then((contributors)=> refreshMessages(company.id, contributors))
+          refreshTeam(company.id).then((contributors) => refreshMessages(company.id, contributors))
         }
         break;
       case "agenda":
@@ -994,88 +1006,88 @@ const Empresa: NextPage = () => {
                       </Card.Title>
                       <Card.Text></Card.Text>
                       {
-                       messages.length && contribuitors.length <= 0 
-                       ? (
-                        <Card>
-                          <Card.Body >
-                            <Card.Text>
-                              <p className="mb-1" style={{ textAlign: "center" }}>
-                                <span
-                                  className="darkBlueText"
-                                  style={{ fontWeight: "bold" }}
-                                >
-                                  Não foram encontrados novos avisos.
-                                </span>{" "}
-                              </p>
-                            </Card.Text>
-                          </Card.Body>
-                        </Card>
-                       )
-                      :  messages.map((m)=> (
-                      <Card key={m.id}>
-                        <Card.Body >
-                          <Card.Text>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Contribuidor:
-                              </span>{" "}
-                              {m.contributor.name}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Data:
-                              </span>{" "}
-                              {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Cliente:
-                              </span>{" "}
-                              {m.client.name}
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Mensagem:
-                              </span>
-                              <br /> {m.content}
-                            </p>
-                            {!m.readed 
-                             ?(
-                              <Button
-                              variant="primary"
-                              className="mt-3 btn-sm"
-                              style={{ float: "right" }}
-                              onClick={() => setMessageAsReaded(m)}
-                            >
-                              Marcar como lida
-                            </Button>
-                             )
-                             :(
-                              <Button
-                              variant="success"
-                              className="mt-3 btn-sm"
-                              style={{ float: "right" }}
-                              disabled
-                            >
-                              Lida
-                            </Button>
-                             )
-                             }
-                          </Card.Text>
-                        </Card.Body>
-                      </Card>
+                        messages.length && contribuitors.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Não foram encontrados novos avisos.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : messages.map((m) => (
+                            <Card key={m.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Contribuidor:
+                                    </span>{" "}
+                                    {m.contributor.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Data:
+                                    </span>{" "}
+                                    {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Cliente:
+                                    </span>{" "}
+                                    {m.client.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Mensagem:
+                                    </span>
+                                    <br /> {m.content}
+                                  </p>
+                                  {!m.readed
+                                    ? (
+                                      <Button
+                                        variant="primary"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        onClick={() => setMessageAsReaded(m)}
+                                      >
+                                        Marcar como lida
+                                      </Button>
+                                    )
+                                    : (
+                                      <Button
+                                        variant="success"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        disabled
+                                      >
+                                        Lida
+                                      </Button>
+                                    )
+                                  }
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
                           ))
                       }
                     </Card.Body>
@@ -1276,7 +1288,7 @@ const Empresa: NextPage = () => {
                           autoFocus
                           className="bg-white"
                           value={email}
-                          onChange={({ target }) => setEmail(target.value)}
+                          onChange={({ target }) => handleInputError(target.value, 'email')}
                           disabled={modalTitle == "Deletar"}
                         />
                       </Form.Group>
@@ -1319,7 +1331,7 @@ const Empresa: NextPage = () => {
                             placeholder="Senha"
                             className="bg-white"
                             value={password}
-                            onChange={({ target }) => setPassword(target.value)}
+                            onChange={({ target }) => handleInputError(target.value, 'password')}
                           />
                         </Form.Group>
                       )}
