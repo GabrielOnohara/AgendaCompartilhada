@@ -107,15 +107,15 @@ const Home: NextPage = () => {
     if (!validateEmail(searchClientEmail)) {
       validations.emailIsValid = false;
       setSearchErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira um email");
+        const index = oldValue.indexOf("Insira um email válido");
         if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return [...oldValue, "Insira um email"];
+        return [...oldValue, "Insira um email válido"];
       });
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Insira um email");
+      const index = errorMessage.indexOf("Insira um email válido");
       if (index >= 0)
         setSearchErrorMessage((oldValue) => {
           return oldValue.splice(index, 1);
@@ -226,9 +226,8 @@ const Home: NextPage = () => {
 
   function handleEmailInput(value: string) {
     setSearchClientEmail(value)
-    console.log(adviseErrorMessage)
-    if(value) {
-      setSearchErrorMessage(searchErrorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+    if (value) {
+      setSearchErrorMessage(searchErrorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
     }
   }
 

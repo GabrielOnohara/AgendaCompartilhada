@@ -94,15 +94,15 @@ const RegisterPage: NextPage = () => {
     if (!validateEmail(email)) {
       validations.emailIsValid = false;
       setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira um email");
+        const index = oldValue.indexOf("Insira um email válido");
         if (index >= 0) {
           oldValue.splice(index, 1);
         }
-        return [...oldValue, "Insira um email"];
+        return [...oldValue, "Insira um email válido"];
       });
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Insira um email");
+      const index = errorMessage.indexOf("Insira um email válido");
       if (index >= 0)
         setErrorMessage((oldValue) => {
           return oldValue.splice(index, 1);
@@ -172,10 +172,10 @@ const RegisterPage: NextPage = () => {
     if (type === 'email') {
       setEmail(value)
       if (value)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
     } else if (type === 'password') {
       setPassword(value)
-      if (value.length > 6)
+      if (value.length >= 6)
         setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
     }
   }
@@ -258,7 +258,7 @@ const RegisterPage: NextPage = () => {
               name="address"
               id="address"
               value={address}
-              onChange={({target}) => setAddress(target.value)}
+              onChange={({ target }) => setAddress(target.value)}
             />
             <label htmlFor="telefone" className="title3">
               Telefone

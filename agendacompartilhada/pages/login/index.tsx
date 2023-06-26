@@ -82,18 +82,18 @@ const Home: NextPage = () => {
 
     if (email.trim().length == 0) {
       validations.emailIsValid = false;
-      showError("Insira um email");
+      showError("Insira um email válido");
     } else {
       validations.emailIsValid = true;
-      hideError("Insira um email");
+      hideError("Insira um email válido");
     }
 
     if (password.trim().length == 0) {
       validations.passwordIsValid = false;
-      showError("Insira uma senha");
+      showError("Insira uma senha válida");
     } else {
       validations.passwordIsValid = true;
-      hideError("Insira uma senha");
+      hideError("Insira uma senha válida");
     }
 
     if (validations.emailIsValid && validations.passwordIsValid) {
@@ -142,14 +142,14 @@ const Home: NextPage = () => {
   function handleEmail(value: string) {
     setEmail(value)
     if (value) {
-      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email"))
+      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
     }
   }
 
   function handlePassword(value: string) {
     setPassword(value)
     if (value) {
-      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha"))
+      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha válida"))
     } else {
       setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senha inválida"))
     }
