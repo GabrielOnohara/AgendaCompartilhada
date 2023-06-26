@@ -191,6 +191,7 @@ const CompanyPage: NextPage = () => {
       };
 
       try {
+        setErrorMessage([]);
         const url = path + "/api/companies/scheduleTimes/create";
         setIsLoading(true)
         const response = await fetch(url, {
