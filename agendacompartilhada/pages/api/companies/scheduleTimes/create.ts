@@ -1,4 +1,4 @@
-import { PrismaClient, ScheduleTime } from "@prisma/client";
+import { Prisma, PrismaClient, ScheduleTime } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -66,6 +66,19 @@ export default async function handler(
                 },
               });
             } catch (error) {
+              console.log(error);
+              if (
+                error instanceof Prisma.PrismaClientKnownRequestError &&
+                error.code === "P2002" &&
+                error.meta
+              ) {
+                let target: any = error.meta.target;
+                if (target.includes("email")) {
+                  throw new Error("Usuário com o email já existe.");
+                } else if (target.includes("phone")) {
+                  throw new Error("Usuário com o telefone já existe.");
+                }
+              }
               throw new Error("Não foi possível cadastrar cliente");
             }
           }
