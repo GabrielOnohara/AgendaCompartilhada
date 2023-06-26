@@ -30,7 +30,7 @@ const Empresa: NextPage = () => {
     React.useState<string>("resumo");
   const [showModal, setShowModal] = React.useState(false);
   const [showModalCalendar, setShowModalCalendar] = React.useState(false);
-
+  const [isLoading, setIsLoading] = React.useState(false)
   const handleCloseModal = () => {
     setShowModal(false);
     setModalTitle("");
@@ -592,21 +592,30 @@ const Empresa: NextPage = () => {
       contributor: scheduleTimeContributor,
       date: date.subtract(1, 'hour').format("YYYY-MM-DD")
     }
-
-    const url = "api/contribuitors/scheduleTimes/show";
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify(data),
-    });
+    
+    try {
+      setIsLoading(true)
+      const url = "api/contribuitors/scheduleTimes/show";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(data),
+      });
 
     if (response.ok) {
       const json = await response.json()
       setScheduleTimes(json.scheduleTimes)
     } else {
     }
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setIsLoading(false)
+    }
+    
+
   }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
@@ -878,12 +887,11 @@ const Empresa: NextPage = () => {
                           </Form.Group>
                         </Form>
                       </Card.Text>
-                      <Button variant="success" onClick={searchScheduleTimes}>
+                      <Button variant="success" onClick={searchScheduleTimes} disabled={isLoading}>
                         Confirmar
                       </Button>
                     </Card.Body>
-                  </Card>
-                  <Card>
+                    <hr />
                     <Card.Body>
                       <Card.Title
                         style={{ marginBottom: "20px", textAlign: "center" }}
@@ -929,6 +937,52 @@ const Empresa: NextPage = () => {
                       }
                     </Card.Body>
                   </Card>
+                  {/* <Card>
+                    <Card.Body>
+                      <Card.Title
+                        style={{ marginBottom: "20px", textAlign: "center" }}
+                      >
+                        Agendamentos
+                      </Card.Title>
+                      <Card.Text></Card.Text>
+                      {
+                        scheduleTimes.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="error"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Nenhum horário encontrado.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : scheduleTimes.map((s) => (
+                            <Card key={s.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Horário:
+                                    </span>{" "}
+                                    {s.time}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          ))
+                      }
+                    </Card.Body>
+                  </Card> */}
                 </Col>
                 <Col>
                   <Card>
