@@ -168,16 +168,17 @@ const Empresa: NextPage = () => {
     }
   }
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   async function onSubmitModalConfirm(e: any) {
     e.preventDefault();
     const validations = {
       emailIsValid: false,
+      hasName: false,
       passwordLengthIsValid: false,
-    };
-
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
     };
 
     switch (modalTitle) {
@@ -192,6 +193,42 @@ const Empresa: NextPage = () => {
         };
 
         setModalTitle("Adicionar");
+
+        if (!validateEmail(email)) {
+          validations.emailIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um email válido");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um email válido"];
+          });
+        } else {
+          validations.emailIsValid = true;
+          const index = errorMessage.indexOf("Insira um email válido");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
+
+        if (!name) {
+          validations.hasName = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um nome");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um nome"];
+          });
+        } else {
+          validations.hasName = true;
+          const index = errorMessage.indexOf("Insira um nome");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
 
         if (password.length <= 5) {
           validations.passwordLengthIsValid = false;
@@ -209,24 +246,6 @@ const Empresa: NextPage = () => {
           const index = errorMessage.indexOf(
             "Senhas devem ter pelo menos seis dígitos"
           );
-          if (index >= 0)
-            setErrorMessageContribuitor((oldValue) => {
-              return oldValue.splice(index, 1);
-            });
-        }
-
-        if (!validateEmail(email)) {
-          validations.emailIsValid = false;
-          setErrorMessageContribuitor((oldValue) => {
-            const index = oldValue.indexOf("Insira um email válido");
-            if (index >= 0) {
-              oldValue.splice(index, 1);
-            }
-            return [...oldValue, "Insira um email válido"];
-          });
-        } else {
-          validations.emailIsValid = true;
-          const index = errorMessage.indexOf("Insira um email válido");
           if (index >= 0)
             setErrorMessageContribuitor((oldValue) => {
               return oldValue.splice(index, 1);
@@ -313,7 +332,7 @@ const Empresa: NextPage = () => {
             });
         }
 
-        if (validations.emailIsValid && validations.passwordLengthIsValid) {
+        if (validations.emailIsValid && validations.passwordLengthIsValid && validations.hasName) {
           const url = "api/contribuitors/edit";
           try {
             const response = await fetch(url, {
@@ -378,14 +397,24 @@ const Empresa: NextPage = () => {
   }
 
   function handleInputError(value: string, type: string) {
-    if (type === 'email') {
-      setEmail(value)
-      if (value)
-        setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um email válido"))
-    } else if (type === 'password') {
-      setPassword(value)
-      if (value.length >= 6)
-        setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value.length >= 6)
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+        break;
+      case 'name':
+        setName(value)
+        if (value)
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      default:
+        break;
     }
   }
 
@@ -1302,7 +1331,7 @@ const Empresa: NextPage = () => {
                           placeholder="Nome Completo"
                           className="bg-white"
                           value={name}
-                          onChange={({ target }) => setName(target.value)}
+                          onChange={({ target }) => handleInputError(target.value, 'name')}
                           disabled={modalTitle == "Deletar"}
                         />
                       </Form.Group>
