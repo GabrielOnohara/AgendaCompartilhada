@@ -23,6 +23,11 @@ const RegisterPage: NextPage = () => {
   const { company, setCompany } = React.useContext(CompanyContext);
   const router = useRouter();
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
     setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "É necessário aceitar a nossa política de privacidade"))
@@ -33,14 +38,10 @@ const RegisterPage: NextPage = () => {
 
     const validations = {
       emailIsValid: false,
+      hasName: false,
       passwordLengthIsValid: false,
       passwordsMatches: false,
       privacyPoliticIsAccepted: false,
-    };
-
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
     };
 
     let data = {
@@ -50,6 +51,42 @@ const RegisterPage: NextPage = () => {
       phone: telefone,
       address: address
     };
+
+    if (!name) {
+      validations.hasName = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Insira um nome");
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, "Insira um nome"];
+      });
+    } else {
+      validations.hasName = true;
+      const index = errorMessage.indexOf("Insira um nome");
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
+    if (!validateEmail(email)) {
+      validations.emailIsValid = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Insira um email válido");
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, "Insira um email válido"];
+      });
+    } else {
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Insira um email válido");
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
 
     if (password != passwordConfirmation) {
       validations.passwordsMatches = false;
@@ -91,24 +128,6 @@ const RegisterPage: NextPage = () => {
         });
     }
 
-    if (!validateEmail(email)) {
-      validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira um email válido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Insira um email válido"];
-      });
-    } else {
-      validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Insira um email válido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
-    }
-
     if (!acceptPrivacyPolitics) {
       validations.privacyPoliticIsAccepted = false;
       setErrorMessage((oldValue) => {
@@ -138,7 +157,8 @@ const RegisterPage: NextPage = () => {
       validations.emailIsValid &&
       validations.passwordsMatches &&
       validations.passwordLengthIsValid &&
-      validations.privacyPoliticIsAccepted
+      validations.privacyPoliticIsAccepted &&
+      validations.hasName
     ) {
       var salt = bcrypt.genSaltSync(10);
       var hash = bcrypt.hashSync(data.password, salt);
@@ -169,14 +189,24 @@ const RegisterPage: NextPage = () => {
   }
 
   function handleInput(value: string, type: string) {
-    if (type === 'email') {
-      setEmail(value)
-      if (value)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
-    } else if (type === 'password') {
-      setPassword(value)
-      if (value.length >= 6)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value.length >= 6)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+        break;
+      case 'name':
+        setName(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      default:
+        break;
     }
   }
 
@@ -236,7 +266,7 @@ const RegisterPage: NextPage = () => {
               name="name"
               id="name"
               value={name}
-              onChange={({ target }) => setName(target.value)}
+              onChange={({ target }) => handleInput(target.value, "name")}
             />
             <label htmlFor="email" className="title3">
               Email

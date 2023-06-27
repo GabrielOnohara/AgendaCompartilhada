@@ -87,6 +87,11 @@ const CompanyPage: NextPage = () => {
     setSelectedScheduleDay(day);
   };
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   const handleModalConfirm = async () => {
     function showError(message: string) {
       setErrorMessage((oldValue) => {
@@ -126,11 +131,6 @@ const CompanyPage: NextPage = () => {
       nameIsValid: false,
       phoneIsValid: false,
       contributorIsValid: false,
-    };
-
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
     };
 
     if (!(selectedContributor.length > 0)) {
@@ -220,22 +220,29 @@ const CompanyPage: NextPage = () => {
   };
 
   function handleInput(value: string, type: string) {
-    if (type === 'email') {
-      setClientEmail(value)
-      if (value)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
-    } else if (type === 'name') {
-      setClientName(value)
-      if (value)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
-    } else if (type === 'phone') {
-      setClientPhone(value)
-      if (value.length >= 10)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um telefone válido"))
-    } else if (type === 'contribuitor') {
-      setSelectedContributor(value)
-      if (value)
-        setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Selecione um contribuidor"))
+    switch (type) {
+      case 'email':
+        setClientEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'name':
+        setClientName(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      case 'phone':
+        setClientPhone(value)
+        if (value.length >= 10)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um telefone válido"))
+        break;
+      case 'contribuitor':
+        setSelectedContributor(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Selecione um contribuidor"))
+        break;
+      default:
+        break;
     }
   }
 

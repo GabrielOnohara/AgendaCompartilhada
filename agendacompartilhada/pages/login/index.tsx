@@ -49,6 +49,11 @@ const Home: NextPage = () => {
     setRemindeMe(event.target.checked);
   }
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   async function onSubmitHandler(e: any) {
     function showError(message: string) {
       setErrorMessage((oldValue) => {
@@ -80,7 +85,7 @@ const Home: NextPage = () => {
       password: password,
     };
 
-    if (email.trim().length == 0) {
+    if (!validateEmail(email)) {
       validations.emailIsValid = false;
       showError("Insira um email válido");
     } else {
@@ -139,19 +144,22 @@ const Home: NextPage = () => {
     window.localStorage.setItem("email", email);
   }
 
-  function handleEmail(value: string) {
-    setEmail(value)
-    if (value) {
-      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
-    }
-  }
-
-  function handlePassword(value: string) {
-    setPassword(value)
-    if (value) {
-      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha válida"))
-    } else {
-      setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senha inválida"))
+  function handleInput(value: string, type: string) {
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha válida"))
+        else
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senha inválida"))
+        break;
+      default:
+        break;
     }
   }
 
@@ -210,7 +218,7 @@ const Home: NextPage = () => {
               name="email"
               id="email"
               value={email}
-              onChange={({ target }) => handleEmail(target.value)}
+              onChange={({ target }) => handleInput(target.value, 'email')}
             />
             <label htmlFor="password" className="title3">
               Senha
@@ -221,7 +229,7 @@ const Home: NextPage = () => {
               name="password"
               id="password"
               value={password}
-              onChange={({ target }) => handlePassword(target.value)}
+              onChange={({ target }) => handleInput(target.value, 'password')}
             />
             <div className={styles.checkboxContainer}>
               <input
