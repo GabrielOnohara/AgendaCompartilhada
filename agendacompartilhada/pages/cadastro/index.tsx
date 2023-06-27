@@ -176,6 +176,7 @@ const RegisterPage: NextPage = () => {
           const json = await response.json();
 
           window.localStorage.setItem("token", json.token);
+          window.localStorage.setItem("email", email);
           setToken(json.token);
           setCompany(json.newCompany);
           router.push("/empresa");
