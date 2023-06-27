@@ -252,7 +252,7 @@ const Empresa: NextPage = () => {
             });
         }
 
-        if (validations.emailIsValid && validations.passwordLengthIsValid) {
+        if (validations.emailIsValid && validations.passwordLengthIsValid && validations.hasName) {
           var salt = bcrypt.genSaltSync(10);
           var hash = bcrypt.hashSync(dataADD.password, salt);
           dataADD.password = hash;
@@ -326,6 +326,24 @@ const Empresa: NextPage = () => {
         } else {
           validations.emailIsValid = true;
           const index = errorMessage.indexOf("Email inválido");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
+
+        if (!name) {
+          validations.hasName = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um nome");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um nome"];
+          });
+        } else {
+          validations.hasName = true;
+          const index = errorMessage.indexOf("Insira um nome");
           if (index >= 0)
             setErrorMessageContribuitor((oldValue) => {
               return oldValue.splice(index, 1);
