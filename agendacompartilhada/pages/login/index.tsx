@@ -8,14 +8,16 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { TokenContext } from "../../src/context/TokenContext";
 import { CompanyContext } from "../../src/context/CompanyContext";
+import { ContribuitorContext } from "../../src/context/ContribuitorContext";
 
 const Home: NextPage = () => {
   const [remindeMe, setRemindeMe] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
-  const { token, setToken } = React.useContext(TokenContext);
-  const { company, setCompany } = React.useContext(CompanyContext);
+  const { setToken } = React.useContext(TokenContext);
+  const { setCompany } = React.useContext(CompanyContext);
+  const { setContribuitor } = React.useContext(ContribuitorContext);
   const router = useRouter();
   const [autoLogin, setAutologin] = React.useState(false);
 
@@ -28,26 +30,49 @@ const Home: NextPage = () => {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (token) {
-      setAutologin(true);
-      try {
-        setTimeout(() => {
-          router.push("/empresa");
-        }, 3000);
-      } finally {
-        setAutologin(false);
-      }
-    } else {
-      setAutologin(false);
-    }
-  }, [router, token]);
+  // React.useEffect(() => {
+  //   if (token) {
+  //     setAutologin(true);
+  //     try {
+  //       setTimeout(() => {
+  //         router.push("/empresa");
+  //       }, 3000);
+  //     } finally {
+  //       setAutologin(false);
+  //     }
+  //   } else {
+  //     setAutologin(false);
+  //   }
+  // }, [router, token]);
 
   function toggleCheckbox(event: any) {
     setRemindeMe(event.target.checked);
   }
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   async function onSubmitHandler(e: any) {
+    function showError(message: string) {
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf(message);
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, message];
+      });
+    }
+
+    function hideError(message: string) {
+      const index = errorMessage.indexOf(message);
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
     e.preventDefault();
 
     const validations = {
@@ -60,45 +85,26 @@ const Home: NextPage = () => {
       password: password,
     };
 
-    if (email.trim().length == 0) {
+    if (!validateEmail(email)) {
       validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira um email");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Insira um email"];
-      });
+      showError("Insira um email válido");
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Insira um email");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira um email válido");
     }
 
     if (password.trim().length == 0) {
       validations.passwordIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Insira uma senha");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Insira uma senha"];
-      });
+      showError("Insira uma senha válida");
     } else {
       validations.passwordIsValid = true;
-      const index = errorMessage.indexOf("Insira uma senha");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira uma senha válida");
     }
 
     if (validations.emailIsValid && validations.passwordIsValid) {
-      const url = "api/companies/auth";
+      const url = "api/auth";
       try {
+        console.log(data);
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -107,11 +113,26 @@ const Home: NextPage = () => {
           body: JSON.stringify(data),
         });
         if (response.status == 200) {
-          const { token, company } = await response.json();
+          const { token, company, contribuitor } = await response.json();
+          console.log(company);
+          console.log(contribuitor);
           window.localStorage.setItem("token", token);
           setToken(token);
-          setCompany(company);
-          router.push("/empresa");
+          if (company) {
+            console.log("set company");
+            setCompany(company);
+            setContribuitor({});
+            router.push("/empresa");
+          } else if (contribuitor) {
+            console.log("set contribuitor");
+            setCompany({});
+            setContribuitor(contribuitor);
+            router.push("/contribuidor");
+          } else {
+            setErrorMessage([
+              "Erro interno: usuário não é empresa nem contribuidor",
+            ]);
+          }
         } else {
           setErrorMessage([response.statusText]);
         }
@@ -121,6 +142,25 @@ const Home: NextPage = () => {
     }
     window.localStorage.setItem("remindeMe", remindeMe.toString());
     window.localStorage.setItem("email", email);
+  }
+
+  function handleInput(value: string, type: string) {
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira uma senha válida"))
+        else
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senha inválida"))
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -178,7 +218,7 @@ const Home: NextPage = () => {
               name="email"
               id="email"
               value={email}
-              onChange={({ target }) => setEmail(target.value)}
+              onChange={({ target }) => handleInput(target.value, 'email')}
             />
             <label htmlFor="password" className="title3">
               Senha
@@ -189,7 +229,7 @@ const Home: NextPage = () => {
               name="password"
               id="password"
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
+              onChange={({ target }) => handleInput(target.value, 'password')}
             />
             <div className={styles.checkboxContainer}>
               <input
@@ -228,7 +268,7 @@ const Home: NextPage = () => {
                 href={{ pathname: "/cadastro" }}
                 className={`darkBlueText apply-no-underline`}
               >
-                Criar Conta
+                Criar conta
               </Link>
             </div>
           </form>

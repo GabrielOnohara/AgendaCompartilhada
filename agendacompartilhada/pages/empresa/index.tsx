@@ -12,7 +12,7 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import styles from "../../styles/Company.module.css";
-var bcrypt = require("bcryptjs");
+import bcrypt from "bcryptjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -21,6 +21,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import dayjs, { Dayjs } from "dayjs";
+import { log } from "console";
 const Empresa: NextPage = () => {
   const router = useRouter();
   const { token, setToken } = React.useContext(TokenContext);
@@ -29,13 +30,14 @@ const Empresa: NextPage = () => {
     React.useState<string>("resumo");
   const [showModal, setShowModal] = React.useState(false);
   const [showModalCalendar, setShowModalCalendar] = React.useState(false);
-
+  const [isLoading, setIsLoading] = React.useState(false)
   const handleCloseModal = () => {
     setShowModal(false);
     setModalTitle("");
     setEmail("");
     setName("");
     setTelefone("");
+    setAddress("");
     setPassword("");
     setAdmin(false);
     setErrorMessageContribuitor([]);
@@ -46,6 +48,7 @@ const Empresa: NextPage = () => {
     setEmail("");
     setName("");
     setTelefone("");
+    setAddress("");
     setPassword("");
     setAdmin(false);
     setShowModal(true);
@@ -56,6 +59,7 @@ const Empresa: NextPage = () => {
     setEmail(contributor.email ?? "");
     setName(contributor.name ?? "");
     setTelefone(contributor.phone ?? "");
+    setAddress(contributor.address ?? "");
     setPassword(contributor.password ?? "");
     setAdmin(contributor.isAdmin ?? false);
     setModalTitle("Editar");
@@ -67,6 +71,7 @@ const Empresa: NextPage = () => {
     setEmail(contributor.email ?? "");
     setName(contributor.name ?? "");
     setTelefone(contributor.phone ?? "");
+    setAddress(contributor.address ?? "");
     setModalTitle("Deletar");
     setShowModal(true);
   };
@@ -76,6 +81,7 @@ const Empresa: NextPage = () => {
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
+  const [address, setAddress] = React.useState("");
   const [admin, setAdmin] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [errorMessageContribuitor, setErrorMessageContribuitor] =
@@ -88,7 +94,7 @@ const Empresa: NextPage = () => {
   const [modalCalendarTitle, setModalCalendarTitle] =
     React.useState("Adicionar");
   const [calendar, setCalendar] = React.useState<any>({});
-  const [date, setDate] = React.useState<Date | null>(new Date());
+  const [date, setDate] = React.useState<Dayjs>(dayjs(new Date));
   const handleCloseCalendarModal = () => {
     setShowModalCalendar(false);
     setInitialTime("");
@@ -162,16 +168,17 @@ const Empresa: NextPage = () => {
     }
   }
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   async function onSubmitModalConfirm(e: any) {
     e.preventDefault();
     const validations = {
       emailIsValid: false,
+      hasName: false,
       passwordLengthIsValid: false,
-    };
-
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
     };
 
     switch (modalTitle) {
@@ -186,6 +193,42 @@ const Empresa: NextPage = () => {
         };
 
         setModalTitle("Adicionar");
+
+        if (!validateEmail(email)) {
+          validations.emailIsValid = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um email válido");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um email válido"];
+          });
+        } else {
+          validations.emailIsValid = true;
+          const index = errorMessage.indexOf("Insira um email válido");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
+
+        if (!name) {
+          validations.hasName = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um nome");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um nome"];
+          });
+        } else {
+          validations.hasName = true;
+          const index = errorMessage.indexOf("Insira um nome");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
 
         if (password.length <= 5) {
           validations.passwordLengthIsValid = false;
@@ -209,25 +252,7 @@ const Empresa: NextPage = () => {
             });
         }
 
-        if (!validateEmail(email)) {
-          validations.emailIsValid = false;
-          setErrorMessageContribuitor((oldValue) => {
-            const index = oldValue.indexOf("Email inválido");
-            if (index >= 0) {
-              oldValue.splice(index, 1);
-            }
-            return [...oldValue, "Email inválido"];
-          });
-        } else {
-          validations.emailIsValid = true;
-          const index = errorMessage.indexOf("Email inválido");
-          if (index >= 0)
-            setErrorMessageContribuitor((oldValue) => {
-              return oldValue.splice(index, 1);
-            });
-        }
-
-        if (validations.emailIsValid && validations.passwordLengthIsValid) {
+        if (validations.emailIsValid && validations.passwordLengthIsValid && validations.hasName) {
           var salt = bcrypt.genSaltSync(10);
           var hash = bcrypt.hashSync(dataADD.password, salt);
           dataADD.password = hash;
@@ -307,7 +332,25 @@ const Empresa: NextPage = () => {
             });
         }
 
-        if (validations.emailIsValid && validations.passwordLengthIsValid) {
+        if (!name) {
+          validations.hasName = false;
+          setErrorMessageContribuitor((oldValue) => {
+            const index = oldValue.indexOf("Insira um nome");
+            if (index >= 0) {
+              oldValue.splice(index, 1);
+            }
+            return [...oldValue, "Insira um nome"];
+          });
+        } else {
+          validations.hasName = true;
+          const index = errorMessage.indexOf("Insira um nome");
+          if (index >= 0)
+            setErrorMessageContribuitor((oldValue) => {
+              return oldValue.splice(index, 1);
+            });
+        }
+
+        if (validations.emailIsValid && validations.passwordLengthIsValid && validations.hasName) {
           const url = "api/contribuitors/edit";
           try {
             const response = await fetch(url, {
@@ -321,7 +364,6 @@ const Empresa: NextPage = () => {
               const { contributorEdited } = await response.json();
               if (contributorEdited) {
                 refreshTeam(dataEDIT.companyId);
-                setShowModal(false);
                 setModalTitle("");
                 handleCloseModal();
               }
@@ -372,6 +414,28 @@ const Empresa: NextPage = () => {
     }
   }
 
+  function handleInputError(value: string, type: string) {
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value.length >= 6)
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+        break;
+      case 'name':
+        setName(value)
+        if (value)
+          setErrorMessageContribuitor(errorMessageContribuitor.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      default:
+        break;
+    }
+  }
+
   async function refreshTeam(companyID: any) {
     const url = "api/contribuitors/list";
     try {
@@ -386,6 +450,7 @@ const Empresa: NextPage = () => {
         const { contribuitors } = await response.json();
         if (contribuitors) {
           setContribuitors(contribuitors);
+          return contribuitors
         }
       } else {
         setErrorMessage([response.statusText]);
@@ -422,32 +487,7 @@ const Empresa: NextPage = () => {
     }
   }
 
-  async function refreshMessages(companyID: any) {
-    const data = {
-      date: dayjs(new Date()).format("YYYY-MM-DD"),
-      companyId: companyID,
-    };
-    try {
-      const url = "api/companies/scheduleTimes/message/show";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await response.json();
-      if (response.status == 200) {
-        console.log(json.messages);
-        setMessages((oldValue) => [json.messages, ...oldValue]);
-        setAdviseErrorMessage([]);
-      } else {
-        setAdviseErrorMessage([json.error]);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+
 
   async function onSubmitCalendarModalConfirm(e: any) {
     e.preventDefault();
@@ -571,13 +611,71 @@ const Empresa: NextPage = () => {
     }
   }
 
+  function handleInput() {
+    if (initialTime == "" || finishTime == "" || intervalTime == "")
+      setErrorMessageCalendar(errorMessageCalendar.filter((mensagem) => mensagem !== "Preencha todos os campos"))
+  }
+
   const [scheduleTimeContributor, setScheduleTimeContributor] =
     React.useState("");
 
-  async function searchScheduleTimes(e: any) {
-    e.preventDefault();
+  async function setMessageAsReaded(message: any) {
+    const data = {
+      id: message.id,
+      readed: true
+    };
+    const url = "api/companies/scheduleTimes/message/update";
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      setMessages((oldValue) => {
+        return oldValue.map(m => {
+          if (message == m) {
+            m.readed = true;
+          }
+          return m
+        })
+      })
+    }
   }
 
+  async function searchScheduleTimes(e: any) {
+    e.preventDefault()
+    const data = {
+      companyId: company.id,
+      contributor: scheduleTimeContributor,
+      date: date.subtract(1, 'hour').format("YYYY-MM-DD")
+    }
+
+    try {
+      setIsLoading(true)
+      const url = "api/contribuitors/scheduleTimes/show";
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const json = await response.json()
+        setScheduleTimes(json.scheduleTimes)
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false)
+    }
+
+
+  }
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -618,10 +716,56 @@ const Empresa: NextPage = () => {
   }, [router, setCompany]);
 
   React.useEffect(() => {
+    async function refreshMessages(companyID: any, contributors: any) {
+      const data = {
+        date: dayjs(new Date()).format("YYYY-MM-DD"),
+        companyId: companyID,
+      };
+      try {
+        const url = "api/companies/scheduleTimes/message/show";
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+          body: JSON.stringify(data),
+        });
+        const json = await response.json();
+        if (response.status == 200) {
+          let messages = json.messages.map((message: any) => {
+            let scheduleTimesList = json.scheduleTimes;
+            scheduleTimesList.forEach((time: any) => {
+              if (time.id == message.scheduleTimeId) {
+                message.scheduleTime = time;
+                contributors.forEach((contribuitor: any) => {
+                  if (contribuitor.id == message.scheduleTime.contribuitorId) {
+                    message.contributor = contribuitor
+                  }
+                })
+                let clientList = json.clients;
+                clientList.forEach((client: any) => {
+                  if (client.id == message.scheduleTime.clientId) {
+                    message.client = client;
+                  }
+                })
+              }
+            })
+
+            return message
+          })
+          setMessages(messages);
+          setAdviseErrorMessage([]);
+        } else {
+          setAdviseErrorMessage([json.error]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
     switch (menuItemSelected) {
       case "resumo":
         if (company.id > 0) {
-          refreshMessages(company.id);
+          refreshTeam(company.id).then((contributors) => refreshMessages(company.id, contributors))
         }
         break;
       case "agenda":
@@ -641,6 +785,7 @@ const Empresa: NextPage = () => {
   }, [company.id]);
 
   const [messages, setMessages] = React.useState<any[]>([]);
+  const [scheduleTimes, setScheduleTimes] = React.useState<any[]>([]);
   const [adviseErrorMessage, setAdviseErrorMessage] = React.useState<string[]>([
     "Sem avisos",
   ]);
@@ -704,9 +849,8 @@ const Empresa: NextPage = () => {
               <Nav className="mx-auto">
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2 ${
-                      menuItemSelected == "resumo" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2 ${menuItemSelected == "resumo" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={companyMenuClick}
                   >
@@ -715,9 +859,8 @@ const Empresa: NextPage = () => {
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2  ${
-                      menuItemSelected == "agenda" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2  ${menuItemSelected == "agenda" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={scheduleMenuClick}
                   >
@@ -726,9 +869,8 @@ const Empresa: NextPage = () => {
                 </li>
                 <li className="nav-item">
                   <button
-                    className={`nav-link mx-2  ${
-                      menuItemSelected == "equipe" ? "active" : ""
-                    } ${styles.menuButton}`}
+                    className={`nav-link mx-2  ${menuItemSelected == "equipe" ? "active" : ""
+                      } ${styles.menuButton}`}
                     type="button"
                     onClick={teamMenuClick}
                   >
@@ -793,9 +935,9 @@ const Empresa: NextPage = () => {
                                 label=""
                                 value={date}
                                 onChange={(newValue) => {
-                                  setDate(newValue);
+                                  setDate(dayjs(newValue));
                                 }}
-                                renderInput={(params) => (
+                                renderInput={(params: any) => (
                                   <TextField {...params} />
                                 )}
                                 inputFormat="DD/MM/YYYY"
@@ -804,11 +946,102 @@ const Empresa: NextPage = () => {
                           </Form.Group>
                         </Form>
                       </Card.Text>
-                      <Button variant="success" onClick={searchScheduleTimes}>
+                      <Button variant="success" onClick={searchScheduleTimes} disabled={isLoading}>
                         Confirmar
                       </Button>
                     </Card.Body>
+                    <hr />
+                    <Card.Body>
+                      <Card.Title
+                        style={{ marginBottom: "20px", textAlign: "center" }}
+                      >
+                        Agendamentos
+                      </Card.Title>
+                      <Card.Text></Card.Text>
+                      {
+                        scheduleTimes.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="error"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Nenhum horário encontrado.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : scheduleTimes.map((s) => (
+                            <Card key={s.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Horário:
+                                    </span>{" "}
+                                    {s.time}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          ))
+                      }
+                    </Card.Body>
                   </Card>
+                  {/* <Card>
+                    <Card.Body>
+                      <Card.Title
+                        style={{ marginBottom: "20px", textAlign: "center" }}
+                      >
+                        Agendamentos
+                      </Card.Title>
+                      <Card.Text></Card.Text>
+                      {
+                        scheduleTimes.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="error"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Nenhum horário encontrado.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : scheduleTimes.map((s) => (
+                            <Card key={s.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Horário:
+                                    </span>{" "}
+                                    {s.time}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          ))
+                      }
+                    </Card.Body>
+                  </Card> */}
                 </Col>
                 <Col>
                   <Card>
@@ -819,57 +1052,91 @@ const Empresa: NextPage = () => {
                         Últimos avisos
                       </Card.Title>
                       <Card.Text></Card.Text>
-                      <Card>
-                        <Card.Body>
-                          <Card.Text>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Contribuidor:
-                              </span>{" "}
-                              Teste Completo
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Data:
-                              </span>{" "}
-                              01/01/2001
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Cliente:
-                              </span>{" "}
-                              Adam
-                            </p>
-                            <p className="mb-1">
-                              <span
-                                className="darkBlueText"
-                                style={{ fontWeight: "bold" }}
-                              >
-                                Mensagem:
-                              </span>
-                              <br /> Vou me atrasar 5 min, se tiver horario mais
-                              cedo por favor me avise
-                            </p>
-                            <Button
-                              variant="primary"
-                              className="mt-3 btn-sm"
-                              style={{ float: "right" }}
-                              onClick={searchScheduleTimes}
-                            >
-                              Marcar como lida
-                            </Button>
-                          </Card.Text>
-                        </Card.Body>
-                      </Card>
+                      {
+                        messages.length && contribuitors.length <= 0
+                          ? (
+                            <Card>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1" style={{ textAlign: "center" }}>
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Não foram encontrados novos avisos.
+                                    </span>{" "}
+                                  </p>
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          )
+                          : messages.map((m) => (
+                            <Card key={m.id}>
+                              <Card.Body >
+                                <Card.Text>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Contribuidor:
+                                    </span>{" "}
+                                    {m.contributor.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Data:
+                                    </span>{" "}
+                                    {dayjs(new Date(m.createdAt)).format("YYYY-MM-DD")}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Cliente:
+                                    </span>{" "}
+                                    {m.client.name}
+                                  </p>
+                                  <p className="mb-1">
+                                    <span
+                                      className="darkBlueText"
+                                      style={{ fontWeight: "bold" }}
+                                    >
+                                      Mensagem:
+                                    </span>
+                                    <br /> {m.content}
+                                  </p>
+                                  {!m.readed
+                                    ? (
+                                      <Button
+                                        variant="primary"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        onClick={() => setMessageAsReaded(m)}
+                                      >
+                                        Marcar como lida
+                                      </Button>
+                                    )
+                                    : (
+                                      <Button
+                                        variant="success"
+                                        className="mt-3 btn-sm"
+                                        style={{ float: "right" }}
+                                        disabled
+                                      >
+                                        Lida
+                                      </Button>
+                                    )
+                                  }
+                                </Card.Text>
+                              </Card.Body>
+                            </Card>
+                          ))
+                      }
                     </Card.Body>
                   </Card>
                 </Col>
@@ -910,8 +1177,10 @@ const Empresa: NextPage = () => {
                           color="034078"
                           type="time"
                           value={initialTime}
-                          onChange={({ target }) =>
+                          onChange={({ target }) => {
                             setInitialTime(target.value)
+                            handleInput()
+                          }
                           }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
@@ -926,7 +1195,11 @@ const Empresa: NextPage = () => {
                           className="bg-white"
                           type="time"
                           value={finishTime}
-                          onChange={({ target }) => setFinishTime(target.value)}
+                          onChange={({ target }) => {
+                            setFinishTime(target.value)
+                            handleInput()
+                          }
+                          }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
                       </Form.Group>
@@ -942,8 +1215,10 @@ const Empresa: NextPage = () => {
                           className="bg-white"
                           value={intervalTime}
                           type="number"
-                          onChange={({ target }) =>
+                          onChange={({ target }) => {
                             setIntervalTime(target.value)
+                            handleInput()
+                          }
                           }
                           disabled={modalCalendarTitle == "Deletar"}
                         />
@@ -1060,7 +1335,7 @@ const Empresa: NextPage = () => {
                           autoFocus
                           className="bg-white"
                           value={email}
-                          onChange={({ target }) => setEmail(target.value)}
+                          onChange={({ target }) => handleInputError(target.value, 'email')}
                           disabled={modalTitle == "Deletar"}
                         />
                       </Form.Group>
@@ -1074,7 +1349,7 @@ const Empresa: NextPage = () => {
                           placeholder="Nome Completo"
                           className="bg-white"
                           value={name}
-                          onChange={({ target }) => setName(target.value)}
+                          onChange={({ target }) => handleInputError(target.value, 'name')}
                           disabled={modalTitle == "Deletar"}
                         />
                       </Form.Group>
@@ -1103,7 +1378,7 @@ const Empresa: NextPage = () => {
                             placeholder="Senha"
                             className="bg-white"
                             value={password}
-                            onChange={({ target }) => setPassword(target.value)}
+                            onChange={({ target }) => handleInputError(target.value, 'password')}
                           />
                         </Form.Group>
                       )}

@@ -15,6 +15,7 @@ const RegisterPage: NextPage = () => {
   const [passwordConfirmation, setPasswordConfirmation] = React.useState("");
   const [name, setName] = React.useState("");
   const [telefone, setTelefone] = React.useState("");
+  const [address, setAddress] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState<String[]>([]);
   const [acceptPrivacyPolitics, setAcceptPrivacyPolitics] =
     React.useState(false);
@@ -22,8 +23,14 @@ const RegisterPage: NextPage = () => {
   const { company, setCompany } = React.useContext(CompanyContext);
   const router = useRouter();
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   function toggleCheckbox(event: any) {
     setAcceptPrivacyPolitics(event.target.checked);
+    setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "É necessário aceitar a nossa política de privacidade"))
   }
 
   async function onSubmitHandler(e: any) {
@@ -31,14 +38,10 @@ const RegisterPage: NextPage = () => {
 
     const validations = {
       emailIsValid: false,
+      hasName: false,
       passwordLengthIsValid: false,
       passwordsMatches: false,
       privacyPoliticIsAccepted: false,
-    };
-
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
     };
 
     let data = {
@@ -46,7 +49,44 @@ const RegisterPage: NextPage = () => {
       password: password,
       name: name,
       phone: telefone,
+      address: address
     };
+
+    if (!name) {
+      validations.hasName = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Insira um nome");
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, "Insira um nome"];
+      });
+    } else {
+      validations.hasName = true;
+      const index = errorMessage.indexOf("Insira um nome");
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
+    if (!validateEmail(email)) {
+      validations.emailIsValid = false;
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf("Insira um email válido");
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, "Insira um email válido"];
+      });
+    } else {
+      validations.emailIsValid = true;
+      const index = errorMessage.indexOf("Insira um email válido");
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
 
     if (password != passwordConfirmation) {
       validations.passwordsMatches = false;
@@ -88,24 +128,6 @@ const RegisterPage: NextPage = () => {
         });
     }
 
-    if (!validateEmail(email)) {
-      validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Email inválido"];
-      });
-    } else {
-      validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
-    }
-
     if (!acceptPrivacyPolitics) {
       validations.privacyPoliticIsAccepted = false;
       setErrorMessage((oldValue) => {
@@ -135,7 +157,8 @@ const RegisterPage: NextPage = () => {
       validations.emailIsValid &&
       validations.passwordsMatches &&
       validations.passwordLengthIsValid &&
-      validations.privacyPoliticIsAccepted
+      validations.privacyPoliticIsAccepted &&
+      validations.hasName
     ) {
       var salt = bcrypt.genSaltSync(10);
       var hash = bcrypt.hashSync(data.password, salt);
@@ -153,6 +176,7 @@ const RegisterPage: NextPage = () => {
           const json = await response.json();
 
           window.localStorage.setItem("token", json.token);
+          window.localStorage.setItem("email", email);
           setToken(json.token);
           setCompany(json.newCompany);
           router.push("/empresa");
@@ -162,6 +186,28 @@ const RegisterPage: NextPage = () => {
       } catch (error) {
         throw error;
       }
+    }
+  }
+
+  function handleInput(value: string, type: string) {
+    switch (type) {
+      case 'email':
+        setEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'password':
+        setPassword(value)
+        if (value.length >= 6)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Senhas devem ter pelo menos seis dígitos"))
+        break;
+      case 'name':
+        setName(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      default:
+        break;
     }
   }
 
@@ -221,7 +267,7 @@ const RegisterPage: NextPage = () => {
               name="name"
               id="name"
               value={name}
-              onChange={({ target }) => setName(target.value)}
+              onChange={({ target }) => handleInput(target.value, "name")}
             />
             <label htmlFor="email" className="title3">
               Email
@@ -232,7 +278,18 @@ const RegisterPage: NextPage = () => {
               name="email"
               id="email"
               value={email}
-              onChange={({ target }) => setEmail(target.value)}
+              onChange={({ target }) => handleInput(target.value, "email")}
+            />
+            <label htmlFor="address" className="title3">
+              Endereço
+            </label>
+            <input
+              className={styles.input}
+              type="address"
+              name="address"
+              id="address"
+              value={address}
+              onChange={({ target }) => setAddress(target.value)}
             />
             <label htmlFor="telefone" className="title3">
               Telefone
@@ -254,7 +311,7 @@ const RegisterPage: NextPage = () => {
               name="password"
               id="password"
               value={password}
-              onChange={({ target }) => setPassword(target.value)}
+              onChange={({ target }) => handleInput(target.value, "password")}
             />
             <label htmlFor="password" className="title3">
               Confirmar Senha

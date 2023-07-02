@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -12,28 +12,27 @@ export default async function handler(
   switch (req.method) {
     case "DELETE":
       try {
-        const calendarExists = await prisma.calendar.findUnique({
+        const deletedCalendar = await prisma.calendar.delete({
           where: {
             companyId: parseInt(id ?? "0"),
           },
         });
-        if (calendarExists) {
-          const deletedCalendar = await prisma.calendar.delete({
-            where: {
-              companyId: parseInt(id ?? "0"),
-            },
-          });
-          if (deletedCalendar) {
-            res.status(200).json({ deletedCalendar });
-          } else {
-            res
-              .status(400)
-              .json({ error: "Não foi possível deletar agenda", query });
-          }
+        if (deletedCalendar) {
+          res.status(200).json({ deletedCalendar });
         } else {
-          res.status(400).json({ error: "Agenda não encontrada", query });
+          res
+            .status(400)
+            .json({ error: "Não foi possível deletar agenda", query });
         }
       } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025"
+        ) {
+          return res
+            .status(404)
+            .json({ error: "Agenda não encontrada", query });
+        }
         throw error;
       } finally {
         res.end();

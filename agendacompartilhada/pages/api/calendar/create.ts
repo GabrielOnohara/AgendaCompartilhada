@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -12,22 +12,20 @@ export default async function handler(
       const prisma = new PrismaClient();
       await prisma.$connect();
       try {
-        const calendar = await prisma.calendar.findFirst({
-          where: {
-            companyId: jsonData.companyId,
-          },
+        const newCalendar = await prisma.calendar.create({
+          data: jsonData,
         });
-        if (calendar) {
-          res.statusMessage = "Calendário já existente";
-          res.status(400);
-        } else {
-          const newCalendar = await prisma.calendar.create({
-            data: jsonData,
-          });
-          res.statusMessage = "Calendário criado com sucesso";
-          res.status(200).json({ newCalendar });
-        }
+        res.statusMessage = "Calendário criado com sucesso";
+        res.status(200).json({ newCalendar });
       } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          res.statusMessage = "Calendário já existente";
+          return res.status(400).json({ error: error });
+        }
+
         res.statusMessage = "Não foi possível criar calendário.";
         res.status(400).json({ error: error });
       } finally {

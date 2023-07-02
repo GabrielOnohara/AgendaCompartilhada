@@ -20,28 +20,39 @@ import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 require("dayjs/locale/pt");
 import Modal from "react-bootstrap/Modal";
+import { Calendar, Company, Contribuitor, ScheduleTime } from "@prisma/client";
 
-const Company: NextPage = () => {
+interface DateToIntervals {
+  [date: string]: Interval[];
+}
+
+interface Interval {
+  time: string;
+  freeContribuitors: Contribuitor[];
+}
+
+const CompanyPage: NextPage = () => {
   const [errorMessage, setErrorMessage] = React.useState<string[]>([""]);
   const [viewIsReady, setViewIsReady] = React.useState<boolean>(false);
   const [date, setDate] = React.useState<Dayjs>(dayjs(new Date()));
-  const [company, setCompany] = React.useState<any>({});
-  const [calendar, setCalendar] = React.useState<any>({});
-  const [scheduleTime, setScheduleTime] = React.useState<any>({});
-  const [contributors, setContributors] = React.useState<any[]>([]);
+  const [company, setCompany] = React.useState<Company | null>(null);
+  const [calendar, setCalendar] = React.useState<Calendar | null>(null);
+  const [scheduleTime, setScheduleTime] = React.useState<ScheduleTime | null>(
+    null
+  );
+  const [contributors, setContributors] = React.useState<Contribuitor[]>([]);
   const [searchedScheduleTimes, setSearchedScheduleTimes] =
     React.useState<boolean>(false);
   const [intervalsAreUpdated, setIntervalsAreUpdated] =
     React.useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
   const path = router.basePath;
-  const queryId = router.query.id ?? "0";
-  const id = queryId as string;
+  const id = router.query.id as string | undefined;
   const [showModalScheduleTime, setShowModalScheduleTime] =
     React.useState(false);
   const [selectedScheduleTime, setSelectedScheduleTime] =
-    React.useState<string>("");
+    React.useState<Interval | null>(null);
   const [selectedScheduleDay, setSelectedScheduleDay] =
     React.useState<string>("");
   const [selectedContributor, setSelectedContributor] =
@@ -49,33 +60,72 @@ const Company: NextPage = () => {
   const [clientEmail, setClientEmail] = React.useState<string>("");
   const [clientPhone, setClientPhone] = React.useState<string>("");
   const [clientName, setClientName] = React.useState<string>("");
-  const [schedulesGroupByDay, setSchedulesGroupByDay] = React.useState<any>({});
+  const [schedulesGroupByDay, setSchedulesGroupByDay] =
+    React.useState<DateToIntervals>({});
 
   const handleCloseModal = () => {
     setShowModalScheduleTime(false);
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
   const handleCloseModaAfterCreated = () => {
     setShowModalScheduleTime(false);
-    setSelectedScheduleTime("");
+    setSelectedScheduleTime(null);
     setSelectedScheduleDay("");
     setSelectedContributor("");
     setClientEmail("");
     setClientPhone("");
     setClientName("");
-    setScheduleTime({});
+    setScheduleTime(null);
     setErrorMessage([""]);
   };
 
-  const handleShowModalScheduleTime = (sheduleTime: string, day: string) => {
+  const handleShowModalScheduleTime = (sheduleTime: Interval, day: string) => {
     setShowModalScheduleTime(true);
     setSelectedScheduleTime(sheduleTime);
     setSelectedScheduleDay(day);
   };
 
+  const validateEmail = (email: string) => {
+    var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return regexEmail.test(email);
+  };
+
   const handleModalConfirm = async () => {
+    function showError(message: string) {
+      setErrorMessage((oldValue) => {
+        const index = oldValue.indexOf(message);
+        if (index >= 0) {
+          oldValue.splice(index, 1);
+        }
+        return [...oldValue, message];
+      });
+    }
+
+    function hideError(message: string) {
+      const index = errorMessage.indexOf(message);
+      if (index >= 0)
+        setErrorMessage((oldValue) => {
+          return oldValue.splice(index, 1);
+        });
+    }
+
+    if (company === null) {
+      showError("Erro Interno: compania não existe");
+      return;
+    }
+
+    if (calendar === null) {
+      showError("Erro Interno: calendário não existe");
+      return;
+    }
+
+    if (selectedScheduleTime === null) {
+      showError("Erro Interno: selectedScheduleTime não existe");
+      return;
+    }
+
     const validations = {
       emailIsValid: false,
       nameIsValid: false,
@@ -83,78 +133,33 @@ const Company: NextPage = () => {
       contributorIsValid: false,
     };
 
-    const validateEmail = (email: string) => {
-      var regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      return regexEmail.test(email);
-    };
+    if (!(selectedContributor.length > 0)) {
+      showError("Selecione um contribuidor");
+    } else {
+      validations.contributorIsValid = true;
+      hideError("Selecione um contribuidor");
+    }
 
     if (!validateEmail(clientEmail)) {
       validations.emailIsValid = false;
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Email inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Email inválido"];
-      });
+      showError("Insira um email válido");
     } else {
       validations.emailIsValid = true;
-      const index = errorMessage.indexOf("Email inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
-    }
-
-    if (!(clientPhone.length >= 10)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Telefone inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Telefone inválido"];
-      });
-    } else {
-      validations.phoneIsValid = true;
-      const index = errorMessage.indexOf("Telefone inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira um email válido");
     }
 
     if (!(clientName.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Nome inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Nome inválido"];
-      });
+      showError("Insira um nome");
     } else {
       validations.nameIsValid = true;
-      const index = errorMessage.indexOf("Nome inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      hideError("Insira um nome");
     }
 
-    if (!(selectedContributor.length > 0)) {
-      setErrorMessage((oldValue) => {
-        const index = oldValue.indexOf("Contribuidor inválido");
-        if (index >= 0) {
-          oldValue.splice(index, 1);
-        }
-        return [...oldValue, "Contribuidor inválido"];
-      });
+    if (!(clientPhone.length >= 10)) {
+      showError("Insira um telefone válido");
     } else {
-      validations.contributorIsValid = true;
-      const index = errorMessage.indexOf("Contribuidor inválido");
-      if (index >= 0)
-        setErrorMessage((oldValue) => {
-          return oldValue.splice(index, 1);
-        });
+      validations.phoneIsValid = true;
+      hideError("Insira um telefone válido");
     }
 
     if (
@@ -180,13 +185,15 @@ const Company: NextPage = () => {
         contributorId: contributorId,
         scheduleTime: {
           date: dayjs(selectedScheduleDay).format("YYYY-MM-DD"),
-          time: selectedScheduleTime,
+          time: selectedScheduleTime.time,
           duration: calendar.intervalTime,
         },
       };
 
       try {
+        setErrorMessage([]);
         const url = path + "/api/companies/scheduleTimes/create";
+        setIsLoading(true);
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -197,29 +204,56 @@ const Company: NextPage = () => {
         if (response.status == 200) {
           const json = await response.json();
           setScheduleTime(json.newScheduleTime);
-          let thereAreFreeTimes = await thereAreTimesAvaliable(scheduleTime);
-          if (thereAreFreeTimes) {
-            setIntervalsAreUpdated(true);
-          } else {
-            setIntervalsAreUpdated(false);
-          }
+          let thereAreFreeTimes = await thereAreTimesAvaliable(company);
+          setIntervalsAreUpdated(false);
         } else {
           const json = await response.json();
           setErrorMessage([json.error]);
         }
       } catch (error) {
         console.log(error);
+        showError(`Erro Interno: ${error}`);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
-  const thereAreTimesAvaliable = async (scheduleTime: any) => {
+  function handleInput(value: string, type: string) {
+    switch (type) {
+      case 'email':
+        setClientEmail(value)
+        if (validateEmail(value))
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um email válido"))
+        break;
+      case 'name':
+        setClientName(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um nome"))
+        break;
+      case 'phone':
+        setClientPhone(value)
+        if (value.length >= 10)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Insira um telefone válido"))
+        break;
+      case 'contribuitor':
+        setSelectedContributor(value)
+        if (value)
+          setErrorMessage(errorMessage.filter((mensagem) => mensagem !== "Selecione um contribuidor"))
+        break;
+      default:
+        break;
+    }
+  }
+
+  const thereAreTimesAvaliable = async (company: Company) => {
     let thereAreAvaliableTimes = false;
+    if (selectedScheduleTime == null) return false;
     const data = {
       companyId: company.id,
       scheduleTime: {
         date: dayjs(selectedScheduleDay).format("YYYY-MM-DD"),
-        time: selectedScheduleTime,
+        time: selectedScheduleTime.time,
       },
     };
 
@@ -247,85 +281,96 @@ const Company: NextPage = () => {
   };
 
   React.useEffect(() => {
-    async function getCompanyAndCalendarByID(id: Number) {
+    async function getCompanyAndCalendarByID(id: string) {
+      var company = null;
       try {
-        const url = path + "/api/companies/searchById/" + id;
-        const response = await fetch(url, {
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        });
-        if (response.status == 200) {
-          const { newCompany, calendar, contributors } = await response.json();
-          setCompany(newCompany);
-          setCalendar(calendar);
-          setContributors(contributors);
-        } else {
-          setCompany({});
+        if (parseInt(id) > 0) {
+          const url = path + "/api/companies/searchById/" + id;
+          const response = await fetch(url, {
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+          if (response.status == 200) {
+            const { newCompany, calendar, contributors } =
+              await response.json();
+            company = newCompany;
+            setCalendar(calendar);
+            setContributors(contributors);
+          }
         }
-      } catch (error) {
-        throw error;
+      } finally {
+        setCompany(company);
+        setViewIsReady(true);
       }
     }
 
-    if (parseInt(id) > 0) {
-      getCompanyAndCalendarByID(parseInt(id));
-    }
+    if (id) getCompanyAndCalendarByID(id);
   }, [id, path]);
 
   React.useEffect(() => {
-    function updateIntervals(calendar: any, scheduleTimes: any[]) {
-      const [startHour, startMinute] = calendar?.startTime.split(":");
-      const [finishHour, finishtMinute] = calendar?.finishTime.split(":");
-      const intervalTime = calendar.intervalTime;
-      let hour = parseInt(finishHour) - parseInt(startHour);
-      let minute = parseInt(finishtMinute) - parseInt(startMinute);
-      let totalMinutesDifference = Math.floor(
-        (hour * 60 + minute) / intervalTime
-      );
-      let intervalTimesList: any[] = [];
-      for (let index = 0; index < totalMinutesDifference; index++) {
-        let hourAsNumber =
-          parseInt(startHour) + Math.floor((index * intervalTime) / 60);
-        let minuteAsNumber = (index * intervalTime) % 60;
-        let hourString;
-        let minuteString;
+    function updateIntervals(
+      calendar: Calendar | null,
+      scheduleTimes: ScheduleTime[]
+    ) {
+      let intervalTimesList: string[] = [];
+      if (calendar) {
+        const [startHour, startMinute] = calendar.startTime.split(":");
+        const [finishHour, finishtMinute] = calendar.finishTime.split(":");
+        const intervalTime = calendar.intervalTime;
+        let hour = parseInt(finishHour) - parseInt(startHour);
+        let minute = parseInt(finishtMinute) - parseInt(startMinute);
+        let totalMinutesDifference = Math.floor(
+          (hour * 60 + minute) / intervalTime
+        );
+        for (let index = 0; index < totalMinutesDifference; index++) {
+          let hourAsNumber =
+            parseInt(startHour) + Math.floor((index * intervalTime) / 60);
+          let minuteAsNumber = (index * intervalTime) % 60;
+          let hourString;
+          let minuteString;
 
-        if (hourAsNumber <= 9) {
-          hourString = "0" + hourAsNumber.toString();
-        } else {
-          hourString = hourAsNumber.toString();
+          if (hourAsNumber <= 9) {
+            hourString = "0" + hourAsNumber.toString();
+          } else {
+            hourString = hourAsNumber.toString();
+          }
+
+          if (minuteAsNumber <= 9) {
+            minuteString = "0" + minuteAsNumber.toString();
+          } else {
+            minuteString = minuteAsNumber.toString();
+          }
+
+          let lastString = hourString + ":" + minuteString;
+          intervalTimesList[index] = lastString;
         }
-
-        if (minuteAsNumber <= 9) {
-          minuteString = "0" + minuteAsNumber.toString();
-        } else {
-          minuteString = minuteAsNumber.toString();
-        }
-
-        let lastString = hourString + ":" + minuteString;
-        intervalTimesList[index] = lastString;
       }
 
-      let weekIntervalTimesList: any = {};
+      let weekIntervalTimesList: DateToIntervals = {};
 
       for (let index = 0; index < 5; index++) {
         weekIntervalTimesList[date.add(index, "day").format("DD-MM-YYYY")] =
-          intervalTimesList;
+          intervalTimesList.map((x) => {
+            return { time: x, freeContribuitors: [...contributors] };
+          });
       }
 
+      // remove os contribuidores ocupados da lista freeContribuitors.
       scheduleTimes.map((scheduleTime) => {
         const dateAsKey = dayjs(new Date(scheduleTime.date))
           .add(1, "day")
           .format("DD-MM-YYYY"); //necessario adicionar 1 dia
 
-        if (weekIntervalTimesList[dateAsKey].includes(scheduleTime.time)) {
-          weekIntervalTimesList[dateAsKey] = weekIntervalTimesList[
-            dateAsKey
-          ].filter(function (item: any) {
-            //preciso verificar se existe prestador disponível
-            return item != scheduleTime.time;
-          });
+        const interval = weekIntervalTimesList[dateAsKey].find(
+          (x) => x.time == scheduleTime.time
+        );
+
+        if (interval) {
+          const index = interval.freeContribuitors.findIndex(
+            (x) => x.id == scheduleTime.contribuitorId
+          );
+          if (index >= 0) interval.freeContribuitors.splice(index, 1);
         }
       });
 
@@ -337,8 +382,8 @@ const Company: NextPage = () => {
       initialDate: String,
       endDate: String,
       id: Number
-    ) {
-      let scheduleTimesList = [];
+    ): Promise<ScheduleTime[]> {
+      let scheduleTimesList: ScheduleTime[] = [];
       try {
         const data = {
           companyId: id,
@@ -354,31 +399,30 @@ const Company: NextPage = () => {
           body: JSON.stringify(data),
         });
         if (response.status == 200) {
-          const { scheduleTimes } = await response.json();
+          const scheduleTimes: ScheduleTime[] = (await response.json())
+            .scheduleTimes;
           setSearchedScheduleTimes(true);
           scheduleTimesList = scheduleTimes;
         }
-      } catch (error) {
-        throw error;
       } finally {
         return scheduleTimesList;
       }
     }
 
-    if (parseInt(id) > 0) {
+    if (company != null) {
       const initialDateFormatted = date.subtract(1, "day").format("YYYY-MM-DD");
       const endDateFormatted = date.add(5, "day").format("YYYY-MM-DD");
       getScheduleTimeNextFiveDaysByDate(
         initialDateFormatted,
         endDateFormatted,
-        parseInt(id)
+        company.id
       ).then((scheduleTimesList) => {
-        if (!intervalsAreUpdated && calendar.hasOwnProperty("startTime")) {
+        if (!intervalsAreUpdated) {
           updateIntervals(calendar, scheduleTimesList);
         }
       });
     }
-  }, [id, path, date, calendar, intervalsAreUpdated]);
+  }, [path, company, contributors, date, calendar, intervalsAreUpdated]);
 
   return (
     <div>
@@ -411,21 +455,24 @@ const Company: NextPage = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <Nav.Link href="/login">Login</Nav.Link>
+              {/*
               <NavDropdown
                 align={{ lg: "end" }}
                 drop="down"
                 title="Login"
                 id="basic-nav-dropdown"
               >
-                {/* <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
-                <NavDropdown.Divider /> */}
+                <NavDropdown.Item   href="#">Sou cliente</NavDropdown.Item>
+                <NavDropdown.Divider />
                 <NavDropdown.Item href="/login">Sou empresa</NavDropdown.Item>
               </NavDropdown>
+              */}
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      {company.hasOwnProperty("name") ? (
+      {company != null ? (
         <main className={styles.mainContainer}>
           <Modal
             show={showModalScheduleTime}
@@ -460,13 +507,13 @@ const Company: NextPage = () => {
                       <Form.Control
                         autoFocus
                         className="bg-white"
-                        value={selectedScheduleTime}
+                        value={selectedScheduleTime?.time ?? ""}
                         disabled
                       />
                     </Form.Group>
                   </Col>
                 </Row>
-                {scheduleTime.hasOwnProperty("id") ? (
+                {scheduleTime != null ? (
                   <div>
                     <Form.Group
                       className="mb-3"
@@ -486,15 +533,17 @@ const Company: NextPage = () => {
                       <Form.Select
                         onChange={({ target }) => {
                           console.log(target.value);
-                          setSelectedContributor(target.value);
+                          handleInput(target.value, 'contribuitor');
                         }}
                       >
                         <option></option>
-                        {contributors.map((contribuitor, index) => (
-                          <option className={styles.option} key={index}>
-                            {contribuitor.name}
-                          </option>
-                        ))}
+                        {selectedScheduleTime?.freeContribuitors.map(
+                          (contribuitor, index) => (
+                            <option className={styles.option} key={index}>
+                              {contribuitor.name}
+                            </option>
+                          )
+                        )}
                       </Form.Select>
                     </Form.Group>
                     <Form.Group
@@ -507,7 +556,7 @@ const Company: NextPage = () => {
                         className="bg-white"
                         value={clientEmail}
                         type="email"
-                        onChange={({ target }) => setClientEmail(target.value)}
+                        onChange={({ target }) => handleInput(target.value, 'email')}
                       />
                     </Form.Group>
                     <Form.Group
@@ -520,7 +569,7 @@ const Company: NextPage = () => {
                         className="bg-white"
                         value={clientName}
                         type="text"
-                        onChange={({ target }) => setClientName(target.value)}
+                        onChange={({ target }) => handleInput(target.value, "name")}
                       />
                     </Form.Group>
                     <Form.Group
@@ -533,7 +582,7 @@ const Company: NextPage = () => {
                         className="bg-white"
                         value={clientPhone}
                         type="tel"
-                        onChange={({ target }) => setClientPhone(target.value)}
+                        onChange={({ target }) => handleInput(target.value, "phone")}
                       />
                     </Form.Group>
                   </div>
@@ -547,7 +596,7 @@ const Company: NextPage = () => {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              {scheduleTime.hasOwnProperty("id") ? (
+              {scheduleTime != null ? (
                 <div>
                   <Button
                     variant="danger"
@@ -557,11 +606,15 @@ const Company: NextPage = () => {
                   </Button>
                 </div>
               ) : (
-                <div>
+                <div className="d-flex gap-2">
                   <Button variant="danger" onClick={handleCloseModal}>
                     Cancelar
                   </Button>
-                  <Button variant="success" onClick={handleModalConfirm}>
+                  <Button
+                    variant="success"
+                    onClick={handleModalConfirm}
+                    disabled={isLoading}
+                  >
                     Confirmar
                   </Button>
                 </div>
@@ -609,26 +662,39 @@ const Company: NextPage = () => {
                         {intervalsAreUpdated ? (
                           schedulesGroupByDay[
                             date.add(num, "day").format("DD-MM-YYYY")
-                          ].map((timeString: string, index: any) => (
-                            <Card.Text key={index} className="my-3">
-                              <Button
-                                variant="outline-success"
-                                className="text-center"
-                                onClick={() => {
-                                  handleShowModalScheduleTime(
-                                    timeString,
-                                    date.add(num, "day").format("YYYY-MM-DD")
-                                  );
-                                }}
-                              >
-                                {timeString}
-                              </Button>
+                          ].length == 0 ? (
+                            <Card.Text className="d-flex my-3">
+                              <span className={`darkBlueText py-2`}>
+                                Não há horários disponíveis
+                              </span>
                             </Card.Text>
-                          ))
+                          ) : (
+                            schedulesGroupByDay[
+                              date.add(num, "day").format("DD-MM-YYYY")
+                            ].map((interval: Interval, index: any) => (
+                              <Card.Text key={index} className="my-3">
+                                <Button
+                                  variant="outline-success"
+                                  className="text-center"
+                                  disabled={
+                                    interval.freeContribuitors.length == 0
+                                  }
+                                  onClick={() => {
+                                    handleShowModalScheduleTime(
+                                      interval,
+                                      date.add(num, "day").format("YYYY-MM-DD")
+                                    );
+                                  }}
+                                >
+                                  {`${interval.time} +${interval.freeContribuitors.length}`}
+                                </Button>
+                              </Card.Text>
+                            ))
+                          )
                         ) : (
                           <Card.Text className="d-flex my-3">
                             <span className={`darkBlueText py-2`}>
-                              Verificando horarios
+                              Verificando horários
                             </span>
                           </Card.Text>
                         )}
@@ -660,4 +726,4 @@ const Company: NextPage = () => {
   );
 };
 
-export default Company;
+export default CompanyPage;

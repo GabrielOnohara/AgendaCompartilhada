@@ -21,37 +21,36 @@ export default async function handler(
           },
         });
 
-        if (company) {
-          const contribuitors = await prisma.contribuitor.findMany({
-            where: {
-              companyId: company.id,
-            },
-          });
-          if (contribuitors.length > 0) {
-            const scheduleTimes = await prisma.scheduleTime.findMany({
-              where: {
-                companyId: companyId,
-                date: new Date(scheduleTimeData.date),
-                time: scheduleTimeData.time,
-              },
-            });
-            if (
-              scheduleTimes.length > 0 &&
-              contribuitors.length == scheduleTimes.length
-            ) {
-              res.status(200).json({ free: false });
-            } else {
-              res.status(200).json({ free: true });
-            }
-          } else {
-            res.status(400).json({ error: "Empresa sem colaboradores" });
-          }
-        } else {
-          res.status(400).json({ error: "Empresa não encontrada" });
+        if (company == null) {
+          return res.status(400).json({ error: "Empresa não encontrada" });
         }
+
+        const contribuitors = await prisma.contribuitor.findMany({
+          where: {
+            companyId: company.id,
+          },
+        });
+
+        if (contribuitors.length == 0) {
+          return res.status(400).json({ error: "Empresa sem colaboradores" });
+        }
+
+        const scheduleTimes = await prisma.scheduleTime.findMany({
+          where: {
+            companyId: companyId,
+            date: new Date(scheduleTimeData.date),
+            time: scheduleTimeData.time,
+          },
+        });
+
+        const isFull =
+          scheduleTimes.length > 0 &&
+          contribuitors.length == scheduleTimes.length;
+
+        res.status(200).json({ free: !isFull });
       } catch (error) {
-        throw error;
         res.status(400).json({ error: error });
+        throw error;
       } finally {
         res.end();
         await prisma.$disconnect();

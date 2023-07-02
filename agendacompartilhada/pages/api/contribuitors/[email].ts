@@ -5,11 +5,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { name } = req.query;
-  if (typeof name !== "string") {
-    return res.status(400).json("invalid name");
-  }
-
+  const email = req.query["email"] as string;
   const prisma = new PrismaClient();
   await prisma.$connect();
   switch (req.method) {
@@ -17,13 +13,15 @@ export default async function handler(
       break;
     default:
       try {
-        const companies = await prisma.company.findMany({
-          where: { name: { contains: name } },
+        const contribuitor = await prisma.contribuitor.findFirst({
+          where: {
+            email: email,
+          },
         });
-        if (companies.length > 0) {
-          res.status(200).json({ companies });
+        if (contribuitor) {
+          res.status(200).json({ contribuitor });
         } else {
-          res.status(400).json({ error: "Nenhuma empresa encontrada" });
+          res.status(400).json({ error: "Usuário não encontrado" });
         }
       } catch (error) {
         res.status(400).json({ error: error });
